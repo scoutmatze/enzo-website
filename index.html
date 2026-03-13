@@ -13,23 +13,8 @@
 <meta property="og:url" content="https://enzo-muenchen.de">
 <meta property="og:type" content="restaurant">
 
-<!--
-  FONTS – DSGVO-HINWEIS:
-  Google Fonts direkt einzubinden überträgt IP-Adressen an Google (USA).
-  Das ist in Deutschland abmahngefährdet seit dem LG München Urteil (Jan 2022).
-
-  LÖSUNG: Fonts lokal hosten.
-  1. Geh zu https://gwfh.mranftl.com/fonts
-  2. Suche "Cormorant Garamond" → wähle: 400, 400i, 600, 600i, 700
-  3. Suche "DM Sans" → wähle: 300, 400, 500, 600
-  4. Download → entpacken → Dateien in /fonts/ Ordner legen
-  5. Die generierte CSS in eine fonts.css kopieren
-  6. Dann diese zwei Zeilen unten ersetzen durch:
-     <link rel="stylesheet" href="./fonts/fonts.css">
-
-  BIS DAHIN funktioniert die Google-Fonts-Einbindung zum Entwickeln:
--->
- <link rel="stylesheet" href="./fonts/fonts.css">
+<!-- Fonts: lokal gehostet (DSGVO-konform) -->
+<link rel="stylesheet" href="./fonts/fonts.css">
 <style>
   /* ═══════════════════════════════════════════
      DESIGN TOKENS
@@ -521,6 +506,15 @@
     font-size: 0.95rem;
   }
 
+  .menu-item-allergens {
+    font-size: 0.7rem;
+    color: var(--col-text-muted);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    margin-left: 6px;
+    opacity: 0.6;
+  }
+
   /* ═══════════════════════════════════════════
      WOCHENKARTE
      ═══════════════════════════════════════════ */
@@ -959,7 +953,7 @@
   <div class="hero-content">
     <div class="hero-tag">München · Laim · Zschokkestraße 34</div>
     <h1>Buon appetito <em>in Laim.</em></h1>
-    <p>Italienische Küche, wie sie sein soll – ehrlich, frisch und mit Liebe gemacht. Seit [Jahr] ein Stück Italien mitten in München.</p>
+    <p>Italienische Küche, wie sie sein soll – ehrlich, frisch und mit Liebe gemacht. Ein Stück Italien mitten in München.</p>
     <div class="hero-actions">
       <a href="#reservieren" class="btn btn-primary">Tisch reservieren</a>
       <a href="#karte" class="btn btn-outline">Speisekarte</a>
@@ -972,13 +966,15 @@
   <div class="about">
     <div class="about-text reveal">
       <div class="section-label">Benvenuti</div>
-      <h2 class="section-title">Willkommen <em>bei Enzo.</em></h2>
-      <p>Was als Traum von einem kleinen italienischen Lokal begann, ist heute ein Stück Italien mitten in Laim. Bei uns gibt's keine Kompromisse: frische Zutaten, Rezepte aus der Familie und die Überzeugung, dass gutes Essen Zeit und Herz braucht.</p>
-      <p>Ob du morgens auf einen Espresso vorbeikommst, mittags die Tageskarte probierst oder nachmittags ein Stück Torta genießt – du bist immer willkommen.</p>
-      <div class="about-sig">– Enzo</div>
+      <h2 class="section-title">Willkommen <em>bei da Enzo.</em></h2>
+      <p>Wir sind eine italienische Familie, die die authentischen Aromen unserer Heimat nach München bringt. Unsere Küche basiert auf der Liebe zu traditionellen Rezepten, frischen Zutaten und echter Gastfreundschaft.</p>
+      <p>Jedes Gericht erzählt ein Stück unserer Geschichte. Ich heiße Sie herzlich willkommen und hoffe, dass Sie sich bei uns wohlfühlen und uns oft besuchen werden.</p>
+      <p>Buon Appetito!</p>
+      <div class="about-sig">– Enzo Curatolo</div>
     </div>
     <div class="about-image reveal">
       <img src="./img/about.jpg" alt="Frische Pasta wird zubereitet" loading="lazy">
+    </div>
   </div>
 </section>
 
@@ -1187,10 +1183,9 @@
 <script>
 /* ── CONFIG ──────────────────────────────── */
 const CONFIG = {
-  // n8n Webhook URL für Reservierungen (nach n8n-Setup ersetzen)
   webhookUrl: 'https://enzo-website.app.n8n.cloud/webhook/enzo-reservierung',
   wochenkarteUrl: './wochenkarte.json',
-  speisekarteUrl: './speisekarte.json',,
+  speisekarteUrl: './speisekarte.json',
 };
 
 /* ── NAVIGATION ──────────────────────────── */
@@ -1234,7 +1229,6 @@ async function loadWochenkarte() {
     const data = await res.json();
     renderWochenkarte(data, container);
   } catch (e) {
-    // Fallback: Beispiel-Daten anzeigen (für Demo/Entwicklung)
     const demo = {
       title: "Wochenkarte 10.–14. März",
       items: [
@@ -1253,7 +1247,6 @@ async function loadWochenkarte() {
 function renderWochenkarte(data, container) {
   let html = '';
   if (data.title) {
-    // Datum aus dem Titel extrahieren oder "diese Woche" zeigen
     html += `<p class="wochenkarte-date">${data.title}</p>`;
   }
 
@@ -1276,6 +1269,7 @@ function renderWochenkarte(data, container) {
 }
 
 loadWochenkarte();
+
 /* ── SPEISEKARTE LADEN ───────────────────── */
 async function loadSpeisekarte() {
   const container = document.getElementById('menuContent');
@@ -1287,17 +1281,14 @@ async function loadSpeisekarte() {
     if (!res.ok) throw new Error('Nicht gefunden');
     const data = await res.json();
 
-    // Intro-Text
     if (data.intro && introEl) {
       introEl.textContent = data.intro;
     }
 
-    // Allergene-Hinweis
     if (data.allergenNote && allergensEl) {
       allergensEl.textContent = data.allergenNote;
     }
 
-    // Kategorien rendern
     let html = '';
     for (const cat of (data.categories || [])) {
       html += `<div class="menu-category reveal">`;
@@ -1311,7 +1302,11 @@ async function loadSpeisekarte() {
         }
         html += `</div>`;
         html += `<span class="menu-item-dots"></span>`;
-        html += `<span class="menu-item-price">${item.price}</span>`;
+        html += `<span class="menu-item-price">${item.price}`;
+        if (item.allergens) {
+          html += `<span class="menu-item-allergens"> (${item.allergens})</span>`;
+        }
+        html += `</span>`;
         html += `</div>`;
       }
 
@@ -1319,8 +1314,6 @@ async function loadSpeisekarte() {
     }
 
     container.innerHTML = html;
-
-    // Scroll-Reveal für neu geladene Elemente aktivieren
     container.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
   } catch (e) {
@@ -1332,7 +1325,7 @@ async function loadSpeisekarte() {
 }
 
 loadSpeisekarte();
-</script>
+
 /* ── RESERVIERUNG ABSENDEN ───────────────── */
 async function submitReservation(e) {
   e.preventDefault();
