@@ -1,0 +1,111 @@
+{
+  "updated": "2026-03-13",
+  "intro": "Wir kochen ausschließlich saisonal. Bei uns kommen nur die Produkte auf den Teller, die gerade Saison haben – so können wir Frische, Qualität und vollen Geschmack garantieren.",
+  "allergenNote": "Bitte sprechen Sie uns bei Unverträglichkeiten an. Wir informieren Sie gerne über die enthaltenen Allergene.",
+  "categories": [
+    {
+      "name": "Antipasti",
+      "items": [
+        { "name": "Caprese", "desc": "Mozzarella, Tomaten und Pesto", "price": "13,50 €", "allergens": "G, H, O" },
+        { "name": "Parmigiana di Melanzane", "desc": "Überbackene Aubergine mit Tomaten und Parmesan", "price": "13,50 €", "allergens": "A, G" },
+        { "name": "Vitello Tonnato", "desc": "Kalbfleisch mit Thunfischsoße und Kapern", "price": "16,50 €", "allergens": "C, D, G, L" },
+        { "name": "Carpaccio di Manzo", "desc": "Rindfleisch mit Rucola und Parmesan", "price": "17,50 €", "allergens": "D, G" },
+        { "name": "Antipasto all'Italiana", "desc": "Auswahl italienischer Wurst, Käse und gegrilltem Gemüse", "price": "18,50 €", "allergens": "A, G, H, O" }
+      ]
+    },
+    {
+      "name": "Primi Piatti",
+      "items": [
+        { "name": "Trofie al Pesto", "desc": "mit grünen Bohnen", "price": "13,50 €", "allergens": "A, G, H" },
+        { "name": "Pennette all'Arrabbiata", "desc": "mit scharfer Tomatensauce", "price": "13,50 €", "allergens": "A" },
+        { "name": "Spaghetti alla Bolognese", "desc": "mit Fleischsauce aus Rinderhack und Tomaten", "price": "14,50 €", "allergens": "A, C, G, L" },
+        { "name": "Lasagne al Forno", "desc": "mit Rinderhack, Tomaten und Béchamel", "price": "15,50 €", "allergens": "A, C, G, L" },
+        { "name": "Ravioli gefüllt mit Steinpilzen", "desc": "mit Butter und Salbei", "price": "17,50 €", "allergens": "A, C, G" },
+        { "name": "Paccheri con Gamberi e Zucchine", "desc": "mit Garnelen und Zucchini", "price": "18,50 €", "allergens": "A, B, G" }
+      ]
+    },
+    {
+      "name": "Pinse",
+      "items": [
+        { "name": "Margherita", "desc": "mit Fior di Latte", "price": "9,50 €", "allergens": "A, G" },
+        { "name": "Bufalina", "desc": "mit Büffelmozzarella", "price": "10,50 €", "allergens": "A, G" },
+        { "name": "Cotto e Mozzarella", "desc": "mit gekochtem Schinken und Mozzarella", "price": "11,50 €", "allergens": "A, G" },
+        { "name": "Diavola", "desc": "mit scharfer Salami", "price": "11,50 €", "allergens": "A, G" },
+        { "name": "Tonno e Cipolla", "desc": "mit Tunfisch und Käse", "price": "12,50 €", "allergens": "A, D" },
+        { "name": "Rucola, Crudo e Grana", "desc": "mit Parmaschinken und Grana Padano Käse", "price": "13,50 €", "allergens": "A, G" }
+      ]
+    },
+    {
+      "name": "Secondi Piatti",
+      "items": [
+        { "name": "Scaloppine al Limone", "desc": "mit Rosmarin-Kartoffeln", "price": "17,50 €", "allergens": "A, C, G" },
+        { "name": "Tagliata di Manzo", "desc": "Rind vom Grill mit Rucola, Parmesan und Kirschtomaten", "price": "29,50 €", "allergens": "G" },
+        { "name": "Filetto di Orata su Verdure Grigliate", "desc": "Doradenfilet auf gegrilltem Gemüse", "price": "27,50 €", "allergens": "D" }
+      ]
+    },
+    {
+      "name": "Dessert",
+      "items": [
+        { "name": "Dessertvariation aus der Vitrine", "desc": "Fragen Sie nach unserer aktuellen Auswahl", "price": "nach Auswahl", "allergens": "A, C, G, H" }
+      ]
+    },
+    {
+      "name": "Illy Cafè",
+      "items": [
+        { "name": "Espresso", "price": "2,60 €" },
+        { "name": "Espresso Deca", "price": "2,80 €" },
+        { "name": "Espresso Doppio", "price": "3,80 €" },
+        { "name": "Espresso Corretto", "price": "3,80 €" },
+        { "name": "Café Americano", "price": "3,90 €" },
+        { "name": "Cappuccino", "price": "4,20 €" },
+        { "name": "Cappuccino Viennese", "price": "4,80 €" },
+        { "name": "Latte Macchiato", "price": "4,80 €" },
+        { "name": "Marocchino", "price": "4,90 €" },
+        { "name": "Café Shakerato", "desc": "Eis Café", "price": "4,80 €" }
+      ]
+    },
+    {
+      "name": "Tee & Schokolade",
+      "items": [
+        { "name": "Earl Grey / Darjeeling / Früchte Tee", "price": "5,20 €" },
+        { "name": "Grüner Tee Jasmin / Kamillen Tee", "price": "5,20 €" },
+        { "name": "Rooibos / Fr. Minze mit Honig", "price": "5,20 €" },
+        { "name": "Heiße Schokolade (Domori)", "desc": "Extra Sahne +0,50 €", "price": "4,80 €" }
+      ]
+    },
+    {
+      "name": "Alkoholfreie Getränke",
+      "items": [
+        { "name": "Aqua Morelli", "desc": "0,25 l / 0,75 l", "price": "3,50 / 7,50 €" },
+        { "name": "Coca-Cola / Orangina / Limonata", "desc": "0,2 l", "price": "3,80 €" },
+        { "name": "Tonic Water / Ginger Ale", "desc": "0,2 l", "price": "3,80 €" },
+        { "name": "Crodino / SanBitter", "desc": "0,2 l", "price": "3,80 €" },
+        { "name": "Säfte", "desc": "Apfel, Johannisbeere, Maracuja, Rhabarber, Ananas – 0,2 l", "price": "3,50 €" },
+        { "name": "Saftschorle", "desc": "0,3 l", "price": "4,20 €" }
+      ]
+    },
+    {
+      "name": "Bier",
+      "items": [
+        { "name": "Peroni", "desc": "0,33 l", "price": "4,50 €" },
+        { "name": "Augustiner Hell", "desc": "0,33 l", "price": "4,50 €" },
+        { "name": "Franziskaner Weißbier", "desc": "0,33 l", "price": "3,90 €" },
+        { "name": "Alkoholfreies Bier / Gösser Radler", "desc": "0,33 l", "price": "3,90 €" }
+      ]
+    },
+    {
+      "name": "Aperitivi & Longdrinks",
+      "items": [
+        { "name": "Aperol Spritz", "desc": "Prosecco, Aperol, Soda", "price": "7,50 €" },
+        { "name": "Hugo", "desc": "Prosecco, Holundersirup, Soda", "price": "7,50 €" },
+        { "name": "Crodino / SanBitter / Sarti Spritz", "desc": "jeweils mit Prosecco und Soda", "price": "7,50 €" },
+        { "name": "Italicus Spritz", "desc": "Prosecco, Italicus Bergamotto, Soda", "price": "8,50 €" },
+        { "name": "Americano / Negroni", "desc": "Vermouth Rosso, Campari", "price": "8,50 €" },
+        { "name": "Espresso Martini", "desc": "Vermouth Rosso, Campari, Soda", "price": "9,50 €" },
+        { "name": "Campari / Martini / Tocco Rosso", "desc": "Soda oder Orange", "price": "ab 4,90 €" },
+        { "name": "Vodka Lemon / Gin Tonic / Cuba Libre", "price": "ab 7,50 €" },
+        { "name": "Digestivi", "desc": "Averna, Ramazzotti, Fernet Branca, Montenegro, Cynar, Limoncello", "price": "4,90 €" }
+      ]
+    }
+  ]
+}
