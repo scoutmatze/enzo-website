@@ -514,7 +514,12 @@
     margin-left: 6px;
     opacity: 0.6;
   }
-
+#menuAllergens {
+    background: var(--col-cream-dark);
+    padding: 1rem 1.5rem;
+    border-radius: 6px;
+    line-height: 1.9;
+  }
   /* ═══════════════════════════════════════════
      WOCHENKARTE
      ═══════════════════════════════════════════ */
@@ -1350,7 +1355,7 @@ async function submitReservation(e) {
 
     if (res.ok) {
       status.className = 'form-status success';
-      status.textContent = '✅ Danke! Deine Anfrage ist eingegangen. Wir melden uns in Kürze bei dir.';
+      status.textContent = '✅ Danke! Deine Anfrage ist eingegangen. Wir melden uns in Kürzakkkkke bei dir.';
       status.style.display = 'block';
       form.reset();
     } else {
