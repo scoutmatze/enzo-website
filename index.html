@@ -7,8 +7,8 @@
 <meta name="description" content="Frische Pasta, echter Espresso und italienische Spezialitäten in München-Laim. Wochenkarte, Mittagstisch & Reservierung. Zschokkestraße 34.">
 
 <!-- Open Graph / Social Media -->
-<meta property="og:title" content="Enzo – Caffé & Ristorante">
-<meta property="og:description" content="Frische Pasta, echter Espresso und italienische Spezialitäten in München-Laim.">
+<meta property="og:title" content="Enzo – Caffé & Ristorante | Italienisch essen in München-Laim">
+<meta property="og:description" content="Frische Pasta, echter Espresso und italienische Spezialitäten in München-Laim. Wochenkarte, Mittagstisch und Reservierung. Besuche uns in der Zschokkestraße 34.">
 <meta property="og:image" content="https://enzo-website.netlify.app/img/og-image.jpg">
 <meta property="og:url" content="https://enzo-muenchen.de">
 <meta property="og:type" content="restaurant">
@@ -29,9 +29,7 @@
 
   BIS DAHIN funktioniert die Google-Fonts-Einbindung zum Entwickeln:
 -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
+ <link rel="stylesheet" href="./fonts/fonts.css">
 <style>
   /* ═══════════════════════════════════════════
      DESIGN TOKENS
@@ -1016,96 +1014,12 @@
     <div class="reveal">
       <div class="section-label">La Carta</div>
       <h2 class="section-title">Unsere <em>Speisekarte</em></h2>
-      <p class="menu-intro">Nicht zu lang, nicht zu kurz. Was draufsteht, bekommst du frisch und mit guten Zutaten. Wenn etwas aus ist, ist es aus – weil wir nur verarbeiten, was wir morgens frisch kriegen.</p>
+      <p class="menu-intro" id="menuIntro">Speisekarte wird geladen...</p>
     </div>
-
-    <div class="menu-categories">
-      <div class="menu-category reveal">
-        <h3>Antipasti</h3>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Bruschetta Classica</span><br><span class="menu-item-desc">Geröstetes Brot, Tomaten, Basilikum, Olivenöl</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">6,90 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Caprese</span><br><span class="menu-item-desc">Büffelmozzarella, Tomaten, Basilikum</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">9,50 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Vitello Tonnato</span><br><span class="menu-item-desc">Kalbfleisch mit Thunfischcreme</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">11,90 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Carpaccio di Manzo</span><br><span class="menu-item-desc">Rinderfilet, Rucola, Parmesan, Zitrone</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">12,50 €</span>
-        </div>
-      </div>
-
-      <div class="menu-category reveal">
-        <h3>Pasta & Primi</h3>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Spaghetti Aglio e Olio</span><br><span class="menu-item-desc">Knoblauch, Olivenöl, Peperoncino</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">10,90 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Penne all'Arrabbiata</span><br><span class="menu-item-desc">Scharfe Tomatensauce, frischer Basilikum</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">11,50 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Tagliatelle al Ragù</span><br><span class="menu-item-desc">Hausgemachte Pasta, Bolognese nach Familienrezept</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">13,90 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Gnocchi al Pesto</span><br><span class="menu-item-desc">Kartoffelgnocchi, Basilikumpesto, Pinienkerne</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">12,90 €</span>
-        </div>
-      </div>
-
-      <div class="menu-category reveal">
-        <h3>Secondi</h3>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Saltimbocca alla Romana</span><br><span class="menu-item-desc">Kalbsschnitzel, Salbei, Parmaschinken</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">16,90 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Pollo alla Parmigiana</span><br><span class="menu-item-desc">Hähnchenbrust überbacken, Tomatensauce</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">14,90 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Insalata Caesar</span><br><span class="menu-item-desc">Romana, Parmesan, Croutons, Hühnchen</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">12,50 €</span>
-        </div>
-      </div>
-
-      <div class="menu-category reveal">
-        <h3>Dolci</h3>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Tiramisu</span><br><span class="menu-item-desc">Hausgemacht, nach Enzos Rezept</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">7,50 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Panna Cotta</span><br><span class="menu-item-desc">Vanille, Beerensauce</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">6,90 €</span>
-        </div>
-        <div class="menu-item">
-          <div><span class="menu-item-name">Affogato al Caffé</span><br><span class="menu-item-desc">Vanilleeis, doppelter Espresso</span></div>
-          <span class="menu-item-dots"></span>
-          <span class="menu-item-price">5,90 €</span>
-        </div>
-      </div>
+    <div class="menu-categories" id="menuContent">
+      <!-- Wird per JS aus speisekarte.json geladen -->
     </div>
+    <p id="menuAllergens" style="margin-top:2rem;font-size:0.8rem;color:var(--col-text-muted);text-align:center;max-width:700px;margin-left:auto;margin-right:auto;"></p>
   </div>
 </section>
 
@@ -1134,18 +1048,18 @@
       <p>Wir sind ein kleines Lokal mit großem Herz, aber eben auch mit begrenzten Plätzen. Reservier am besten kurz vorher – per Formular, WhatsApp oder ruf einfach an.</p>
 
       <div class="reservierung-channels">
-        <a href="https://wa.me/49XXXXXXXXXXX?text=Hallo%20Enzo%2C%20ich%20möchte%20gerne%20einen%20Tisch%20reservieren." class="channel" target="_blank">
+        <a href="https://wa.me/4915776571218?text=Hallo%20Enzo%2C%20ich%20möchte%20gerne%20einen%20Tisch%20reservieren." class="channel" target="_blank">
           <div class="channel-icon channel-wa">💬</div>
           <div>
             <span>Per WhatsApp</span>
             <small>Schnell und unkompliziert</small>
           </div>
         </a>
-        <a href="tel:+49XXXXXXXXXXX" class="channel">
+        <a href="tel:+498994432100" class="channel">
           <div class="channel-icon channel-phone">📞</div>
           <div>
             <span>Per Telefon</span>
-            <small>+49 (0) XXX XXXXXXX</small>
+            <small>+49 (0) 89 94432100</small>
           </div>
         </a>
       </div>
@@ -1275,9 +1189,8 @@
 const CONFIG = {
   // n8n Webhook URL für Reservierungen (nach n8n-Setup ersetzen)
   webhookUrl: 'https://enzo-website.app.n8n.cloud/webhook/enzo-reservierung',
-
-  // Pfad zur Wochenkarte JSON (wird von n8n geschrieben)
   wochenkarteUrl: './wochenkarte.json',
+  speisekarteUrl: './speisekarte.json',,
 };
 
 /* ── NAVIGATION ──────────────────────────── */
@@ -1363,7 +1276,63 @@ function renderWochenkarte(data, container) {
 }
 
 loadWochenkarte();
+/* ── SPEISEKARTE LADEN ───────────────────── */
+async function loadSpeisekarte() {
+  const container = document.getElementById('menuContent');
+  const introEl = document.getElementById('menuIntro');
+  const allergensEl = document.getElementById('menuAllergens');
 
+  try {
+    const res = await fetch(CONFIG.speisekarteUrl);
+    if (!res.ok) throw new Error('Nicht gefunden');
+    const data = await res.json();
+
+    // Intro-Text
+    if (data.intro && introEl) {
+      introEl.textContent = data.intro;
+    }
+
+    // Allergene-Hinweis
+    if (data.allergenNote && allergensEl) {
+      allergensEl.textContent = data.allergenNote;
+    }
+
+    // Kategorien rendern
+    let html = '';
+    for (const cat of (data.categories || [])) {
+      html += `<div class="menu-category reveal">`;
+      html += `<h3>${cat.name}</h3>`;
+
+      for (const item of (cat.items || [])) {
+        html += `<div class="menu-item">`;
+        html += `<div><span class="menu-item-name">${item.name}</span>`;
+        if (item.desc) {
+          html += `<br><span class="menu-item-desc">${item.desc}</span>`;
+        }
+        html += `</div>`;
+        html += `<span class="menu-item-dots"></span>`;
+        html += `<span class="menu-item-price">${item.price}</span>`;
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+    }
+
+    container.innerHTML = html;
+
+    // Scroll-Reveal für neu geladene Elemente aktivieren
+    container.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  } catch (e) {
+    console.error('Speisekarte konnte nicht geladen werden:', e);
+    if (introEl) {
+      introEl.textContent = 'Die Speisekarte konnte leider nicht geladen werden. Bitte fragen Sie direkt bei uns nach.';
+    }
+  }
+}
+
+loadSpeisekarte();
+</script>
 /* ── RESERVIERUNG ABSENDEN ───────────────── */
 async function submitReservation(e) {
   e.preventDefault();
