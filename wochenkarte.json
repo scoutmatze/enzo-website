@@ -1,0 +1,12 @@
+{
+  "title": "Wochenkarte 10.–14. März 2026",
+  "updated": "2026-03-10T08:30:00+01:00",
+  "items": [
+    { "day": "Mo", "dish": "Lasagne al Forno mit gemischtem Salat", "price": "11,90 €" },
+    { "day": "Di", "dish": "Risotto ai Funghi Porcini", "price": "12,90 €" },
+    { "day": "Mi", "dish": "Spaghetti alle Vongole", "price": "13,90 €" },
+    { "day": "Do", "dish": "Pollo alla Cacciatora mit Rosmarinkartoffeln", "price": "12,50 €" },
+    { "day": "Fr", "dish": "Tagliatelle al Salmone", "price": "13,50 €" }
+  ],
+  "note": "Zu jedem Mittagsgericht: Wasser oder Espresso inklusive."
+}

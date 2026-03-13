@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datenschutzerklärung – Enzo Caffé & Ristorante</title>
+<meta name="robots" content="noindex">
+
+<!-- Fonts (DSGVO: vor Go-Live lokal hosten!) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --col-terra: #B85A3A;
+    --col-terra-light: #D4845E;
+    --col-cream: #FAF5EE;
+    --col-cream-dark: #F0E8DB;
+    --col-espresso: #2A1F17;
+    --col-text: #1E1E1E;
+    --col-text-muted: #7A6E62;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--col-text);
+    background: var(--col-cream);
+    line-height: 1.8;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--col-terra); }
+  a:hover { color: var(--col-terra-light); }
+
+  nav {
+    background: var(--col-espresso);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--col-cream);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .nav-logo span { color: var(--col-terra-light); font-style: italic; font-weight: 400; }
+
+  .nav-back {
+    color: rgba(240,232,219,0.6);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .nav-back:hover { color: var(--col-cream); }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 2rem 4rem;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: var(--col-espresso);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--col-espresso);
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--col-espresso);
+    margin-top: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  p, li { margin-bottom: 0.5rem; color: var(--col-text-muted); }
+  ul { margin-left: 1.5rem; margin-bottom: 0.75rem; }
+  li { margin-bottom: 0.25rem; }
+
+  .stand {
+    font-size: 0.85rem;
+    color: var(--col-text-muted);
+    font-style: italic;
+    margin-bottom: 2rem;
+  }
+
+  .hinweis {
+    background: #FFF3E0;
+    border-left: 4px solid #FF9800;
+    padding: 12px 16px;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #E65100;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .hinweis strong { color: #BF360C; }
+
+  .platzhalter {
+    background: #FFECB3;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: 600;
+    color: #E65100;
+  }
+
+  .empfehlung {
+    background: #E8F5E9;
+    border-left: 4px solid #4CAF50;
+    padding: 12px 16px;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #1B5E20;
+    border-radius: 0 4px 4px 0;
+  }
+
+  footer {
+    background: var(--col-espresso);
+    color: rgba(240,232,219,0.5);
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+
+  footer a { color: rgba(240,232,219,0.5); text-decoration: none; }
+  footer a:hover { color: var(--col-terra-light); }
+</style>
+</head>
+
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">Enzo<span>'s</span></a>
+  <a href="/" class="nav-back">← Zurück zur Startseite</a>
+</nav>
+
+<main>
+
+<h1>Datenschutzerklärung</h1>
+<p class="stand">Stand: März 2026</p>
+
+<!--
+  ════════════════════════════════════════════════════
+  HINWEISE FÜR DICH (den Webentwickler):
+
+  Diese Datenschutzerklärung ist zugeschnitten auf den
+  tatsächlichen Tech-Stack von Enzos Website:
+
+  ✅ Abgedeckt:
+  - Netlify Hosting (Server-Logfiles)
+  - Google Maps Embed (Drittland-Transfer)
+  - Kontaktformular / Reservierung (n8n Webhook)
+  - WhatsApp-Links (externe Verlinkung)
+  - Google Fonts (lokal gehostet nach Umstellung)
+  - Kein Analytics, keine Cookies, kein Tracking
+
+  ❌ NICHT abgedeckt (bei Bedarf ergänzen):
+  - Google Analytics / Matomo
+  - Facebook Pixel
+  - Newsletter / Mailchimp
+  - Online-Bestellung / WooCommerce / Stripe
+  - Social Media Plugins (Like/Share Buttons)
+
+  Rechtsgrundlagen:
+  - DSGVO (EU-Datenschutz-Grundverordnung)
+  - TDDDG (Telekommunikation-Digitale-Dienste-
+    Datenschutz-Gesetz, ehemals TTDSG)
+  - DDG (Digitale-Dienste-Gesetz, ehemals TMG)
+
+  WICHTIG: Ich bin kein Anwalt. Diese Vorlage basiert
+  auf aktuellen Best Practices und IHK-Empfehlungen.
+  Für absolute Rechtssicherheit empfehle ich, die
+  Erklärung von einem Datenschutzbeauftragten oder
+  Anwalt gegenprüfen zu lassen.
+
+  Vor Go-Live alle ⚠️-Boxen und Kommentare entfernen!
+  ════════════════════════════════════════════════════
+-->
+
+<div class="hinweis">
+  <strong>⚠️ Vor dem Go-Live:</strong> Alle gelb markierten Platzhalter
+  durch echte Daten ersetzen, Hinweis-Boxen und grüne Empfehlungs-Boxen
+  entfernen!
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>1. Verantwortlicher</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Verantwortlich für die Datenverarbeitung auf dieser Website ist:
+</p>
+<p>
+  <span class="platzhalter">⚠️ Vorname Nachname</span><br>
+  Da Enzo – Caffé & Ristorante<br>
+  Zschokkestraße 34<br>
+  80686 München<br>
+  Telefon: +49 (0)89 9443 2100<br>
+  E-Mail: <span class="platzhalter">⚠️ info@enzo-muenchen.de</span>
+</p>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>2. Allgemeines zur Datenverarbeitung</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Der Schutz Ihrer persönlichen Daten ist uns wichtig. Wir verarbeiten
+  personenbezogene Daten, die beim Besuch unserer Website erhoben werden,
+  ausschließlich im Einklang mit der EU-Datenschutz-Grundverordnung (DSGVO)
+  und dem Telekommunikation-Digitale-Dienste-Datenschutz-Gesetz (TDDDG).
+</p>
+<p>
+  Personenbezogene Daten werden auf dieser Website nur im technisch
+  notwendigen Umfang erhoben. Wir geben Ihre Daten nicht an Dritte weiter,
+  es sei denn, dies ist in dieser Erklärung beschrieben oder gesetzlich
+  vorgeschrieben.
+</p>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>3. Hosting und Server-Logfiles</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Diese Website wird bei Netlify, Inc. (Sitz: 512 2nd Street, Suite 200,
+  San Francisco, CA 94107, USA) gehostet. Beim Aufruf unserer Website
+  werden durch den Hosting-Anbieter automatisch Informationen in
+  sogenannten Server-Logfiles erfasst, die Ihr Browser automatisch
+  übermittelt. Dies sind:
+</p>
+<ul>
+  <li>IP-Adresse des anfragenden Geräts</li>
+  <li>Datum und Uhrzeit des Zugriffs</li>
+  <li>Name und URL der abgerufenen Seite</li>
+  <li>Übertragene Datenmenge</li>
+  <li>Browsertyp und -version</li>
+  <li>Betriebssystem</li>
+  <li>Referrer-URL (die zuvor besuchte Seite)</li>
+</ul>
+<p>
+  Diese Daten werden nicht mit anderen Datenquellen zusammengeführt.
+  Die Erfassung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO
+  (berechtigtes Interesse). Unser berechtigtes Interesse liegt in der
+  Sicherstellung eines störungsfreien Betriebs der Website sowie der
+  Abwehr von Angriffen.
+</p>
+<p>
+  Netlify verarbeitet Daten auch in den USA. Die Datenübermittlung in
+  die USA stützt sich auf die Standardvertragsklauseln der EU-Kommission.
+  Weitere Informationen finden Sie in der
+  <a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener">
+  Datenschutzerklärung von Netlify</a>.
+</p>
+
+<div class="empfehlung">
+  <strong>💡 Tipp:</strong> Wenn du auf ein EU-Hosting wechseln möchtest
+  (z. B. Cloudflare Pages mit EU-only Routing oder einen deutschen Hoster),
+  wird der Drittland-Transfer-Hinweis einfacher. Für den Start ist
+  Netlify aber okay – die Standardvertragsklauseln sind eine anerkannte
+  Rechtsgrundlage.
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>4. Kontaktformular / Reservierungsanfrage</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Wenn Sie über das Reservierungsformular auf unserer Website eine Anfrage
+  senden, werden folgende Daten erhoben und verarbeitet:
+</p>
+<ul>
+  <li>Name</li>
+  <li>E-Mail-Adresse</li>
+  <li>Telefonnummer</li>
+  <li>Gewünschtes Datum und Uhrzeit</li>
+  <li>Anzahl der Personen</li>
+  <li>Ggf. Ihre Nachricht (Sonderwünsche)</li>
+</ul>
+<p>
+  Diese Daten werden ausschließlich zur Bearbeitung Ihrer Reservierungsanfrage
+  verwendet und per verschlüsselter Verbindung (HTTPS) an unseren
+  Automatisierungsdienst (n8n, selbst gehostet / n8n GmbH, Berlin) übermittelt,
+  der die Anfrage an unser Team weiterleitet.
+</p>
+
+<div class="hinweis">
+  <strong>⚠️ Anpassen je nach n8n-Setup:</strong><br>
+  • Falls n8n <strong>self-hosted</strong> (eigener Server in der EU):
+  Schreibe „auf einem Server in Deutschland/der EU verarbeitet".<br>
+  • Falls <strong>n8n Cloud</strong>: n8n GmbH, Berlin, Deutschland –
+  Daten bleiben in der EU (Frankfurt).<br>
+  • In beiden Fällen kein Drittland-Transfer nötig.
+</div>
+
+<p>
+  Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO
+  (vorvertragliche Maßnahmen – Ihre Anfrage dient der Anbahnung eines
+  Bewirtungsvertrags). Die Daten werden gelöscht, sobald sie für die
+  Bearbeitung der Anfrage nicht mehr erforderlich sind, spätestens nach
+  30 Tagen, sofern keine gesetzlichen Aufbewahrungspflichten bestehen.
+</p>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>5. Kontaktaufnahme per E-Mail und WhatsApp</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Sie können uns per E-Mail oder über WhatsApp kontaktieren. In diesem Fall
+  werden die von Ihnen übermittelten personenbezogenen Daten (z. B. Name,
+  Telefonnummer, Nachrichteninhalt) gespeichert, um Ihre Anfrage zu bearbeiten.
+</p>
+<p>
+  Bei einer Kontaktaufnahme über WhatsApp werden Ihre Daten durch die
+  Meta Platforms Ireland Limited (4 Grand Canal Square, Grand Canal Harbour,
+  Dublin 2, Irland) verarbeitet. Es gelten die
+  <a href="https://www.whatsapp.com/legal/privacy-policy-eea" target="_blank" rel="noopener">
+  Datenschutzbestimmungen von WhatsApp</a>. Wir weisen darauf hin, dass bei
+  der Nutzung von WhatsApp Daten in die USA übermittelt werden können.
+</p>
+<p>
+  Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO
+  (vorvertragliche Maßnahmen) sowie Art. 6 Abs. 1 lit. a DSGVO
+  (Ihre Einwilligung durch aktive Kontaktaufnahme).
+</p>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>6. Google Maps</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Auf unserer Website ist ein Kartendienst von Google Maps
+  (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland)
+  eingebunden. Beim Laden der Karte wird eine Verbindung zu Googles Servern
+  hergestellt. Dabei wird Ihre IP-Adresse an Google übermittelt.
+  Google kann dabei Cookies setzen oder ähnliche Technologien verwenden.
+</p>
+<p>
+  Wir nutzen Google Maps, um Ihnen unseren Standort anschaulich darzustellen.
+  Die Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse
+  an einer nutzerfreundlichen Darstellung unseres Standorts).
+</p>
+<p>
+  Google verarbeitet Ihre Daten ggf. auch in den USA. Für die
+  Datenübermittlung in die USA hat Google sich dem EU-U.S. Data Privacy
+  Framework (DPF) unterworfen. Weitere Informationen finden Sie in der
+  <a href="https://policies.google.com/privacy?hl=de" target="_blank" rel="noopener">
+  Datenschutzerklärung von Google</a>.
+</p>
+
+<div class="empfehlung">
+  <strong>💡 DSGVO-Optimierung:</strong> Idealerweise sollte Google Maps
+  erst nach Einwilligung geladen werden (sog. Zwei-Klick-Lösung). Dafür
+  zeigst du zuerst ein statisches Bild der Karte mit einem Button
+  „Karte laden – dabei werden Daten an Google übermittelt". Erst nach Klick
+  wird der iframe geladen. Das ist die sicherste Variante.<br><br>
+  Alternativ: Google Maps komplett durch OpenStreetMap ersetzen oder nur
+  einen Link zu Google Maps setzen statt eines Embeds. Dann entfällt dieser
+  gesamte Abschnitt.
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>7. Schriftarten (Google Fonts)</h2>
+<!-- ══════════════════════════════════════ -->
+
+<div class="hinweis">
+  <strong>⚠️ Diesen Abschnitt anpassen je nach Umsetzung:</strong><br>
+  • Wenn Google Fonts <strong>lokal gehostet</strong> werden (empfohlen!):
+  den Text „Variante A" verwenden und den Abschnitt zu externem Laden löschen.<br>
+  • Wenn Google Fonts noch <strong>extern geladen</strong> werden:
+  den Text „Variante B" verwenden – aber das sollte nur vorübergehend sein!
+</div>
+
+<h3>Variante A: Lokale Einbindung (empfohlen – nach Umstellung verwenden)</h3>
+<p>
+  Diese Website verwendet die Schriftarten „Cormorant Garamond" und „DM Sans".
+  Die Schriftdateien sind lokal auf unserem Server gespeichert.
+  Es findet keine Verbindung zu externen Servern statt. Es werden keine
+  Daten an Dritte übermittelt.
+</p>
+
+<h3>Variante B: Externe Einbindung (nur falls Fonts noch von Google geladen werden)</h3>
+<p>
+  Diese Website nutzt Schriftarten von Google Fonts, die von Servern der
+  Google Ireland Limited (Gordon House, Barrow Street, Dublin 4, Irland)
+  geladen werden. Beim Aufruf unserer Website stellt Ihr Browser eine
+  Verbindung zu Googles Servern her, wobei Ihre IP-Adresse übermittelt wird.
+</p>
+<p>
+  Die Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse
+  an einer einheitlichen Darstellung der Website). Google verarbeitet Daten
+  ggf. auch in den USA im Rahmen des EU-U.S. Data Privacy Framework.
+  Weitere Informationen:
+  <a href="https://policies.google.com/privacy?hl=de" target="_blank" rel="noopener">
+  Datenschutzerklärung von Google</a>,
+  <a href="https://developers.google.com/fonts/faq/privacy?hl=de" target="_blank" rel="noopener">
+  Google Fonts FAQ</a>.
+</p>
+
+<div class="empfehlung">
+  <strong>💡 Dringende Empfehlung:</strong> Google Fonts unbedingt lokal
+  hosten! Das LG München hat 2022 entschieden, dass die dynamische Einbindung
+  von Google Fonts ohne Einwilligung einen Verstoß gegen die DSGVO darstellt
+  (Urteil vom 20.01.2022, Az. 3 O 17493/20). Danach wurden tausende
+  Abmahnungen verschickt. Nach dem lokalen Hosting kannst du „Variante B"
+  komplett löschen und nur „Variante A" stehen lassen.
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>8. Cookies</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Diese Website verwendet keine Cookies und kein Tracking. Wir setzen
+  weder eigene Cookies noch Analyse- oder Werbe-Cookies ein.
+</p>
+<p>
+  Durch eingebundene Drittdienste (insbesondere Google Maps) können
+  jedoch Cookies von Drittanbietern gesetzt werden. Informationen dazu
+  finden Sie in Abschnitt 6 dieser Datenschutzerklärung.
+</p>
+
+<div class="hinweis">
+  <strong>⚠️ Anpassen falls sich etwas ändert:</strong><br>
+  Solltest du später Analytics (z. B. Plausible, Matomo) oder andere
+  Dienste einbinden, die Cookies setzen, muss dieser Abschnitt erweitert
+  und ggf. ein Cookie-Banner eingebaut werden.
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>9. Ihre Rechte als betroffene Person</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>Sie haben gegenüber uns folgende Rechte hinsichtlich Ihrer personenbezogenen Daten:</p>
+
+<ul>
+  <li><strong>Auskunft</strong> (Art. 15 DSGVO): Sie können Auskunft darüber verlangen, ob und welche personenbezogenen Daten wir über Sie verarbeiten.</li>
+  <li><strong>Berichtigung</strong> (Art. 16 DSGVO): Sie können die Berichtigung unrichtiger Daten verlangen.</li>
+  <li><strong>Löschung</strong> (Art. 17 DSGVO): Sie können die Löschung Ihrer Daten verlangen, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</li>
+  <li><strong>Einschränkung der Verarbeitung</strong> (Art. 18 DSGVO): Sie können unter bestimmten Voraussetzungen verlangen, dass die Verarbeitung Ihrer Daten eingeschränkt wird.</li>
+  <li><strong>Datenübertragbarkeit</strong> (Art. 20 DSGVO): Sie können verlangen, dass wir Ihnen Ihre Daten in einem strukturierten, gängigen und maschinenlesbaren Format übermitteln.</li>
+  <li><strong>Widerspruch</strong> (Art. 21 DSGVO): Sie können der Verarbeitung Ihrer Daten jederzeit widersprechen, wenn diese auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse) erfolgt.</li>
+  <li><strong>Widerruf einer Einwilligung</strong> (Art. 7 Abs. 3 DSGVO): Eine erteilte Einwilligung können Sie jederzeit für die Zukunft widerrufen.</li>
+</ul>
+
+<p>
+  Zur Ausübung Ihrer Rechte wenden Sie sich bitte an die unter Abschnitt 1
+  genannte Kontaktadresse.
+</p>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>10. Beschwerderecht bei einer Aufsichtsbehörde</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Wenn Sie der Ansicht sind, dass die Verarbeitung Ihrer personenbezogenen
+  Daten gegen die DSGVO verstößt, haben Sie das Recht, sich bei einer
+  Datenschutz-Aufsichtsbehörde zu beschweren. Die für uns zuständige
+  Aufsichtsbehörde ist:
+</p>
+<p>
+  Bayerisches Landesamt für Datenschutzaufsicht (BayLDA)<br>
+  Promenade 18<br>
+  91522 Ansbach<br>
+  <a href="https://www.lda.bayern.de" target="_blank" rel="noopener">www.lda.bayern.de</a>
+</p>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>11. SSL-/TLS-Verschlüsselung</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Diese Website nutzt aus Sicherheitsgründen und zum Schutz der Übertragung
+  personenbezogener Daten eine SSL- bzw. TLS-Verschlüsselung. Sie erkennen
+  eine verschlüsselte Verbindung an dem Schloss-Symbol in der Adresszeile
+  Ihres Browsers sowie daran, dass die Adresszeile mit „https://" beginnt.
+</p>
+
+
+<!-- ══════════════════════════════════════ -->
+<h2>12. Aktualität und Änderungen</h2>
+<!-- ══════════════════════════════════════ -->
+
+<p>
+  Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an
+  geänderte Rechtslagen oder bei Änderungen unserer Website anzupassen.
+  Die jeweils aktuelle Fassung finden Sie stets auf dieser Seite.
+</p>
+
+<p style="margin-top: 2rem; font-size: 0.85rem; color: var(--col-text-muted); font-style: italic;">
+  Stand: März 2026
+</p>
+
+</main>
+
+<footer>
+  <p>© 2026 Da Enzo – Caffé & Ristorante · Zschokkestraße 34 · 80686 München</p>
+  <p style="margin-top:8px;">
+    <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a> · <a href="/">Startseite</a>
+  </p>
+</footer>
+
+</body>
+</html>
