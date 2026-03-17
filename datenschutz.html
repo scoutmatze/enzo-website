@@ -6,9 +6,8 @@
 <title>Datenschutzerklärung – Enzo Caffé & Ristorante</title>
 <meta name="robots" content="noindex">
 
-<!-- Fonts (DSGVO: vor Go-Live lokal hosten!) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Fonts: lokal gehostet (DSGVO-konform) -->
+<link rel="stylesheet" href="./fonts/fonts.css">
 
 <style>
   :root {
@@ -45,25 +44,57 @@
     align-items: center;
   }
 
-  .nav-logo {
+ .nav-logo {
     font-family: var(--font-display);
     font-size: 1.6rem;
     font-weight: 700;
     color: var(--col-cream);
-    text-decoration: none;
     letter-spacing: 0.04em;
   }
-
-  .nav-logo span { color: var(--col-terra-light); font-style: italic; font-weight: 400; }
-
-  .nav-back {
-    color: rgba(240,232,219,0.6);
-    font-size: 0.85rem;
-    text-decoration: none;
-    transition: color 0.3s;
+  
+  .nav-logo-img {
+    height: 44px;
+    width: auto;
+    transition: opacity 0.3s;
   }
 
-  .nav-back:hover { color: var(--col-cream); }
+.nav-logo-img:hover {
+  opacity: 0.85;
+}
+  .nav-logo span {
+    color: var(--col-terra-light);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: var(--space-md);
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--col-cream);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+    padding-bottom: 2px;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--col-terra-light);
+    transition: width 0.3s;
+  }
+
+  .nav-links a:hover::after { width: 100%; }
 
   main {
     max-width: 720px;
@@ -108,36 +139,6 @@
     margin-bottom: 2rem;
   }
 
-  .hinweis {
-    background: #FFF3E0;
-    border-left: 4px solid #FF9800;
-    padding: 12px 16px;
-    margin: 1rem 0;
-    font-size: 0.9rem;
-    color: #E65100;
-    border-radius: 0 4px 4px 0;
-  }
-
-  .hinweis strong { color: #BF360C; }
-
-  .platzhalter {
-    background: #FFECB3;
-    padding: 2px 6px;
-    border-radius: 2px;
-    font-weight: 600;
-    color: #E65100;
-  }
-
-  .empfehlung {
-    background: #E8F5E9;
-    border-left: 4px solid #4CAF50;
-    padding: 12px 16px;
-    margin: 1rem 0;
-    font-size: 0.9rem;
-    color: #1B5E20;
-    border-radius: 0 4px 4px 0;
-  }
-
   footer {
     background: var(--col-espresso);
     color: rgba(240,232,219,0.5);
@@ -152,9 +153,9 @@
 </head>
 
 <body>
-
-<nav>
-  <a href="/" class="nav-logo">Enzo<span>'s</span></a>
+<nav id="mainNav">
+  <a href="#" class="nav-logo"><img src="./img/logo-header.webp" alt="da Enzo" class="nav-logo-img"></a>
+  <a href="#" class="nav-logo">da Enzo</a>
   <a href="/" class="nav-back">← Zurück zur Startseite</a>
 </nav>
 
@@ -162,50 +163,6 @@
 
 <h1>Datenschutzerklärung</h1>
 <p class="stand">Stand: März 2026</p>
-
-<!--
-  ════════════════════════════════════════════════════
-  HINWEISE FÜR DICH (den Webentwickler):
-
-  Diese Datenschutzerklärung ist zugeschnitten auf den
-  tatsächlichen Tech-Stack von Enzos Website:
-
-  ✅ Abgedeckt:
-  - Netlify Hosting (Server-Logfiles)
-  - Google Maps Embed (Drittland-Transfer)
-  - Kontaktformular / Reservierung (n8n Webhook)
-  - WhatsApp-Links (externe Verlinkung)
-  - Google Fonts (lokal gehostet nach Umstellung)
-  - Kein Analytics, keine Cookies, kein Tracking
-
-  ❌ NICHT abgedeckt (bei Bedarf ergänzen):
-  - Google Analytics / Matomo
-  - Facebook Pixel
-  - Newsletter / Mailchimp
-  - Online-Bestellung / WooCommerce / Stripe
-  - Social Media Plugins (Like/Share Buttons)
-
-  Rechtsgrundlagen:
-  - DSGVO (EU-Datenschutz-Grundverordnung)
-  - TDDDG (Telekommunikation-Digitale-Dienste-
-    Datenschutz-Gesetz, ehemals TTDSG)
-  - DDG (Digitale-Dienste-Gesetz, ehemals TMG)
-
-  WICHTIG: Ich bin kein Anwalt. Diese Vorlage basiert
-  auf aktuellen Best Practices und IHK-Empfehlungen.
-  Für absolute Rechtssicherheit empfehle ich, die
-  Erklärung von einem Datenschutzbeauftragten oder
-  Anwalt gegenprüfen zu lassen.
-
-  Vor Go-Live alle ⚠️-Boxen und Kommentare entfernen!
-  ════════════════════════════════════════════════════
--->
-
-<div class="hinweis">
-  <strong>⚠️ Vor dem Go-Live:</strong> Alle gelb markierten Platzhalter
-  durch echte Daten ersetzen, Hinweis-Boxen und grüne Empfehlungs-Boxen
-  entfernen!
-</div>
 
 
 <!-- ══════════════════════════════════════ -->
@@ -216,12 +173,12 @@
   Verantwortlich für die Datenverarbeitung auf dieser Website ist:
 </p>
 <p>
-  <span class="platzhalter">⚠️ Vorname Nachname</span><br>
+  Enzo Curatolo<br>
   Da Enzo – Caffé & Ristorante<br>
   Zschokkestraße 34<br>
   80686 München<br>
   Telefon: +49 (0)89 9443 2100<br>
-  E-Mail: <span class="platzhalter">⚠️ info@enzo-muenchen.de</span>
+  E-Mail: info@enzo-muenchen.de
 </p>
 
 
@@ -248,8 +205,8 @@
 <!-- ══════════════════════════════════════ -->
 
 <p>
-  Diese Website wird bei Netlify, Inc. (Sitz: 512 2nd Street, Suite 200,
-  San Francisco, CA 94107, USA) gehostet. Beim Aufruf unserer Website
+  Diese Website wird bei der Hetzner Online GmbH (Industriestr. 25,
+  91710 Gunzenhausen, Deutschland) gehostet. Beim Aufruf unserer Website
   werden durch den Hosting-Anbieter automatisch Informationen in
   sogenannten Server-Logfiles erfasst, die Ihr Browser automatisch
   übermittelt. Dies sind:
@@ -271,20 +228,12 @@
   Abwehr von Angriffen.
 </p>
 <p>
-  Netlify verarbeitet Daten auch in den USA. Die Datenübermittlung in
-  die USA stützt sich auf die Standardvertragsklauseln der EU-Kommission.
+  Die Datenverarbeitung erfolgt ausschließlich auf Servern in Deutschland.
+  Eine Übermittlung Ihrer Daten in Drittstaaten findet nicht statt.
   Weitere Informationen finden Sie in der
-  <a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener">
-  Datenschutzerklärung von Netlify</a>.
+  <a href="https://www.hetzner.com/de/legal/privacy-policy/" target="_blank" rel="noopener">
+  Datenschutzerklärung von Hetzner</a>.
 </p>
-
-<div class="empfehlung">
-  <strong>💡 Tipp:</strong> Wenn du auf ein EU-Hosting wechseln möchtest
-  (z. B. Cloudflare Pages mit EU-only Routing oder einen deutschen Hoster),
-  wird der Drittland-Transfer-Hinweis einfacher. Für den Start ist
-  Netlify aber okay – die Standardvertragsklauseln sind eine anerkannte
-  Rechtsgrundlage.
-</div>
 
 
 <!-- ══════════════════════════════════════ -->
@@ -309,15 +258,6 @@
   Automatisierungsdienst (n8n, selbst gehostet / n8n GmbH, Berlin) übermittelt,
   der die Anfrage an unser Team weiterleitet.
 </p>
-
-<div class="hinweis">
-  <strong>⚠️ Anpassen je nach n8n-Setup:</strong><br>
-  • Falls n8n <strong>self-hosted</strong> (eigener Server in der EU):
-  Schreibe „auf einem Server in Deutschland/der EU verarbeitet".<br>
-  • Falls <strong>n8n Cloud</strong>: n8n GmbH, Berlin, Deutschland –
-  Daten bleiben in der EU (Frankfurt).<br>
-  • In beiden Fällen kein Drittland-Transfer nötig.
-</div>
 
 <p>
   Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO
@@ -376,64 +316,18 @@
   Datenschutzerklärung von Google</a>.
 </p>
 
-<div class="empfehlung">
-  <strong>💡 DSGVO-Optimierung:</strong> Idealerweise sollte Google Maps
-  erst nach Einwilligung geladen werden (sog. Zwei-Klick-Lösung). Dafür
-  zeigst du zuerst ein statisches Bild der Karte mit einem Button
-  „Karte laden – dabei werden Daten an Google übermittelt". Erst nach Klick
-  wird der iframe geladen. Das ist die sicherste Variante.<br><br>
-  Alternativ: Google Maps komplett durch OpenStreetMap ersetzen oder nur
-  einen Link zu Google Maps setzen statt eines Embeds. Dann entfällt dieser
-  gesamte Abschnitt.
-</div>
 
 
 <!-- ══════════════════════════════════════ -->
-<h2>7. Schriftarten (Google Fonts)</h2>
+<h2>7. Schriftarten</h2>
 <!-- ══════════════════════════════════════ -->
 
-<div class="hinweis">
-  <strong>⚠️ Diesen Abschnitt anpassen je nach Umsetzung:</strong><br>
-  • Wenn Google Fonts <strong>lokal gehostet</strong> werden (empfohlen!):
-  den Text „Variante A" verwenden und den Abschnitt zu externem Laden löschen.<br>
-  • Wenn Google Fonts noch <strong>extern geladen</strong> werden:
-  den Text „Variante B" verwenden – aber das sollte nur vorübergehend sein!
-</div>
-
-<h3>Variante A: Lokale Einbindung (empfohlen – nach Umstellung verwenden)</h3>
 <p>
   Diese Website verwendet die Schriftarten „Cormorant Garamond" und „DM Sans".
   Die Schriftdateien sind lokal auf unserem Server gespeichert.
   Es findet keine Verbindung zu externen Servern statt. Es werden keine
   Daten an Dritte übermittelt.
 </p>
-
-<h3>Variante B: Externe Einbindung (nur falls Fonts noch von Google geladen werden)</h3>
-<p>
-  Diese Website nutzt Schriftarten von Google Fonts, die von Servern der
-  Google Ireland Limited (Gordon House, Barrow Street, Dublin 4, Irland)
-  geladen werden. Beim Aufruf unserer Website stellt Ihr Browser eine
-  Verbindung zu Googles Servern her, wobei Ihre IP-Adresse übermittelt wird.
-</p>
-<p>
-  Die Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse
-  an einer einheitlichen Darstellung der Website). Google verarbeitet Daten
-  ggf. auch in den USA im Rahmen des EU-U.S. Data Privacy Framework.
-  Weitere Informationen:
-  <a href="https://policies.google.com/privacy?hl=de" target="_blank" rel="noopener">
-  Datenschutzerklärung von Google</a>,
-  <a href="https://developers.google.com/fonts/faq/privacy?hl=de" target="_blank" rel="noopener">
-  Google Fonts FAQ</a>.
-</p>
-
-<div class="empfehlung">
-  <strong>💡 Dringende Empfehlung:</strong> Google Fonts unbedingt lokal
-  hosten! Das LG München hat 2022 entschieden, dass die dynamische Einbindung
-  von Google Fonts ohne Einwilligung einen Verstoß gegen die DSGVO darstellt
-  (Urteil vom 20.01.2022, Az. 3 O 17493/20). Danach wurden tausende
-  Abmahnungen verschickt. Nach dem lokalen Hosting kannst du „Variante B"
-  komplett löschen und nur „Variante A" stehen lassen.
-</div>
 
 
 <!-- ══════════════════════════════════════ -->
@@ -450,12 +344,6 @@
   finden Sie in Abschnitt 6 dieser Datenschutzerklärung.
 </p>
 
-<div class="hinweis">
-  <strong>⚠️ Anpassen falls sich etwas ändert:</strong><br>
-  Solltest du später Analytics (z. B. Plausible, Matomo) oder andere
-  Dienste einbinden, die Cookies setzen, muss dieser Abschnitt erweitert
-  und ggf. ein Cookie-Banner eingebaut werden.
-</div>
 
 
 <!-- ══════════════════════════════════════ -->

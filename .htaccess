@@ -1,0 +1,25 @@
+# Kein Caching für JSON-Dateien (Wochenkarte & Speisekarte)
+<FilesMatch "\.(json)$">
+  Header set Cache-Control "no-cache, must-revalidate"
+  Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+# Security Headers
+<IfModule mod_headers.c>
+  Header set X-Frame-Options "DENY"
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# Fehlerseite
+ErrorDocument 404 /404.html
+
+# www auf non-www umleiten (Domain anpassen!)
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.enzo-muenchen\.de$ [NC]
+RewriteRule ^(.*)$ https://enzo-muenchen.de/$1 [R=301,L]
+
+# HTTPS erzwingen
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]

@@ -51,20 +51,52 @@
     font-size: 1.6rem;
     font-weight: 700;
     color: var(--col-cream);
-    text-decoration: none;
     letter-spacing: 0.04em;
   }
-
-  .nav-logo span { color: var(--col-terra-light); font-style: italic; font-weight: 400; }
-
-  .nav-back {
-    color: rgba(240,232,219,0.6);
-    font-size: 0.85rem;
-    text-decoration: none;
-    transition: color 0.3s;
+  
+  .nav-logo-img {
+    height: 44px;
+    width: auto;
+    transition: opacity 0.3s;
   }
 
-  .nav-back:hover { color: var(--col-cream); }
+.nav-logo-img:hover {
+  opacity: 0.85;
+}
+  .nav-logo span {
+    color: var(--col-terra-light);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: var(--space-md);
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--col-cream);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+    padding-bottom: 2px;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--col-terra-light);
+    transition: width 0.3s;
+  }
+
+  .nav-links a:hover::after { width: 100%; }
 
   /* Content */
   main {
@@ -130,9 +162,10 @@
 
 <body>
 
-<nav>
-  <a href="file:///C:/" class="nav-logo">Enzo<span>'s</span></a>
-  <a href="file:///C:/" class="nav-back">← Zurück zur Startseite</a>
+<nav id="mainNav">
+  <a href="#" class="nav-logo"><img src="./img/logo-header.webp" alt="da Enzo" class="nav-logo-img"></a>
+  <a href="#" class="nav-logo">da Enzo</a>
+  <a href="/" class="nav-back">← Zurück zur Startseite</a>
 </nav>
 
 <main>

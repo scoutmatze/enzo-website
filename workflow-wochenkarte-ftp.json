@@ -1,0 +1,102 @@
+{
+  "name": "Enzo – Wochenkarte → FTP → Hetzner",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["messages"],
+        "additionalFields": {}
+      },
+      "id": "wa-trigger-01",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.messages[0].text.body }}",
+              "rightValue": "Wochenkarte",
+              "operator": { "type": "string", "operation": "startsWith" }
+            }
+          ]
+        }
+      },
+      "id": "if-wk-01",
+      "name": "Beginnt mit Wochenkarte?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $input.first().json.messages[0].text.body;\nconst lines = rawText.split('\\n');\nconst title = lines[0].trim();\nconst menuLines = lines.slice(1).filter(l => l.trim() !== '');\n\nconst items = [];\nlet note = '';\n\nfor (const line of menuLines) {\n  const colonIdx = line.indexOf(':');\n  if (colonIdx > 0 && colonIdx < 4) {\n    const day = line.substring(0, colonIdx).trim();\n    const rest = line.substring(colonIdx + 1).trim();\n    const priceMatch = rest.match(/[–\\-]\\s*([\\d]+[,.]\\d{2}\\s*€?)\\s*$/);\n    if (priceMatch) {\n      const dish = rest.substring(0, rest.lastIndexOf(priceMatch[0])).trim();\n      let price = priceMatch[1].trim();\n      if (!price.includes('€')) price += ' €';\n      items.push({ day, dish, price });\n    } else {\n      items.push({ day, dish: rest, price: '' });\n    }\n  } else {\n    note = line.trim();\n  }\n}\n\nconst json = {\n  title,\n  updated: new Date().toISOString(),\n  items,\n  note\n};\n\n// JSON als String für FTP-Upload\nconst jsonString = JSON.stringify(json, null, 2);\n\n// Binary-Output erstellen für FTP\nconst buffer = Buffer.from(jsonString, 'utf-8');\n\nreturn {\n  json: { title, jsonString },\n  binary: {\n    data: {\n      data: buffer.toString('base64'),\n      mimeType: 'application/json',\n      fileName: 'wochenkarte.json'\n    }\n  }\n};"
+      },
+      "id": "code-parse-01",
+      "name": "WhatsApp Text → JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "path": "/wochenkarte.json",
+        "binaryPropertyName": "data"
+      },
+      "id": "ftp-upload-01",
+      "name": "FTP Upload zu Hetzner",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [900, 200],
+      "credentials": {
+        "ftp": {
+          "id": "DEINE_FTP_CREDENTIAL_ID",
+          "name": "Hetzner FTP Enzo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "PHONE_NUMBER_ID",
+        "recipientPhoneNumber": "ENZO_NUMMER",
+        "textBody": "={{ '✅ Wochenkarte aktualisiert!\\nDie Website zeigt jetzt: ' + $('WhatsApp Text → JSON').first().json.title }}"
+      },
+      "id": "wa-confirm-01",
+      "name": "Bestätigung an Enzo",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {},
+      "id": "noop-01",
+      "name": "Keine Wochenkarte (ignorieren)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [680, 420]
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [[{ "node": "Beginnt mit Wochenkarte?", "type": "main", "index": 0 }]]
+    },
+    "Beginnt mit Wochenkarte?": {
+      "main": [
+        [{ "node": "WhatsApp Text → JSON", "type": "main", "index": 0 }],
+        [{ "node": "Keine Wochenkarte (ignorieren)", "type": "main", "index": 0 }]
+      ]
+    },
+    "WhatsApp Text → JSON": {
+      "main": [[{ "node": "FTP Upload zu Hetzner", "type": "main", "index": 0 }]]
+    },
+    "FTP Upload zu Hetzner": {
+      "main": [[{ "node": "Bestätigung an Enzo", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
