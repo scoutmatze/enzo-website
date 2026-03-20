@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<!-- saved from url=(0056)file:///C:/Users/MathiasFazekas/Downloads/impressum.html -->
-<html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="de">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Impressum – Enzo Caffé &amp; Ristorante</title>
+<title>Impressum – da Enzo Caffé & Ristorante</title>
 <meta name="robots" content="noindex">
 
-<!-- Fonts (DSGVO: vor Go-Live lokal hosten!) -->
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link href="./Impressum_files/css2" rel="stylesheet">
+<!-- Fonts: lokal gehostet (DSGVO-konform) -->
+<link rel="stylesheet" href="./fonts/fonts.css">
+
+<!-- Favicons -->
+<link rel="icon" type="image/png" href="./img/favicon.ico">
+<link rel="apple-touch-icon" href="./img/logo-header.webp">
 
 <style>
   :root {
@@ -37,7 +40,6 @@
   a { color: var(--col-terra); }
   a:hover { color: var(--col-terra-light); }
 
-  /* Nav (simplified) */
   nav {
     background: var(--col-espresso);
     padding: 1rem 2rem;
@@ -51,54 +53,27 @@
     font-size: 1.6rem;
     font-weight: 700;
     color: var(--col-cream);
+    text-decoration: none;
     letter-spacing: 0.04em;
   }
-  
+
   .nav-logo-img {
     height: 44px;
     width: auto;
     transition: opacity 0.3s;
   }
 
-.nav-logo-img:hover {
-  opacity: 0.85;
-}
-  .nav-logo span {
-    color: var(--col-terra-light);
-    font-style: italic;
-    font-weight: 400;
-  }
+  .nav-logo-img:hover { opacity: 0.85; }
 
-  .nav-links {
-    display: flex;
-    gap: var(--space-md);
-    list-style: none;
-  }
-
-  .nav-links a {
-    color: var(--col-cream);
+  .nav-back {
+    color: rgba(240,232,219,0.6);
     font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    position: relative;
-    padding-bottom: 2px;
+    text-decoration: none;
+    transition: color 0.3s;
   }
 
-  .nav-links a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: var(--col-terra-light);
-    transition: width 0.3s;
-  }
+  .nav-back:hover { color: var(--col-cream); }
 
-  .nav-links a:hover::after { width: 100%; }
-
-  /* Content */
   main {
     max-width: 720px;
     margin: 0 auto;
@@ -125,28 +100,6 @@
 
   p { margin-bottom: 0.75rem; color: var(--col-text-muted); }
 
-  /* Hinweis-Boxen für Platzhalter */
-  .hinweis {
-    background: #FFF3E0;
-    border-left: 4px solid #FF9800;
-    padding: 12px 16px;
-    margin: 1rem 0;
-    font-size: 0.9rem;
-    color: #E65100;
-    border-radius: 0 4px 4px 0;
-  }
-
-  .hinweis strong { color: #BF360C; }
-
-  .platzhalter {
-    background: #FFECB3;
-    padding: 2px 6px;
-    border-radius: 2px;
-    font-weight: 600;
-    color: #E65100;
-  }
-
-  /* Footer */
   footer {
     background: var(--col-espresso);
     color: rgba(240,232,219,0.5);
@@ -162,9 +115,8 @@
 
 <body>
 
-<nav id="mainNav">
-  <a href="#" class="nav-logo"><img src="./img/logo-header.webp" alt="da Enzo" class="nav-logo-img"></a>
-  <a href="#" class="nav-logo">da Enzo</a>
+<nav>
+  <a href="/" class="nav-logo"><img src="./img/logo-header.webp" alt="da Enzo" class="nav-logo-img"></a>
   <a href="/" class="nav-back">← Zurück zur Startseite</a>
 </nav>
 
@@ -172,71 +124,21 @@
 
 <h1>Impressum</h1>
 
-<!--
-  ════════════════════════════════════════════════════
-  HINWEISE FÜR DICH (den Webentwickler):
-
-  1. Alle Stellen mit ⚠️ und gelber Markierung MÜSSEN durch
-     Enzos echte Daten ersetzt werden.
-
-  2. Rechtsgrundlage ist seit 14.05.2024 das DDG (§ 5 DDG),
-     NICHT mehr das TMG. Wir verzichten auf die Nennung des
-     Paragrafen – das empfehlen die meisten Anwälte, damit
-     man bei künftigen Gesetzesänderungen nichts anpassen muss.
-
-  3. Als Einzelunternehmer darf Enzo sich NICHT als
-     "Inhaber" oder "Geschäftsführer" bezeichnen – nur
-     der Vor- und Nachname ist korrekt.
-
-  4. Gaststätten brauchen eine Gaststättenerlaubnis → die
-     zuständige Aufsichtsbehörde muss angegeben werden
-     (Kreisverwaltungsreferat München).
-
-  5. Die EU-Streitschlichtungsplattform (OS-Plattform) wurde
-     zum 20.07.2025 eingestellt → kein Link mehr nötig.
-
-  6. USt-IdNr. nur angeben, FALLS Enzo eine hat.
-     Steuernummer NICHT ins Impressum!
-
-  7. Vor Go-Live die ⚠️-Hinweisboxen und HTML-Kommentare
-     komplett entfernen.
-  ════════════════════════════════════════════════════
--->
-
-<div class="hinweis">
-  <strong>⚠️ Vor dem Go-Live:</strong> Alle gelb markierten Platzhalter
-  durch echte Daten ersetzen und diese Hinweis-Boxen entfernen!
-</div>
-
 <h2>Angaben zum Betreiber</h2>
 
 <p>
-  <span class="platzhalter">⚠️ Vorname Nachname</span><br>
-  Da Enzo – Caffé &amp; Ristorante<br>
+  Enzo Curatolo<br>
+  Da Enzo – Caffé & Ristorante<br>
   Zschokkestraße 34<br>
   80686 München
 </p>
-
-<div class="hinweis">
-  <strong>⚠️ Wichtig:</strong> Hier muss Enzos bürgerlicher Vor- und Nachname stehen,
-  nicht „Inhaber" oder „Geschäftsführer" – das ist bei einem Einzelunternehmen
-  (nicht im Handelsregister eingetragen) nicht zulässig. „Da Enzo" darf als
-  Geschäftsbezeichnung zusätzlich genannt werden.
-</div>
 
 <h2>Kontakt</h2>
 
 <p>
   Telefon: +49 (0)89 9443 2100<br>
-  E-Mail: <span class="platzhalter">⚠️ info@enzo-muenchen.de oder booking@da-enzo-muenchen.de</span>
+  E-Mail: info@enzo-muenchen.de
 </p>
-
-<div class="hinweis">
-  <strong>⚠️ Pflicht:</strong> Sowohl Telefonnummer als auch E-Mail-Adresse sind
-  Pflichtangaben für die „schnelle elektronische Kontaktaufnahme".
-  Eine davon weglassen reicht nicht.
-</div>
-
 <h2>Umsatzsteuer-Identifikationsnummer</h2>
 
 <p>
@@ -244,12 +146,10 @@
   <span class="platzhalter">⚠️ DE XXXXXXXXX</span>
 </p>
 
-<div class="hinweis">
-  <strong>⚠️ Nur angeben, wenn vorhanden:</strong> Falls Enzo eine USt-IdNr. hat
+<p>  <strong>⚠️ Nur angeben, wenn vorhanden:</strong> Falls eine USt-IdNr. vorhanden
   (beantragt beim Bundeszentralamt für Steuern), muss sie hier rein.
-  Falls er keine hat, diesen gesamten Abschnitt löschen.
   Die normale Steuernummer gehört NICHT ins Impressum!
-</div>
+</p>
 
 <h2>Zuständige Aufsichtsbehörde</h2>
 
@@ -260,26 +160,13 @@
   80337 München
 </p>
 
-<div class="hinweis">
-  <strong>⚠️ Prüfen:</strong> Gaststätten unterliegen der Gaststättenerlaubnis nach
-  dem Gaststättengesetz. Die zuständige Aufsichtsbehörde in München ist das
-  Kreisverwaltungsreferat. Bitte prüfe, ob die Adresse noch aktuell ist und
-  ob Enzos Betrieb tatsächlich dort zugeordnet ist.
-</div>
-
 <h2>Verantwortlich für den Inhalt</h2>
 
 <p>
-  <span class="platzhalter">⚠️ Vorname Nachname</span><br>
+  Enzo Curatolo<br>
   Zschokkestraße 34<br>
   80686 München
 </p>
-
-<div class="hinweis">
-  <strong>⚠️ Info:</strong> Dieser Abschnitt ist gemäß § 18 Abs. 2 MStV
-  (Medienstaatsvertrag) nötig, wenn die Website redaktionelle Inhalte enthält
-  (z. B. Wochenkarte, Blog-Beiträge). In der Regel ist das der Inhaber selbst.
-</div>
 
 <h2>Streitschlichtung</h2>
 
@@ -333,12 +220,11 @@
 </main>
 
 <footer>
-  <p>© 2026 Da Enzo – Caffé &amp; Ristorante · Zschokkestraße 34 · 80686 München</p>
+  <p>© 2026 da Enzo – Caffé & Ristorante · Zschokkestraße 34 · 80686 München</p>
   <p style="margin-top:8px;">
-    <a href="file:///C:/impressum.html">Impressum</a> · <a href="file:///C:/datenschutz.html">Datenschutz</a> · <a href="file:///C:/">Startseite</a>
+    <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a> · <a href="/">Startseite</a>
   </p>
 </footer>
 
-
-
-</body></html>
+</body>
+</html>

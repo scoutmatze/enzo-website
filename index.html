@@ -1,1698 +1,1535 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Enzo – Caffé & Ristorante | Italienisch essen in München-Laim</title>
-    <meta
-      name="description"
-      content="Frische Pasta, echter Espresso und italienische Spezialitäten in München-Laim. Wochenkarte, Mittagstisch & Reservierung. Zschokkestraße 34."
-    />
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enzo – Caffé & Ristorante | Italienisch essen in München-Laim</title>
+<meta name="description" content="Frische Pasta, echter Espresso und italienische Spezialitäten in München-Laim. Wochenkarte, Mittagstisch & Reservierung. Zschokkestraße 34.">
 
-    <!-- Open Graph / Social Media -->
-    <meta
-      property="og:title"
-      content="Enzo – Caffé & Ristorante | Italienisch essen in München-Laim"
-    />
-    <meta
-      property="og:description"
-      content="Frische Pasta, echter Espresso und italienische Spezialitäten in München-Laim. Wochenkarte, Mittagstisch und Reservierung. Besuche uns in der Zschokkestraße 34."
-    />
-    <meta
-      property="og:image"
-      content="https://enzo-website.netlify.app/img/og-image.jpg"
-    />
-    <meta property="og:url" content="https://www.enzo-muenchen.de" />
-    <meta property="og:type" content="restaurant" />
+<!-- Open Graph / Social Media -->
+<meta property="og:title" content="Enzo – Caffé & Ristorante | Italienisch essen in München-Laim">
+<meta property="og:description" content="Frische Pasta, echter Espresso und italienische Spezialitäten in München-Laim. Wochenkarte, Mittagstisch und Reservierung. Besuche uns in der Zschokkestraße 34.">
+<meta property="og:image" content="https://enzo-website.netlify.app/img/og-image.jpg">
+<meta property="og:url" content="https://www.enzo-muenchen.de">
+<meta property="og:type" content="restaurant">
 
-    <!-- Fonts: lokal gehostet (DSGVO-konform) -->
-    <link rel="stylesheet" href="./fonts/fonts.css" />
+<!-- Fonts: lokal gehostet (DSGVO-konform) -->
+<link rel="stylesheet" href="./fonts/fonts.css">
 
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" href="./img/favicon.ico" />
-    <link rel="apple-touch-icon" href="./img/logo-header.webp" />
-    <style>
-      /* ═══════════════════════════════════════════
+<!-- Favicons -->
+<link rel="icon" type="image/png" href="./img/favicon.ico">
+<link rel="apple-touch-icon" href="./img/logo-header.webp">
+<style>
+  /* ═══════════════════════════════════════════
      DESIGN TOKENS
      ═══════════════════════════════════════════ */
-      :root {
-        --col-terra: #b85a3a;
-        --col-terra-light: #d4845e;
-        --col-olive: #5c6b4e;
-        --col-olive-light: #8a9a72;
-        --col-cream: #faf5ee;
-        --col-cream-dark: #f0e8db;
-        --col-espresso: #2a1f17;
-        --col-espresso-mid: #4a3828;
-        --col-text: #1e1e1e;
-        --col-text-muted: #7a6e62;
-        --col-gold: #c9a96e;
+  :root {
+    --col-terra: #B85A3A;
+    --col-terra-light: #D4845E;
+    --col-olive: #5C6B4E;
+    --col-olive-light: #8A9A72;
+    --col-cream: #FAF5EE;
+    --col-cream-dark: #F0E8DB;
+    --col-espresso: #2A1F17;
+    --col-espresso-mid: #4A3828;
+    --col-text: #1E1E1E;
+    --col-text-muted: #7A6E62;
+    --col-gold: #C9A96E;
 
-        --font-display: "Cormorant Garamond", Georgia, serif;
-        --font-body: "DM Sans", system-ui, sans-serif;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
 
-        --space-xs: 0.5rem;
-        --space-sm: 1rem;
-        --space-md: 2rem;
-        --space-lg: 4rem;
-        --space-xl: 6rem;
-        --space-xxl: 8rem;
-      }
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 2rem;
+    --space-lg: 4rem;
+    --space-xl: 6rem;
+    --space-xxl: 8rem;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      RESET & BASE
      ═══════════════════════════════════════════ */
-      *,
-      *::before,
-      *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-      html {
-        scroll-behavior: smooth;
-        scroll-padding-top: 80px;
-      }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 
-      body {
-        font-family: var(--font-body);
-        font-weight: 400;
-        color: var(--col-text);
-        background: var(--col-cream);
-        line-height: 1.7;
-        font-size: 16px;
-        -webkit-font-smoothing: antialiased;
-        overflow-x: hidden;
-      }
+  body {
+    font-family: var(--font-body);
+    font-weight: 400;
+    color: var(--col-text);
+    background: var(--col-cream);
+    line-height: 1.7;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
 
-      img {
-        max-width: 100%;
-        display: block;
-      }
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      TYPOGRAPHY
      ═══════════════════════════════════════════ */
-      .t-display {
-        font-family: var(--font-display);
-        font-weight: 600;
-        line-height: 1.15;
-        letter-spacing: -0.01em;
-      }
+  .t-display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
 
-      .t-serif-italic {
-        font-family: var(--font-display);
-        font-style: italic;
-        font-weight: 400;
-      }
+  .t-serif-italic {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      GRAIN OVERLAY (texture)
      ═══════════════════════════════════════════ */
-      body::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 9999;
-        opacity: 0.025;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-        background-size: 200px;
-      }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      ANIMATIONS
      ═══════════════════════════════════════════ */
-      @keyframes fadeUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 
-      @keyframes slideInLeft {
-        from {
-          opacity: 0;
-          transform: translateX(-40px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
-        }
-      }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
 
-      .reveal {
-        opacity: 0;
-        transform: translateY(30px);
-        transition:
-          opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-          transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      }
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 
-      .reveal.visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      NAVIGATION
      ═══════════════════════════════════════════ */
-      nav {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        padding: var(--space-sm) var(--space-md);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition:
-          background 0.4s,
-          padding 0.4s,
-          box-shadow 0.4s;
-      }
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: var(--space-sm) var(--space-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.4s, padding 0.4s, box-shadow 0.4s;
+  }
 
-      nav.scrolled {
-        background: rgba(42, 31, 23, 0.95);
-        backdrop-filter: blur(12px);
-        padding: 0.7rem var(--space-md);
-        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
-      }
+  nav.scrolled {
+    background: rgba(42, 31, 23, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 0.7rem var(--space-md);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+  }
 
-      .nav-logo {
-        font-family: var(--font-display);
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: var(--col-cream);
-        letter-spacing: 0.04em;
-      }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--col-cream);
+    letter-spacing: 0.04em;
+  }
+  
+  .nav-logo-img {
+    height: 44px;
+    width: auto;
+    transition: opacity 0.3s;
+  }
 
-      .nav-logo-img {
-        height: 44px;
-        width: auto;
-        transition: opacity 0.3s;
-      }
+.nav-logo-img:hover {
+  opacity: 0.85;
+}
+  .nav-logo span {
+    color: var(--col-terra-light);
+    font-style: italic;
+    font-weight: 400;
+  }
 
-      .nav-logo-img:hover {
-        opacity: 0.85;
-      }
-      .nav-logo span {
-        color: var(--col-terra-light);
-        font-style: italic;
-        font-weight: 400;
-      }
+  .nav-links {
+    display: flex;
+    gap: var(--space-md);
+    list-style: none;
+  }
 
-      .nav-links {
-        display: flex;
-        gap: var(--space-md);
-        list-style: none;
-      }
+  .nav-links a {
+    color: var(--col-cream);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+    padding-bottom: 2px;
+  }
 
-      .nav-links a {
-        color: var(--col-cream);
-        font-size: 0.85rem;
-        font-weight: 500;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        position: relative;
-        padding-bottom: 2px;
-      }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--col-terra-light);
+    transition: width 0.3s;
+  }
 
-      .nav-links a::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0;
-        height: 1px;
-        background: var(--col-terra-light);
-        transition: width 0.3s;
-      }
+  .nav-links a:hover::after { width: 100%; }
 
-      .nav-links a:hover::after {
-        width: 100%;
-      }
+  .nav-burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 4px;
+  }
 
-      .nav-burger {
-        display: none;
-        flex-direction: column;
-        gap: 5px;
-        cursor: pointer;
-        padding: 4px;
-      }
+  .nav-burger span {
+    width: 24px;
+    height: 2px;
+    background: var(--col-cream);
+    transition: transform 0.3s, opacity 0.3s;
+  }
 
-      .nav-burger span {
-        width: 24px;
-        height: 2px;
-        background: var(--col-cream);
-        transition:
-          transform 0.3s,
-          opacity 0.3s;
-      }
+  .nav-burger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .nav-burger.open span:nth-child(2) { opacity: 0; }
+  .nav-burger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
-      .nav-burger.open span:nth-child(1) {
-        transform: rotate(45deg) translate(5px, 5px);
-      }
-      .nav-burger.open span:nth-child(2) {
-        opacity: 0;
-      }
-      .nav-burger.open span:nth-child(3) {
-        transform: rotate(-45deg) translate(5px, -5px);
-      }
-
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      HERO
      ═══════════════════════════════════════════ */
-      .hero {
-        min-height: 100vh;
-        display: flex;
-        align-items: flex-end;
-        justify-content: flex-start;
-        padding: var(--space-xxl) var(--space-lg);
-        position: relative;
-        background:
-          linear-gradient(
-            170deg,
-            rgba(42, 31, 23, 0.15) 0%,
-            rgba(42, 31, 23, 0.75) 70%,
-            rgba(42, 31, 23, 0.92) 100%
-          ),
-          url("./img/hero.jpg") center/cover no-repeat;
-      }
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: var(--space-xxl) var(--space-lg);
+    position: relative;
+    background:
+      linear-gradient(170deg, rgba(42,31,23,0.15) 0%, rgba(42,31,23,0.75) 70%, rgba(42,31,23,0.92) 100%),
+      url('./img/hero.jpg') center/cover no-repeat;
+  }
 
-      .hero-content {
-        max-width: 680px;
-        animation: fadeUp 1s 0.3s both;
-      }
+  .hero-content {
+    max-width: 680px;
+    animation: fadeUp 1s 0.3s both;
+  }
 
-      .hero-tag {
-        display: inline-block;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        color: var(--col-terra-light);
-        margin-bottom: var(--space-sm);
-        border: 1px solid rgba(212, 132, 94, 0.4);
-        padding: 6px 16px;
-        border-radius: 2px;
-      }
+  .hero-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--col-terra-light);
+    margin-bottom: var(--space-sm);
+    border: 1px solid rgba(212,132,94,0.4);
+    padding: 6px 16px;
+    border-radius: 2px;
+  }
 
-      .hero h1 {
-        font-family: var(--font-display);
-        font-size: clamp(2.8rem, 6vw, 4.5rem);
-        font-weight: 600;
-        color: var(--col-cream);
-        line-height: 1.1;
-        margin-bottom: var(--space-sm);
-      }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
+    font-weight: 600;
+    color: var(--col-cream);
+    line-height: 1.1;
+    margin-bottom: var(--space-sm);
+  }
 
-      .hero h1 em {
-        font-style: italic;
-        font-weight: 400;
-        color: var(--col-terra-light);
-      }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--col-terra-light);
+  }
 
-      .hero p {
-        color: rgba(240, 232, 219, 0.8);
-        font-size: 1.1rem;
-        max-width: 480px;
-        margin-bottom: var(--space-md);
-        line-height: 1.8;
-      }
+  .hero p {
+    color: rgba(240,232,219,0.8);
+    font-size: 1.1rem;
+    max-width: 480px;
+    margin-bottom: var(--space-md);
+    line-height: 1.8;
+  }
 
-      .hero-actions {
-        display: flex;
-        gap: var(--space-sm);
-        flex-wrap: wrap;
-      }
+  .hero-actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      BUTTONS
      ═══════════════════════════════════════════ */
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 14px 32px;
-        font-family: var(--font-body);
-        font-size: 0.85rem;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s;
-        border-radius: 2px;
-      }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 2px;
+  }
 
-      .btn-primary {
-        background: var(--col-terra);
-        color: var(--col-cream);
-      }
+  .btn-primary {
+    background: var(--col-terra);
+    color: var(--col-cream);
+  }
 
-      .btn-primary:hover {
-        background: var(--col-terra-light);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(184, 90, 58, 0.3);
-      }
+  .btn-primary:hover {
+    background: var(--col-terra-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(184,90,58,0.3);
+  }
 
-      .btn-outline {
-        background: transparent;
-        color: var(--col-cream);
-        border: 1px solid rgba(240, 232, 219, 0.4);
-      }
+  .btn-outline {
+    background: transparent;
+    color: var(--col-cream);
+    border: 1px solid rgba(240,232,219,0.4);
+  }
 
-      .btn-outline:hover {
-        border-color: var(--col-cream);
-        background: rgba(240, 232, 219, 0.08);
-      }
+  .btn-outline:hover {
+    border-color: var(--col-cream);
+    background: rgba(240,232,219,0.08);
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      SECTIONS
      ═══════════════════════════════════════════ */
-      section {
-        padding: var(--space-xxl) var(--space-lg);
-      }
+  section {
+    padding: var(--space-xxl) var(--space-lg);
+  }
 
-      .section-label {
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 0.25em;
-        text-transform: uppercase;
-        color: var(--col-terra);
-        margin-bottom: var(--space-xs);
-      }
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--col-terra);
+    margin-bottom: var(--space-xs);
+  }
 
-      .section-title {
-        font-family: var(--font-display);
-        font-size: clamp(2rem, 4vw, 3rem);
-        font-weight: 600;
-        line-height: 1.15;
-        margin-bottom: var(--space-md);
-        color: var(--col-espresso);
-      }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    line-height: 1.15;
+    margin-bottom: var(--space-md);
+    color: var(--col-espresso);
+  }
 
-      .section-title em {
-        font-weight: 400;
-        font-style: italic;
-        color: var(--col-terra);
-      }
+  .section-title em {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--col-terra);
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      ABOUT (Über Enzo)
      ═══════════════════════════════════════════ */
-      .about {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-xl);
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
+  .about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
-      .about-text p {
-        color: var(--col-text-muted);
-        margin-bottom: var(--space-sm);
-        font-size: 1.05rem;
-      }
+  .about-text p {
+    color: var(--col-text-muted);
+    margin-bottom: var(--space-sm);
+    font-size: 1.05rem;
+  }
 
-      .about-sig {
-        font-family: var(--font-display);
-        font-style: italic;
-        font-size: 1.5rem;
-        color: var(--col-terra);
-        margin-top: var(--space-md);
-      }
+  .about-sig {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--col-terra);
+    margin-top: var(--space-md);
+  }
 
-      .about-image {
-        position: relative;
-        border-radius: 4px;
-        overflow: hidden;
-        aspect-ratio: 4/5;
-      }
+  .about-image {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 4/5;
+  }
 
-      .about-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+  .about-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
-      .about-image::after {
-        content: "";
-        position: absolute;
-        inset: 12px;
-        border: 1px solid rgba(201, 169, 110, 0.3);
-        border-radius: 2px;
-        pointer-events: none;
-      }
+  .about-image::after {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1px solid rgba(201,169,110,0.3);
+    border-radius: 2px;
+    pointer-events: none;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      HIGHLIGHTS
      ═══════════════════════════════════════════ */
-      .highlights {
-        background: var(--col-espresso);
-        color: var(--col-cream);
-      }
+  .highlights {
+    background: var(--col-espresso);
+    color: var(--col-cream);
+  }
 
-      .highlights-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: var(--space-md);
-        max-width: 1200px;
-        margin: 0 auto;
-      }
+  .highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
-      .highlight-card {
-        padding: var(--space-md);
-        border: 1px solid rgba(240, 232, 219, 0.08);
-        border-radius: 4px;
-        transition:
-          border-color 0.3s,
-          transform 0.3s;
-      }
+  .highlight-card {
+    padding: var(--space-md);
+    border: 1px solid rgba(240,232,219,0.08);
+    border-radius: 4px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
 
-      .highlight-card:hover {
-        border-color: rgba(184, 90, 58, 0.4);
-        transform: translateY(-4px);
-      }
+  .highlight-card:hover {
+    border-color: rgba(184,90,58,0.4);
+    transform: translateY(-4px);
+  }
 
-      .highlight-icon {
-        font-size: 2rem;
-        margin-bottom: var(--space-sm);
-        display: block;
-      }
+  .highlight-icon {
+    font-size: 2rem;
+    margin-bottom: var(--space-sm);
+    display: block;
+  }
 
-      .highlight-card h3 {
-        font-family: var(--font-display);
-        font-size: 1.4rem;
-        font-weight: 600;
-        margin-bottom: var(--space-xs);
-      }
+  .highlight-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+  }
 
-      .highlight-card p {
-        color: rgba(240, 232, 219, 0.6);
-        font-size: 0.9rem;
-        line-height: 1.6;
-      }
+  .highlight-card p {
+    color: rgba(240,232,219,0.6);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      SPEISEKARTE
      ═══════════════════════════════════════════ */
-      .menu-section {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
+  .menu-section {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
-      .menu-intro {
-        max-width: 560px;
-        color: var(--col-text-muted);
-        font-size: 1.05rem;
-        margin-bottom: var(--space-lg);
-      }
+  .menu-intro {
+    max-width: 560px;
+    color: var(--col-text-muted);
+    font-size: 1.05rem;
+    margin-bottom: var(--space-lg);
+  }
 
-      .menu-categories {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--space-lg);
-      }
+  .menu-categories {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
 
-      .menu-category h3 {
-        font-family: var(--font-display);
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--col-espresso);
-        padding-bottom: var(--space-xs);
-        border-bottom: 2px solid var(--col-terra);
-        margin-bottom: var(--space-sm);
-        display: inline-block;
-      }
+  .menu-category h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--col-espresso);
+    padding-bottom: var(--space-xs);
+    border-bottom: 2px solid var(--col-terra);
+    margin-bottom: var(--space-sm);
+    display: inline-block;
+  }
 
-      .menu-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        padding: 10px 0;
-        border-bottom: 1px solid var(--col-cream-dark);
-      }
+  .menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--col-cream-dark);
+  }
 
-      .menu-item-name {
-        font-weight: 500;
-        color: var(--col-espresso-mid);
-      }
+  .menu-item-name {
+    font-weight: 500;
+    color: var(--col-espresso-mid);
+  }
 
-      .menu-item-desc {
-        font-size: 0.85rem;
-        color: var(--col-text-muted);
-        font-style: italic;
-      }
+  .menu-item-desc {
+    font-size: 0.85rem;
+    color: var(--col-text-muted);
+    font-style: italic;
+  }
 
-      .menu-item-dots {
-        flex: 1;
-        border-bottom: 1px dotted var(--col-cream-dark);
-        margin: 0 12px;
-        min-width: 20px;
-        align-self: center;
-        position: relative;
-        top: -3px;
-      }
+  .menu-item-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--col-cream-dark);
+    margin: 0 12px;
+    min-width: 20px;
+    align-self: center;
+    position: relative;
+    top: -3px;
+  }
 
-      .menu-item-price {
-        font-weight: 600;
-        color: var(--col-terra);
-        white-space: nowrap;
-        font-size: 0.95rem;
-      }
+  .menu-item-price {
+    font-weight: 600;
+    color: var(--col-terra);
+    white-space: nowrap;
+    font-size: 0.95rem;
+  }
 
-      .menu-item-allergens {
-        font-size: 0.7rem;
-        color: var(--col-text-muted);
-        letter-spacing: 0.02em;
-        white-space: nowrap;
-        margin-left: 6px;
-        opacity: 0.6;
-      }
-
-      #menuAllergens {
-        background: var(--col-cream-dark);
-        padding: 1rem 1.5rem;
-        border-radius: 6px;
-        line-height: 1.9;
-      }
-      /* ═══════════════════════════════════════════
+  .menu-item-allergens {
+    font-size: 0.7rem;
+    color: var(--col-text-muted);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    margin-left: 6px;
+    opacity: 0.6;
+  }
+	
+	#menuAllergens {
+    background: var(--col-cream-dark);
+    padding: 1rem 1.5rem;
+    border-radius: 6px;
+    line-height: 1.9;
+  }
+  /* ═══════════════════════════════════════════
      WOCHENKARTE
      ═══════════════════════════════════════════ */
-      .wochenkarte-section {
-        background: linear-gradient(
-          135deg,
-          var(--col-espresso) 0%,
-          var(--col-espresso-mid) 100%
-        );
-        color: var(--col-cream);
-        position: relative;
-      }
+  .wochenkarte-section {
+    background:
+      linear-gradient(135deg, var(--col-espresso) 0%, var(--col-espresso-mid) 100%);
+    color: var(--col-cream);
+    position: relative;
+  }
 
-      .wochenkarte-section::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          var(--col-gold),
-          transparent
-        );
-      }
+  .wochenkarte-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--col-gold), transparent);
+  }
 
-      .wochenkarte-inner {
-        max-width: 800px;
-        margin: 0 auto;
-        text-align: center;
-      }
+  .wochenkarte-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
 
-      .wochenkarte-section .section-label {
-        color: var(--col-gold);
-      }
-      .wochenkarte-section .section-title {
-        color: var(--col-cream);
-      }
-      .wochenkarte-section .section-title em {
-        color: var(--col-gold);
-      }
+  .wochenkarte-section .section-label { color: var(--col-gold); }
+  .wochenkarte-section .section-title { color: var(--col-cream); }
+  .wochenkarte-section .section-title em { color: var(--col-gold); }
 
-      .wochenkarte-date {
-        color: rgba(240, 232, 219, 0.5);
-        font-size: 0.85rem;
-        font-style: italic;
-        margin-bottom: var(--space-lg);
-      }
+  .wochenkarte-date {
+    color: rgba(240,232,219,0.5);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-bottom: var(--space-lg);
+  }
 
-      .wochenkarte-grid {
-        display: grid;
-        gap: 0;
-        text-align: left;
-      }
+  .wochenkarte-grid {
+    display: grid;
+    gap: 0;
+    text-align: left;
+  }
 
-      .wochenkarte-item {
-        display: grid;
-        grid-template-columns: 80px 1fr auto;
-        gap: var(--space-sm);
-        padding: var(--space-sm) 0;
-        border-bottom: 1px solid rgba(240, 232, 219, 0.08);
-        align-items: center;
-      }
+  .wochenkarte-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid rgba(240,232,219,0.08);
+    align-items: center;
+  }
 
-      .wochenkarte-item:last-child {
-        border-bottom: none;
-      }
+  .wochenkarte-item:last-child { border-bottom: none; }
 
-      .wk-day {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: 1.1rem;
-        color: var(--col-gold);
-      }
+  .wk-day {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--col-gold);
+  }
 
-      .wk-dish {
-        font-size: 1.05rem;
-        color: var(--col-cream);
-      }
+  .wk-dish {
+    font-size: 1.05rem;
+    color: var(--col-cream);
+  }
 
-      .wk-price {
-        font-weight: 600;
-        color: var(--col-terra-light);
-        font-size: 1.05rem;
-        text-align: right;
-      }
+  .wk-price {
+    font-weight: 600;
+    color: var(--col-terra-light);
+    font-size: 1.05rem;
+    text-align: right;
+  }
 
-      .wochenkarte-note {
-        margin-top: var(--space-md);
-        padding-top: var(--space-sm);
-        border-top: 1px solid rgba(240, 232, 219, 0.08);
-        color: rgba(240, 232, 219, 0.5);
-        font-style: italic;
-        font-size: 0.9rem;
-        text-align: center;
-      }
+  .wochenkarte-note {
+    margin-top: var(--space-md);
+    padding-top: var(--space-sm);
+    border-top: 1px solid rgba(240,232,219,0.08);
+    color: rgba(240,232,219,0.5);
+    font-style: italic;
+    font-size: 0.9rem;
+    text-align: center;
+  }
 
-      .wochenkarte-empty {
-        padding: var(--space-lg) 0;
-        color: rgba(240, 232, 219, 0.4);
-        font-style: italic;
-      }
+  .wochenkarte-empty {
+    padding: var(--space-lg) 0;
+    color: rgba(240,232,219,0.4);
+    font-style: italic;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      RESERVIERUNG
      ═══════════════════════════════════════════ */
-      .reservierung {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-xl);
-        align-items: start;
-      }
+  .reservierung {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    align-items: start;
+  }
 
-      .reservierung-text p {
-        color: var(--col-text-muted);
-        font-size: 1.05rem;
-        margin-bottom: var(--space-sm);
-      }
+  .reservierung-text p {
+    color: var(--col-text-muted);
+    font-size: 1.05rem;
+    margin-bottom: var(--space-sm);
+  }
 
-      .reservierung-channels {
-        margin-top: var(--space-md);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-sm);
-      }
+  .reservierung-channels {
+    margin-top: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
 
-      .channel {
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-        padding: var(--space-sm);
-        background: var(--col-cream-dark);
-        border-radius: 4px;
-      }
+  .channel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    background: var(--col-cream-dark);
+    border-radius: 4px;
+  }
 
-      .channel-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        flex-shrink: 0;
-      }
+  .channel-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
 
-      .channel-wa {
-        background: #25d366;
-        color: white;
-      }
-      .channel-phone {
-        background: var(--col-olive);
-        color: white;
-      }
+  .channel-wa { background: #25D366; color: white; }
+  .channel-phone { background: var(--col-olive); color: white; }
 
-      .channel span {
-        font-weight: 500;
-      }
-      .channel small {
-        display: block;
-        color: var(--col-text-muted);
-        font-size: 0.85rem;
-      }
+  .channel span { font-weight: 500; }
+  .channel small { display: block; color: var(--col-text-muted); font-size: 0.85rem; }
 
-      /* Form */
-      .res-form {
-        background: white;
-        padding: var(--space-md);
-        border-radius: 8px;
-        box-shadow: 0 4px 30px rgba(42, 31, 23, 0.06);
-        border: 1px solid var(--col-cream-dark);
-      }
+  /* Form */
+  .res-form {
+    background: white;
+    padding: var(--space-md);
+    border-radius: 8px;
+    box-shadow: 0 4px 30px rgba(42,31,23,0.06);
+    border: 1px solid var(--col-cream-dark);
+  }
 
-      .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-sm);
-        margin-bottom: var(--space-sm);
-      }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+  }
 
-      .form-group {
-        margin-bottom: var(--space-sm);
-      }
+  .form-group { margin-bottom: var(--space-sm); }
 
-      .form-group label {
-        display: block;
-        font-size: 0.8rem;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        color: var(--col-text-muted);
-        margin-bottom: 6px;
-      }
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--col-text-muted);
+    margin-bottom: 6px;
+  }
 
-      .form-group input,
-      .form-group select,
-      .form-group textarea {
-        width: 100%;
-        padding: 12px 14px;
-        font-family: var(--font-body);
-        font-size: 0.95rem;
-        border: 1px solid var(--col-cream-dark);
-        border-radius: 4px;
-        background: var(--col-cream);
-        color: var(--col-text);
-        transition:
-          border-color 0.3s,
-          box-shadow 0.3s;
-      }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    border: 1px solid var(--col-cream-dark);
+    border-radius: 4px;
+    background: var(--col-cream);
+    color: var(--col-text);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
 
-      .form-group input:focus,
-      .form-group select:focus,
-      .form-group textarea:focus {
-        outline: none;
-        border-color: var(--col-terra);
-        box-shadow: 0 0 0 3px rgba(184, 90, 58, 0.1);
-      }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--col-terra);
+    box-shadow: 0 0 0 3px rgba(184,90,58,0.1);
+  }
 
-      .form-group textarea {
-        resize: vertical;
-        min-height: 80px;
-      }
+  .form-group textarea { resize: vertical; min-height: 80px; }
 
-      .form-submit {
-        width: 100%;
-        padding: 16px;
-        background: var(--col-terra);
-        color: var(--col-cream);
-        border: none;
-        font-family: var(--font-body);
-        font-size: 0.9rem;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: all 0.3s;
-      }
+  .form-submit {
+    width: 100%;
+    padding: 16px;
+    background: var(--col-terra);
+    color: var(--col-cream);
+    border: none;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
 
-      .form-submit:hover {
-        background: var(--col-terra-light);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(184, 90, 58, 0.25);
-      }
+  .form-submit:hover {
+    background: var(--col-terra-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(184,90,58,0.25);
+  }
 
-      .form-submit:disabled {
-        opacity: 0.6;
-        cursor: wait;
-      }
+  .form-submit:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
 
-      .form-status {
-        margin-top: var(--space-sm);
-        padding: 12px;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        display: none;
-      }
+  .form-status {
+    margin-top: var(--space-sm);
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    display: none;
+  }
 
-      .form-status.success {
-        display: block;
-        background: #e8f5e9;
-        color: #2e7d32;
-        border: 1px solid #a5d6a7;
-      }
+  .form-status.success {
+    display: block;
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #A5D6A7;
+  }
 
-      .form-status.error {
-        display: block;
-        background: #fbe9e7;
-        color: #c62828;
-        border: 1px solid #ef9a9a;
-      }
+  .form-status.error {
+    display: block;
+    background: #FBE9E7;
+    color: #C62828;
+    border: 1px solid #EF9A9A;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      KONTAKT & MAP
      ═══════════════════════════════════════════ */
-      .kontakt {
-        background: var(--col-cream-dark);
-      }
+  .kontakt {
+    background: var(--col-cream-dark);
+  }
 
-      .kontakt-grid {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-xl);
-      }
+  .kontakt-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+  }
 
-      .kontakt-info h3 {
-        font-family: var(--font-display);
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: var(--col-espresso);
-        margin-top: var(--space-md);
-        margin-bottom: var(--space-xs);
-      }
+  .kontakt-info h3 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--col-espresso);
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-xs);
+  }
 
-      .kontakt-info h3:first-child {
-        margin-top: 0;
-      }
+  .kontakt-info h3:first-child { margin-top: 0; }
 
-      .kontakt-info p {
-        color: var(--col-text-muted);
-        line-height: 1.8;
-      }
+  .kontakt-info p {
+    color: var(--col-text-muted);
+    line-height: 1.8;
+  }
 
-      .kontakt-map {
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid var(--col-cream);
-        min-height: 350px;
-      }
+  .kontakt-map {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--col-cream);
+    min-height: 350px;
+  }
 
-      .kontakt-map iframe {
-        width: 100%;
-        height: 100%;
-        min-height: 350px;
-        border: 0;
-      }
+  .kontakt-map iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 350px;
+    border: 0;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      FOOTER
      ═══════════════════════════════════════════ */
-      footer {
-        background: var(--col-espresso);
-        color: rgba(240, 232, 219, 0.5);
-        padding: var(--space-lg) var(--space-lg) var(--space-md);
-        text-align: center;
-        font-size: 0.85rem;
-      }
+  footer {
+    background: var(--col-espresso);
+    color: rgba(240,232,219,0.5);
+    padding: var(--space-lg) var(--space-lg) var(--space-md);
+    text-align: center;
+    font-size: 0.85rem;
+  }
 
-      .footer-logo {
-        font-family: var(--font-display);
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: var(--col-cream);
-        margin-bottom: var(--space-xs);
-      }
+  .footer-logo {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--col-cream);
+    margin-bottom: var(--space-xs);
+  }
 
-      .footer-logo span {
-        color: var(--col-terra-light);
-        font-style: italic;
-        font-weight: 400;
-      }
+  .footer-logo span { color: var(--col-terra-light); font-style: italic; font-weight: 400; }
 
-      footer p {
-        margin-bottom: 4px;
-      }
+  footer p { margin-bottom: 4px; }
 
-      .footer-links {
-        margin-top: var(--space-sm);
-        display: flex;
-        justify-content: center;
-        gap: var(--space-md);
-      }
+  .footer-links {
+    margin-top: var(--space-sm);
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+  }
 
-      .footer-links a {
-        color: rgba(240, 232, 219, 0.5);
-        transition: color 0.3s;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
+  .footer-links a {
+    color: rgba(240,232,219,0.5);
+    transition: color 0.3s;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
 
-      .footer-links a:hover {
-        color: var(--col-terra-light);
-      }
+  .footer-links a:hover { color: var(--col-terra-light); }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      WHATSAPP FLOATING BUTTON
      ═══════════════════════════════════════════ */
-      .wa-float {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 900;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: #25d366;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-        transition:
-          transform 0.3s,
-          box-shadow 0.3s;
-        font-size: 1.6rem;
-      }
+  .wa-float {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 900;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #25D366;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+    transition: transform 0.3s, box-shadow 0.3s;
+    font-size: 1.6rem;
+  }
 
-      .wa-float:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 28px rgba(37, 211, 102, 0.5);
-      }
+  .wa-float:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 28px rgba(37,211,102,0.5);
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
      DECORATIVE DIVIDER
      ═══════════════════════════════════════════ */
-      .divider {
-        text-align: center;
-        padding: var(--space-md) 0;
-        color: var(--col-terra-light);
-        font-family: var(--font-display);
-        font-size: 1.4rem;
-        opacity: 0.4;
-        letter-spacing: 0.5em;
-      }
+  .divider {
+    text-align: center;
+    padding: var(--space-md) 0;
+    color: var(--col-terra-light);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    opacity: 0.4;
+    letter-spacing: 0.5em;
+  }
 
-      /* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
+     SPEISEKARTE AKKORDEON (Mobile)
+     ═══════════════════════════════════════════ */
+  .menu-category-header {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .menu-categories {
+      display: flex !important;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .menu-category {
+      border-bottom: 1px solid var(--col-cream-dark);
+    }
+
+    .menu-category h3 {
+      display: none;
+    }
+
+    .menu-category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0.5rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .menu-category-header span {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--col-espresso);
+    }
+
+    .menu-category-header .accordion-icon {
+      font-size: 1.4rem;
+      color: var(--col-terra);
+      transition: transform 0.3s ease;
+      line-height: 1;
+    }
+
+    .menu-category.open .accordion-icon {
+      transform: rotate(45deg);
+    }
+
+    .menu-category-items {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+      padding: 0 0.5rem;
+    }
+
+    .menu-category.open .menu-category-items {
+      max-height: 2000px;
+      padding: 0 0.5rem 1rem;
+    }
+
+    .menu-category-items .menu-item {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .menu-category.open .menu-category-items .menu-item {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .menu-category.open .menu-category-items .menu-item:nth-child(1) { transition-delay: 0.05s; }
+    .menu-category.open .menu-category-items .menu-item:nth-child(2) { transition-delay: 0.1s; }
+    .menu-category.open .menu-category-items .menu-item:nth-child(3) { transition-delay: 0.15s; }
+    .menu-category.open .menu-category-items .menu-item:nth-child(4) { transition-delay: 0.2s; }
+    .menu-category.open .menu-category-items .menu-item:nth-child(5) { transition-delay: 0.25s; }
+    .menu-category.open .menu-category-items .menu-item:nth-child(6) { transition-delay: 0.3s; }
+  }
+
+  /* ═══════════════════════════════════════════
      RESPONSIVE
      ═══════════════════════════════════════════ */
-      @media (max-width: 900px) {
-        section {
-          padding: var(--space-xl) var(--space-md);
-        }
+  @media (max-width: 900px) {
+    section { padding: var(--space-xl) var(--space-md); }
 
-        .about,
-        .reservierung,
-        .kontakt-grid {
-          grid-template-columns: 1fr;
-        }
+    .about,
+    .reservierung,
+    .kontakt-grid { grid-template-columns: 1fr; }
 
-        .about-image {
-          max-height: 400px;
-        }
+    .about-image { max-height: 400px; }
 
-        .highlights-grid {
-          grid-template-columns: 1fr 1fr;
-        }
+    .highlights-grid { grid-template-columns: 1fr 1fr; }
 
-        .menu-categories {
-          grid-template-columns: 1fr;
-        }
+    .menu-categories { grid-template-columns: 1fr; }
 
-        .hero {
-          padding: var(--space-xl) var(--space-md);
-        }
-      }
+    .hero { padding: var(--space-xl) var(--space-md); }
+  }
 
-      @media (max-width: 600px) {
-        .nav-links {
-          display: none;
-        }
-        .nav-links.open {
-          display: flex;
-          flex-direction: column;
-          position: absolute;
-          top: 100%;
-          left: 0;
-          right: 0;
-          background: rgba(42, 31, 23, 0.97);
-          padding: var(--space-md);
-          gap: var(--space-sm);
-        }
-        .nav-burger {
-          display: flex;
-        }
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .nav-links.open {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(42,31,23,0.97);
+      padding: var(--space-md);
+      gap: var(--space-sm);
+    }
+    .nav-burger { display: flex; }
 
-        .hero h1 {
-          font-size: 2.2rem;
-        }
+    .hero h1 { font-size: 2.2rem; }
 
-        .highlights-grid {
-          grid-template-columns: 1fr;
-        }
+    .highlights-grid { grid-template-columns: 1fr; }
 
-        .form-row {
-          grid-template-columns: 1fr;
-        }
+    .form-row { grid-template-columns: 1fr; }
 
-        .wochenkarte-item {
-          grid-template-columns: 1fr;
-          gap: 4px;
-          padding: var(--space-sm) 0;
-        }
+    .wochenkarte-item {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: var(--space-sm) 0;
+    }
 
-        .wk-price {
-          text-align: left;
-        }
-      }
-    </style>
-  </head>
+    .wk-price { text-align: left; }
+  }
+</style>
+</head>
 
-  <body>
-    <!-- ═══════ NAVIGATION ═══════ -->
-    <nav id="mainNav">
-      <a href="#" class="nav-logo"
-        ><img src="./img/logo-header.webp" alt="da Enzo" class="nav-logo-img"
-      /></a>
-      <a href="#" class="nav-logo">da Enzo</a>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="#ueber">Über uns</a></li>
-        <li><a href="#karte">Speisekarte</a></li>
-        <li><a href="#wochenkarte">Wochenkarte</a></li>
-        <li><a href="#reservieren">Reservieren</a></li>
-        <li><a href="#kontakt">Kontakt</a></li>
-      </ul>
-      <div class="nav-burger" id="navBurger" onclick="toggleNav()">
-        <span></span><span></span><span></span>
+<body>
+
+<!-- ═══════ NAVIGATION ═══════ -->
+<nav id="mainNav">
+  <a href="#" class="nav-logo"><img src="./img/logo-header.webp" alt="da Enzo" class="nav-logo-img"></a>
+  <a href="#" class="nav-logo">da Enzo</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#ueber">Über uns</a></li>
+    <li><a href="#karte">Speisekarte</a></li>
+    <li><a href="#wochenkarte">Wochenkarte</a></li>
+    <li><a href="#reservieren">Reservieren</a></li>
+    <li><a href="#kontakt">Kontakt</a></li>
+  </ul>
+  <div class="nav-burger" id="navBurger" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<header class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">München · Laim · Zschokkestraße 34</div>
+    <h1>Buon appetito <em>in Laim.</em></h1>
+    <p>Italienische Küche, wie sie sein soll – ehrlich, frisch und mit Liebe gemacht. Ein Stück Italien mitten in München.</p>
+    <div class="hero-actions">
+      <a href="#reservieren" class="btn btn-primary">Tisch reservieren</a>
+      <a href="#karte" class="btn btn-outline">Speisekarte</a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════ ÜBER ENZO ═══════ -->
+<section id="ueber">
+  <div class="about">
+    <div class="about-text reveal">
+      <div class="section-label">Benvenuti</div>
+      <h2 class="section-title">Willkommen <em>bei da Enzo.</em></h2>
+      <p>Wir sind eine italienische Familie, die die authentischen Aromen unserer Heimat nach München bringt. Unsere Küche basiert auf der Liebe zu traditionellen Rezepten, frischen Zutaten und echter Gastfreundschaft.</p>
+      <p>Jedes Gericht erzählt ein Stück unserer Geschichte. Ich heiße Sie herzlich willkommen und hoffe, dass Sie sich bei uns wohlfühlen und uns oft besuchen werden.</p>
+      <p>Buon Appetito!</p>
+      <div class="about-sig">– Enzo Curatolo</div>
+    </div>
+    <div class="about-image reveal">
+      <img src="./img/about.jpg" alt="Frische Pasta wird zubereitet" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ HIGHLIGHTS ═══════ -->
+<section class="highlights" id="highlights">
+  <div class="highlights-grid">
+    <div class="highlight-card reveal">
+      <span class="highlight-icon">🍝</span>
+      <h3>Frische Pasta</h3>
+      <p>Unsere Pasta machen wir selbst. Jeden Tag, von Hand. Punkt.</p>
+    </div>
+    <div class="highlight-card reveal">
+      <span class="highlight-icon">☕</span>
+      <h3>Caffé-Kultur</h3>
+      <p>Espresso, Cappuccino, Caffé Latte – bei uns wird der Kaffee noch so gemacht, wie er schmecken soll.</p>
+    </div>
+    <div class="highlight-card reveal">
+      <span class="highlight-icon">📋</span>
+      <h3>Mittagstisch</h3>
+      <p>Jeden Tag ein neues Gericht auf der Wochenkarte. Schnell, lecker und zum fairen Preis.</p>
+    </div>
+    <div class="highlight-card reveal">
+      <span class="highlight-icon">🍰</span>
+      <h3>Dolci & Kuchen</h3>
+      <p>Tiramisu, Panna Cotta oder unsere Torta della Nonna – das darf man sich gönnen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ SPEISEKARTE ═══════ -->
+<section id="karte">
+  <div class="menu-section">
+    <div class="reveal">
+      <div class="section-label">La Carta</div>
+      <h2 class="section-title">Unsere <em>Speisekarte</em></h2>
+      <p class="menu-intro" id="menuIntro">Speisekarte wird geladen...</p>
+    </div>
+    <div class="menu-categories" id="menuContent">
+      <!-- Wird per JS aus speisekarte.json geladen -->
+    </div>
+    <p id="menuAllergens" style="margin-top:2rem;font-size:0.8rem;color:var(--col-text-muted);text-align:center;max-width:700px;margin-left:auto;margin-right:auto;"></p>
+  </div>
+</section>
+
+<div class="divider">· · ·</div>
+
+<!-- ═══════ WOCHENKARTE ═══════ -->
+<section class="wochenkarte-section" id="wochenkarte">
+  <div class="wochenkarte-inner">
+    <div class="reveal">
+      <div class="section-label">Ogni settimana</div>
+      <h2 class="section-title">Die <em>Wochenkarte</em></h2>
+    </div>
+    <div id="wochenkarteContent" class="reveal">
+      <!-- Wird per JS aus wochenkarte.json geladen -->
+      <p class="wochenkarte-empty">Die Wochenkarte wird geladen...</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ RESERVIERUNG ═══════ -->
+<section id="reservieren">
+  <div class="reservierung">
+    <div class="reservierung-text reveal">
+      <div class="section-label">Prenotazione</div>
+      <h2 class="section-title">Reservier dir <em>deinen Tisch.</em></h2>
+      <p>Wir sind ein kleines Lokal mit großem Herz, aber eben auch mit begrenzten Plätzen. Reservier am besten kurz vorher – per Formular, WhatsApp oder ruf einfach an.</p>
+
+      <div class="reservierung-channels">
+        <a href="https://wa.me/491795456396?text=Hallo%20Enzo%2C%20ich%20möchte%20gerne%20einen%20Tisch%20reservieren." class="channel" target="_blank">
+          <div class="channel-icon channel-wa">💬</div>
+          <div>
+            <span>Per WhatsApp</span>
+            <small>Schnell und unkompliziert</small>
+          </div>
+        </a>
+        <a href="tel:+498994432100" class="channel">
+          <div class="channel-icon channel-phone">📞</div>
+          <div>
+            <span>Per Telefon</span>
+            <small>+49 (0) 89 94432100</small>
+          </div>
+        </a>
       </div>
-    </nav>
+    </div>
 
-    <!-- ═══════ HERO ═══════ -->
-    <header class="hero">
-      <div class="hero-content">
-        <div class="hero-tag">München · Laim · Zschokkestraße 34</div>
-        <h1>Buon appetito <em>in Laim.</em></h1>
-        <p>
-          Italienische Küche, wie sie sein soll – ehrlich, frisch und mit Liebe
-          gemacht. Ein Stück Italien mitten in München.
+    <div class="res-form reveal">
+      <form id="reservationForm" onsubmit="submitReservation(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="resName">Name *</label>
+            <input type="text" id="resName" name="your-name" required placeholder="Dein Name">
+          </div>
+          <div class="form-group">
+            <label for="resPhone">Telefon *</label>
+            <input type="tel" id="resPhone" name="your-phone" required placeholder="0176 ...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="resEmail">E-Mail *</label>
+          <input type="email" id="resEmail" name="your-email" required placeholder="deine@email.de">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="resDate">Datum *</label>
+            <input type="date" id="resDate" name="your-date" required>
+          </div>
+          <div class="form-group">
+            <label for="resTime">Uhrzeit *</label>
+            <select id="resTime" name="your-time" required>
+              <option value="">Bitte wählen</option>
+              <option>11:00</option><option>11:30</option>
+              <option>12:00</option><option>12:30</option>
+              <option>13:00</option><option>13:30</option>
+              <option>14:00</option><option>14:30</option>
+              <option>15:00</option><option>15:30</option>
+              <option>16:00</option><option>16:30</option>
+              <option>17:00</option><option>17:30</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="resGuests">Personen *</label>
+          <select id="resGuests" name="your-guests" required>
+            <option value="">Bitte wählen</option>
+            <option>1 Person</option><option>2 Personen</option>
+            <option>3 Personen</option><option>4 Personen</option>
+            <option>5 Personen</option><option>6 Personen</option>
+            <option>7 Personen</option><option>8 Personen</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="resMsg">Sonderwünsche</label>
+          <textarea id="resMsg" name="your-message" placeholder="Allergien, Kinderstuhl, besonderer Anlass..."></textarea>
+        </div>
+        <!-- Honeypot: unsichtbar für Menschen, Bots füllen es aus -->
+        <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+          <input type="text" name="website" tabindex="-1" autocomplete="off">
+        </div>
+        <button type="submit" class="form-submit" id="submitBtn">Tisch anfragen</button>
+        <div class="form-status" id="formStatus"></div>
+        <p style="margin-top:12px;font-size:0.8rem;color:var(--col-text-muted);text-align:center;">
+          Dies ist eine Anfrage – wir bestätigen per Telefon, E-Mail oder WhatsApp.
         </p>
-        <div class="hero-actions">
-          <a href="#reservieren" class="btn btn-primary">Tisch reservieren</a>
-          <a href="#karte" class="btn btn-outline">Speisekarte</a>
-        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ KONTAKT ═══════ -->
+<section class="kontakt" id="kontakt">
+  <div class="kontakt-grid">
+    <div class="reveal">
+      <div class="section-label">Trovarci</div>
+      <h2 class="section-title">So findest du <em>zu uns.</em></h2>
+
+      <div class="kontakt-info">
+        <h3>Adresse</h3>
+        <p>da Enzo – Caffé & Ristorante<br>Zschokkestraße 34<br>80686 München (Laim)</p>
+
+        <h3>Öffnungszeiten</h3>
+        <p>
+          Montag: 9:00 – 17:00 Uhr<br>
+          Dienstag – Fr: 9:00 – 18:00 Uhr<br>
+		  Sa: 10:00 – 14:00 Uhr<br>
+          So: Ruhetag
+        </p>
+        <p style="font-size:0.85rem;color:var(--col-terra);font-style:italic;margin-top:8px;">
+          ⚠️ Für geschlossene Veranstaltungen können wir besondere Zeiten vereinbaren.
+        </p>
+
+        <h3>Kontakt</h3>
+        <p>
+          Tel: +49 (0)89 9443 2100<br>
+          E-Mail: <a href="#" class="email-protect">[E-Mail wird geladen]</a>
+        </p>
       </div>
-    </header>
+    </div>
+    <div class="kontakt-map reveal">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5325.4103608269415!2d11.516285677094444!3d48.135208651324945!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479dd9006444ce2b%3A0xe526cf6894c7bb12!2sENZO%20CAFFE%20BAR!5e0!3m2!1sde!2sde!4v1773414954351!5m2!1sde!2sde"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="da Enzo Restaurant auf Google Maps">
+      </iframe>
+    </div>
+  </div>
+</section>
 
-    <!-- ═══════ ÜBER ENZO ═══════ -->
-    <section id="ueber">
-      <div class="about">
-        <div class="about-text reveal">
-          <div class="section-label">Benvenuti</div>
-          <h2 class="section-title">Willkommen <em>bei da Enzo.</em></h2>
-          <p>
-            Wir sind eine italienische Familie, die die authentischen Aromen
-            unserer Heimat nach München bringt. Unsere Küche basiert auf der
-            Liebe zu traditionellen Rezepten, frischen Zutaten und echter
-            Gastfreundschaft.
-          </p>
-          <p>
-            Jedes Gericht erzählt ein Stück unserer Geschichte. Ich heiße Sie
-            herzlich willkommen und hoffe, dass Sie sich bei uns wohlfühlen und
-            uns oft besuchen werden.
-          </p>
-          <p>Buon Appetito!</p>
-          <div class="about-sig">– Enzo Curatolo</div>
-        </div>
-        <div class="about-image reveal">
-          <img
-            src="./img/about.jpg"
-            alt="Frische Pasta wird zubereitet"
-            loading="lazy"
-          />
-        </div>
-      </div>
-    </section>
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div class="footer-logo"><img src="./img/logo-footer.webp" alt="da Enzo" style="height:60px;width:auto;margin:0 auto;"></div>
+  <p>Caffé & Ristorante · Zschokkestraße 34 · 80686 München</p>
+  <p>© 2026 da Enzo – Caffé & Ristorante</p>
+  <div class="footer-links">
+    <a href="/impressum.html">Impressum</a>
+    <a href="/datenschutz.html">Datenschutz</a>
+  </div>
+</footer>
 
-    <!-- ═══════ HIGHLIGHTS ═══════ -->
-    <section class="highlights" id="highlights">
-      <div class="highlights-grid">
-        <div class="highlight-card reveal">
-          <span class="highlight-icon">🍝</span>
-          <h3>Frische Pasta</h3>
-          <p>Unsere Pasta machen wir selbst. Jeden Tag, von Hand. Punkt.</p>
-        </div>
-        <div class="highlight-card reveal">
-          <span class="highlight-icon">☕</span>
-          <h3>Caffé-Kultur</h3>
-          <p>
-            Espresso, Cappuccino, Caffé Latte – bei uns wird der Kaffee noch so
-            gemacht, wie er schmecken soll.
-          </p>
-        </div>
-        <div class="highlight-card reveal">
-          <span class="highlight-icon">📋</span>
-          <h3>Mittagstisch</h3>
-          <p>
-            Jeden Tag ein neues Gericht auf der Wochenkarte. Schnell, lecker und
-            zum fairen Preis.
-          </p>
-        </div>
-        <div class="highlight-card reveal">
-          <span class="highlight-icon">🍰</span>
-          <h3>Dolci & Kuchen</h3>
-          <p>
-            Tiramisu, Panna Cotta oder unsere Torta della Nonna – das darf man
-            sich gönnen.
-          </p>
-        </div>
-      </div>
-    </section>
+<!-- ═══════ WHATSAPP BUTTON ═══════ -->
+<a href="https://wa.me/49XXXXXXXXXXX?text=Hallo%20Enzo!" class="wa-float" target="_blank" aria-label="WhatsApp">
+  💬
+</a>
 
-    <!-- ═══════ SPEISEKARTE ═══════ -->
-    <section id="karte">
-      <div class="menu-section">
-        <div class="reveal">
-          <div class="section-label">La Carta</div>
-          <h2 class="section-title">Unsere <em>Speisekarte</em></h2>
-          <p class="menu-intro" id="menuIntro">Speisekarte wird geladen...</p>
-        </div>
-        <div class="menu-categories" id="menuContent">
-          <!-- Wird per JS aus speisekarte.json geladen -->
-        </div>
-        <p
-          id="menuAllergens"
-          style="
-            margin-top: 2rem;
-            font-size: 0.8rem;
-            color: var(--col-text-muted);
-            text-align: center;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-          "
-        ></p>
-      </div>
-    </section>
 
-    <div class="divider">· · ·</div>
-
-    <!-- ═══════ WOCHENKARTE ═══════ -->
-    <section class="wochenkarte-section" id="wochenkarte">
-      <div class="wochenkarte-inner">
-        <div class="reveal">
-          <div class="section-label">Ogni settimana</div>
-          <h2 class="section-title">Die <em>Wochenkarte</em></h2>
-        </div>
-        <div id="wochenkarteContent" class="reveal">
-          <!-- Wird per JS aus wochenkarte.json geladen -->
-          <p class="wochenkarte-empty">Die Wochenkarte wird geladen...</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══════ RESERVIERUNG ═══════ -->
-    <section id="reservieren">
-      <div class="reservierung">
-        <div class="reservierung-text reveal">
-          <div class="section-label">Prenotazione</div>
-          <h2 class="section-title">Reservier dir <em>deinen Tisch.</em></h2>
-          <p>
-            Wir sind ein kleines Lokal mit großem Herz, aber eben auch mit
-            begrenzten Plätzen. Reservier am besten kurz vorher – per Formular,
-            WhatsApp oder ruf einfach an.
-          </p>
-
-          <div class="reservierung-channels">
-            <a
-              href="https://wa.me/491795456396?text=Hallo%20Enzo%2C%20ich%20möchte%20gerne%20einen%20Tisch%20reservieren."
-              class="channel"
-              target="_blank"
-            >
-              <div class="channel-icon channel-wa">💬</div>
-              <div>
-                <span>Per WhatsApp</span>
-                <small>Schnell und unkompliziert</small>
-              </div>
-            </a>
-            <a href="tel:+498994432100" class="channel">
-              <div class="channel-icon channel-phone">📞</div>
-              <div>
-                <span>Per Telefon</span>
-                <small>+49 (0) 89 94432100</small>
-              </div>
-            </a>
-          </div>
-        </div>
-
-        <div class="res-form reveal">
-          <form id="reservationForm" onsubmit="submitReservation(event)">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="resName">Name *</label>
-                <input
-                  type="text"
-                  id="resName"
-                  name="your-name"
-                  required
-                  placeholder="Dein Name"
-                />
-              </div>
-              <div class="form-group">
-                <label for="resPhone">Telefon *</label>
-                <input
-                  type="tel"
-                  id="resPhone"
-                  name="your-phone"
-                  required
-                  placeholder="0176 ..."
-                />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="resEmail">E-Mail *</label>
-              <input
-                type="email"
-                id="resEmail"
-                name="your-email"
-                required
-                placeholder="deine@email.de"
-              />
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="resDate">Datum *</label>
-                <input type="date" id="resDate" name="your-date" required />
-              </div>
-              <div class="form-group">
-                <label for="resTime">Uhrzeit *</label>
-                <select id="resTime" name="your-time" required>
-                  <option value="">Bitte wählen</option>
-                  <option>11:00</option>
-                  <option>11:30</option>
-                  <option>12:00</option>
-                  <option>12:30</option>
-                  <option>13:00</option>
-                  <option>13:30</option>
-                  <option>14:00</option>
-                  <option>14:30</option>
-                  <option>15:00</option>
-                  <option>15:30</option>
-                  <option>16:00</option>
-                  <option>16:30</option>
-                  <option>17:00</option>
-                  <option>17:30</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="resGuests">Personen *</label>
-              <select id="resGuests" name="your-guests" required>
-                <option value="">Bitte wählen</option>
-                <option>1 Person</option>
-                <option>2 Personen</option>
-                <option>3 Personen</option>
-                <option>4 Personen</option>
-                <option>5 Personen</option>
-                <option>6 Personen</option>
-                <option>7 Personen</option>
-                <option>8 Personen</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="resMsg">Sonderwünsche</label>
-              <textarea
-                id="resMsg"
-                name="your-message"
-                placeholder="Allergien, Kinderstuhl, besonderer Anlass..."
-              ></textarea>
-            </div>
-            <!-- Honeypot: unsichtbar für Menschen, Bots füllen es aus -->
-            <div
-              style="position: absolute; left: -9999px; top: -9999px"
-              aria-hidden="true"
-            >
-              <input
-                type="text"
-                name="website"
-                tabindex="-1"
-                autocomplete="off"
-              />
-            </div>
-            <button type="submit" class="form-submit" id="submitBtn">
-              Tisch anfragen
-            </button>
-            <div class="form-status" id="formStatus"></div>
-            <p
-              style="
-                margin-top: 12px;
-                font-size: 0.8rem;
-                color: var(--col-text-muted);
-                text-align: center;
-              "
-            >
-              Dies ist eine Anfrage – wir bestätigen per Telefon, E-Mail oder
-              WhatsApp.
-            </p>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══════ KONTAKT ═══════ -->
-    <section class="kontakt" id="kontakt">
-      <div class="kontakt-grid">
-        <div class="reveal">
-          <div class="section-label">Trovarci</div>
-          <h2 class="section-title">So findest du <em>zu uns.</em></h2>
-
-          <div class="kontakt-info">
-            <h3>Adresse</h3>
-            <p>
-              da Enzo – Caffé & Ristorante<br />Zschokkestraße 34<br />80686
-              München (Laim)
-            </p>
-
-            <h3>Öffnungszeiten</h3>
-            <p>
-              Montag: 9:00 – 17:00 Uhr<br />
-              Dienstag – Fr: 9:00 – 18:00 Uhr<br />
-              Sa: 10:00 – 14:00 Uhr<br />
-              So: Ruhetag
-            </p>
-            <p
-              style="
-                font-size: 0.85rem;
-                color: var(--col-terra);
-                font-style: italic;
-                margin-top: 8px;
-              "
-            >
-              ⚠️ Für geschlossene Veranstaltungen können wir besondere Zeiten
-              vereinbaren.
-            </p>
-
-            <h3>Kontakt</h3>
-            <p>
-              Tel: +49 (0)89 9443 2100<br />
-              E-Mail:
-              <a href="#" class="email-protect">[E-Mail wird geladen]</a>
-            </p>
-          </div>
-        </div>
-        <div class="kontakt-map reveal">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5325.4103608269415!2d11.516285677094444!3d48.135208651324945!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479dd9006444ce2b%3A0xe526cf6894c7bb12!2sENZO%20CAFFE%20BAR!5e0!3m2!1sde!2sde!4v1773414954351!5m2!1sde!2sde"
-            allowfullscreen=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            title="da Enzo Restaurant auf Google Maps"
-          >
-          </iframe>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══════ FOOTER ═══════ -->
-    <footer>
-      <div class="footer-logo">
-        <img
-          src="./img/logo-footer.webp"
-          alt="da Enzo"
-          style="height: 60px; width: auto; margin: 0 auto"
-        />
-      </div>
-      <p>Caffé & Ristorante · Zschokkestraße 34 · 80686 München</p>
-      <p>© 2026 da Enzo – Caffé & Ristorante</p>
-      <div class="footer-links">
-        <a href="/impressum.html">Impressum</a>
-        <a href="/datenschutz.html">Datenschutz</a>
-      </div>
-    </footer>
-
-    <!-- ═══════ WHATSAPP BUTTON ═══════ -->
-    <a
-      href="https://wa.me/49XXXXXXXXXXX?text=Hallo%20Enzo!"
-      class="wa-float"
-      target="_blank"
-      aria-label="WhatsApp"
-    >
-      💬
-    </a>
-
-    <!-- ═══════════════════════════════════════════
+<!-- ═══════════════════════════════════════════
      JAVASCRIPT
      ═══════════════════════════════════════════ -->
-    <script>
-      /* ── CONFIG ──────────────────────────────── */
-      const CONFIG = {
-        webhookUrl:
-          "https://enzo-website.app.n8n.cloud/webhook/enzo-reservierung",
-        wochenkarteUrl: "./wochenkarte.json",
-        speisekarteUrl: "./speisekarte.json",
-      };
+<script>
+/* ── CONFIG ──────────────────────────────── */
+const CONFIG = {
+  webhookUrl: 'https://enzo-website.app.n8n.cloud/webhook/enzo-reservierung',
+  wochenkarteUrl: './wochenkarte.json',
+  speisekarteUrl: './speisekarte.json',
+};
 
-      /* ── NAVIGATION ──────────────────────────── */
-      const nav = document.getElementById("mainNav");
-      window.addEventListener("scroll", () => {
-        nav.classList.toggle("scrolled", window.scrollY > 60);
-      });
+/* ── NAVIGATION ──────────────────────────── */
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
 
-      function toggleNav() {
-        document.getElementById("navLinks").classList.toggle("open");
-        document.getElementById("navBurger").classList.toggle("open");
-      }
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+  document.getElementById('navBurger').classList.toggle('open');
+}
 
-      // Close mobile nav on link click
-      document.querySelectorAll(".nav-links a").forEach((a) => {
-        a.addEventListener("click", () => {
-          document.getElementById("navLinks").classList.remove("open");
-          document.getElementById("navBurger").classList.remove("open");
-        });
-      });
+// Close mobile nav on link click
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('open');
+    document.getElementById('navBurger').classList.remove('open');
+  });
+});
 
-      /* ── SCROLL REVEAL ───────────────────────── */
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry, i) => {
-            if (entry.isIntersecting) {
-              setTimeout(() => entry.target.classList.add("visible"), i * 80);
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.15, rootMargin: "0px 0px -40px 0px" },
-      );
+/* ── SCROLL REVEAL ───────────────────────── */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
 
-      document
-        .querySelectorAll(".reveal")
-        .forEach((el) => observer.observe(el));
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-      /* ── WOCHENKARTE LADEN ───────────────────── */
-      async function loadWochenkarte() {
-        const container = document.getElementById("wochenkarteContent");
+/* ── WOCHENKARTE LADEN ───────────────────── */
+async function loadWochenkarte() {
+  const container = document.getElementById('wochenkarteContent');
 
-        try {
-          const res = await fetch(CONFIG.wochenkarteUrl);
-          if (!res.ok) throw new Error("Nicht gefunden");
-          const data = await res.json();
-          renderWochenkarte(data, container);
-        } catch (e) {
-          const demo = {
-            title: "Wochenkarte 10.–14. März",
-            items: [
-              {
-                day: "Mo",
-                dish: "Lasagne al Forno mit gemischtem Salat",
-                price: "11,90 €",
-              },
-              {
-                day: "Di",
-                dish: "Risotto ai Funghi Porcini",
-                price: "12,90 €",
-              },
-              { day: "Mi", dish: "Spaghetti alle Vongole", price: "13,90 €" },
-              {
-                day: "Do",
-                dish: "Pollo alla Cacciatora mit Rosmarinkartoffeln",
-                price: "12,50 €",
-              },
-              { day: "Fr", dish: "Tagliatelle al Salmone", price: "13,50 €" },
-            ],
-            note: "Zu jedem Mittagsgericht: Wasser oder Espresso inklusive.",
-          };
-          renderWochenkarte(demo, container);
-        }
-      }
+  try {
+    const res = await fetch(CONFIG.wochenkarteUrl);
+    if (!res.ok) throw new Error('Nicht gefunden');
+    const data = await res.json();
+    renderWochenkarte(data, container);
+  } catch (e) {
+    const demo = {
+      title: "Wochenkarte 10.–14. März",
+      items: [
+        { day: "Mo", dish: "Lasagne al Forno mit gemischtem Salat", price: "11,90 €" },
+        { day: "Di", dish: "Risotto ai Funghi Porcini", price: "12,90 €" },
+        { day: "Mi", dish: "Spaghetti alle Vongole", price: "13,90 €" },
+        { day: "Do", dish: "Pollo alla Cacciatora mit Rosmarinkartoffeln", price: "12,50 €" },
+        { day: "Fr", dish: "Tagliatelle al Salmone", price: "13,50 €" }
+      ],
+      note: "Zu jedem Mittagsgericht: Wasser oder Espresso inklusive."
+    };
+    renderWochenkarte(demo, container);
+  }
+}
 
-      function renderWochenkarte(data, container) {
-        let html = "";
-        if (data.title) {
-          html += `<p class="wochenkarte-date">${data.title}</p>`;
-        }
+function renderWochenkarte(data, container) {
+  let html = '';
+  if (data.title) {
+    html += `<p class="wochenkarte-date">${data.title}</p>`;
+  }
 
-        html += '<div class="wochenkarte-grid">';
-        for (const item of data.items || []) {
-          html += `
+  html += '<div class="wochenkarte-grid">';
+  for (const item of (data.items || [])) {
+    html += `
       <div class="wochenkarte-item">
         <span class="wk-day">${item.day}</span>
         <span class="wk-dish">${item.dish}</span>
         <span class="wk-price">${item.price}</span>
       </div>`;
-        }
-        html += "</div>";
+  }
+  html += '</div>';
 
-        if (data.note) {
-          html += `<p class="wochenkarte-note">${data.note}</p>`;
-        }
+  if (data.note) {
+    html += `<p class="wochenkarte-note">${data.note}</p>`;
+  }
 
-        container.innerHTML = html;
+  container.innerHTML = html;
+}
+
+loadWochenkarte();
+
+/* ── SPEISEKARTE LADEN ───────────────────── */
+async function loadSpeisekarte() {
+  const container = document.getElementById('menuContent');
+  const introEl = document.getElementById('menuIntro');
+  const allergensEl = document.getElementById('menuAllergens');
+
+  try {
+    const res = await fetch(CONFIG.speisekarteUrl);
+    if (!res.ok) throw new Error('Nicht gefunden');
+    const data = await res.json();
+
+    if (data.intro && introEl) {
+      introEl.textContent = data.intro;
+    }
+
+    if (data.allergenNote && allergensEl) {
+      allergensEl.textContent = data.allergenNote;
+    }
+
+    let html = '';
+    for (let i = 0; i < (data.categories || []).length; i++) {
+      const cat = data.categories[i];
+      const isFirst = i === 0;
+
+      html += `<div class="menu-category reveal${isFirst ? ' open' : ''}">`;
+
+      // Akkordeon-Header (nur auf Mobile sichtbar per CSS)
+      html += `<div class="menu-category-header" onclick="toggleMenuCategory(this)">`;
+      html += `<span>${cat.name}</span>`;
+      html += `<span class="accordion-icon">+</span>`;
+      html += `</div>`;
+
+      // Originale h3 (nur auf Desktop sichtbar per CSS)
+      html += `<h3>${cat.name}</h3>`;
+
+      // Items-Container (auf Mobile animiert)
+      html += `<div class="menu-category-items">`;
+
+      for (const item of (cat.items || [])) {
+        html += `<div class="menu-item">`;
+        html += `<div><span class="menu-item-name">${item.name}</span>`;
+        if (item.desc) {
+          html += `<br><span class="menu-item-desc">${item.desc}</span>`;
+        }
+        html += `</div>`;
+        html += `<span class="menu-item-dots"></span>`;
+        html += `<span class="menu-item-price">${item.price}`;
+        if (item.allergens) {
+          html += `<span class="menu-item-allergens"> (${item.allergens})</span>`;
+        }
+        html += `</span>`;
+        html += `</div>`;
       }
 
-      loadWochenkarte();
+      html += `</div>`; // /menu-category-items
+      html += `</div>`; // /menu-category
+    }
 
-      /* ── SPEISEKARTE LADEN ───────────────────── */
-      async function loadSpeisekarte() {
-        const container = document.getElementById("menuContent");
-        const introEl = document.getElementById("menuIntro");
-        const allergensEl = document.getElementById("menuAllergens");
+    container.innerHTML = html;
+    container.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-        try {
-          const res = await fetch(CONFIG.speisekarteUrl);
-          if (!res.ok) throw new Error("Nicht gefunden");
-          const data = await res.json();
+  } catch (e) {
+    console.error('Speisekarte konnte nicht geladen werden:', e);
+    if (introEl) {
+      introEl.textContent = 'Die Speisekarte konnte leider nicht geladen werden.';
+    }
+  }
+}
 
-          if (data.intro && introEl) {
-            introEl.textContent = data.intro;
-          }
+function toggleMenuCategory(header) {
+  const category = header.parentElement;
+  const allCategories = category.parentElement.querySelectorAll('.menu-category');
 
-          if (data.allergenNote && allergensEl) {
-            allergensEl.textContent = data.allergenNote;
-          }
+  // Alle anderen schließen
+  allCategories.forEach(cat => {
+    if (cat !== category) cat.classList.remove('open');
+  });
 
-          let html = "";
-          for (const cat of data.categories || []) {
-            html += `<div class="menu-category reveal">`;
-            html += `<h3>${cat.name}</h3>`;
+  // Aktuelle togglen
+  category.classList.toggle('open');
 
-            for (const item of cat.items || []) {
-              html += `<div class="menu-item">`;
-              html += `<div><span class="menu-item-name">${item.name}</span>`;
-              if (item.desc) {
-                html += `<br><span class="menu-item-desc">${item.desc}</span>`;
-              }
-              html += `</div>`;
-              html += `<span class="menu-item-dots"></span>`;
-              html += `<span class="menu-item-price">${item.price}`;
-              if (item.allergens) {
-                html += `<span class="menu-item-allergens"> (${item.allergens})</span>`;
-              }
-              html += `</span>`;
-              html += `</div>`;
-            }
+  // Sanft zum geöffneten Element scrollen
+  if (category.classList.contains('open')) {
+    setTimeout(() => {
+      category.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
 
-            html += `</div>`;
-          }
+loadSpeisekarte();
 
-          container.innerHTML = html;
-          container
-            .querySelectorAll(".reveal")
-            .forEach((el) => observer.observe(el));
-        } catch (e) {
-          console.error("Speisekarte konnte nicht geladen werden:", e);
-          if (introEl) {
-            introEl.textContent =
-              "Die Speisekarte konnte leider nicht geladen werden. Bitte fragen Sie direkt bei uns nach.";
-          }
-        }
-      }
+/* ── RESERVIERUNG ABSENDEN ───────────────── */
+async function submitReservation(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const status = document.getElementById('formStatus');
+  const form = document.getElementById('reservationForm');
 
-      loadSpeisekarte();
+  btn.disabled = true;
+  btn.textContent = 'Wird gesendet...';
+  status.className = 'form-status';
+  status.style.display = 'none';
 
-      /* ── RESERVIERUNG ABSENDEN ───────────────── */
-      async function submitReservation(e) {
-        e.preventDefault();
-        const btn = document.getElementById("submitBtn");
-        const status = document.getElementById("formStatus");
-        const form = document.getElementById("reservationForm");
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
 
-        btn.disabled = true;
-        btn.textContent = "Wird gesendet...";
-        status.className = "form-status";
-        status.style.display = "none";
+  // Honeypot-Check: wenn das versteckte Feld ausgefüllt ist → Bot
+  if (data.website && data.website.length > 0) {
+    status.className = 'form-status success';
+    status.textContent = '✅ Danke! Deine Anfrage ist eingegangen. Wir melden uns in Kürze bei dir.';
+    status.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Tisch anfragen';
+    return; // Nichts an n8n senden – Bot denkt es hat geklappt
+  }
 
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+  // Honeypot-Feld aus den Daten entfernen
+  delete data.website;
 
-        // Honeypot-Check: wenn das versteckte Feld ausgefüllt ist → Bot
-        if (data.website && data.website.length > 0) {
-          status.className = "form-status success";
-          status.textContent =
-            "✅ Danke! Deine Anfrage ist eingegangen. Wir melden uns in Kürze bei dir.";
-          status.style.display = "block";
-          btn.disabled = false;
-          btn.textContent = "Tisch anfragen";
-          return; // Nichts an n8n senden – Bot denkt es hat geklappt
-        }
+  try {
+    const res = await fetch(CONFIG.webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
 
-        // Honeypot-Feld aus den Daten entfernen
-        delete data.website;
+    if (res.ok) {
+      status.className = 'form-status success';
+      status.textContent = '✅ Danke! Deine Anfrage ist eingegangen. Wir melden uns in Kürze bei dir.';
+      status.style.display = 'block';
+      form.reset();
+    } else {
+      throw new Error('Server-Fehler');
+    }
+  } catch (err) {
+    status.className = 'form-status error';
+    status.textContent = '❌ Leider hat etwas nicht geklappt. Ruf uns gerne an oder schreib per WhatsApp.';
+    status.style.display = 'block';
+  }
 
-        try {
-          const res = await fetch(CONFIG.webhookUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          });
+  btn.disabled = false;
+  btn.textContent = 'Tisch anfragen';
+}
 
-          if (res.ok) {
-            status.className = "form-status success";
-            status.textContent =
-              "✅ Danke! Deine Anfrage ist eingegangen. Wir melden uns in Kürze bei dir.";
-            status.style.display = "block";
-            form.reset();
-          } else {
-            throw new Error("Server-Fehler");
-          }
-        } catch (err) {
-          status.className = "form-status error";
-          status.textContent =
-            "❌ Leider hat etwas nicht geklappt. Ruf uns gerne an oder schreib per WhatsApp.";
-          status.style.display = "block";
-        }
+/* ── E-MAIL-SCHUTZ (Anti-Spam) ───────────── */
+document.querySelectorAll('.email-protect').forEach(el => {
+  const u = 'info'; const d = 'enzo-muenchen.de';
+  el.href = 'mailto:' + u + '@' + d;
+  el.textContent = u + '@' + d;
+});
 
-        btn.disabled = false;
-        btn.textContent = "Tisch anfragen";
-      }
+/* ── SET MIN DATE ON DATE PICKER ─────────── */
+document.getElementById('resDate').setAttribute('min', new Date().toISOString().split('T')[0]);
+</script>
 
-      /* ── E-MAIL-SCHUTZ (Anti-Spam) ───────────── */
-      document.querySelectorAll(".email-protect").forEach((el) => {
-        const u = "info";
-        const d = "enzo-muenchen.de";
-        el.href = "mailto:" + u + "@" + d;
-        el.textContent = u + "@" + d;
-      });
-
-      /* ── SET MIN DATE ON DATE PICKER ─────────── */
-      document
-        .getElementById("resDate")
-        .setAttribute("min", new Date().toISOString().split("T")[0]);
-    </script>
-  </body>
+</body>
 </html>
