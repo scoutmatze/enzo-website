@@ -9,8 +9,8 @@
 <!-- Open Graph / Social Media -->
 <meta property="og:title" content="Enzo – Caffé & Ristorante | Italienisch essen in München-Laim">
 <meta property="og:description" content="Frische Pasta, echter Espresso und italienische Spezialitäten in München-Laim. Wochenkarte, Mittagstisch und Reservierung. Besuche uns in der Zschokkestraße 34.">
-<meta property="og:image" content="https://www.da-enzo-muenchen.de/img/og-image.jpg">
-<meta property="og:url" content="https://www.da-enzo-muenchen.de">
+<meta property="og:image" content="https://enzo-website.netlify.app/img/og-image.jpg">
+<meta property="og:url" content="https://www.enzo-muenchen.de">
 <meta property="og:type" content="restaurant">
 
 <!-- Fonts: lokal gehostet (DSGVO-konform) -->
@@ -1033,6 +1033,56 @@
      BARRIEREFREIHEIT (WCAG 2.1 AA)
      ═══════════════════════════════════════════ */
 
+  /* ═══════════════════════════════════════════
+     SPRACHUMSCHALTER
+     ═══════════════════════════════════════════ */
+  .lang-switcher {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 1rem;
+  }
+
+  .lang-btn {
+    background: none;
+    border: 1px solid rgba(240,232,219,0.2);
+    color: rgba(240,232,219,0.5);
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  .lang-btn:hover {
+    color: var(--col-cream);
+    border-color: rgba(240,232,219,0.4);
+  }
+
+  .lang-btn.active {
+    color: var(--col-cream);
+    border-color: var(--col-terra);
+    background: rgba(184,90,58,0.3);
+  }
+
+  .lang-btn[data-lang="ls"] {
+    font-size: 0.6rem;
+    letter-spacing: 0;
+  }
+
+  @media (max-width: 900px) {
+    .lang-switcher {
+      position: absolute;
+      top: 1rem;
+      right: 60px;
+    }
+  }
+
   /* Skip-Link (WCAG 2.4.1) */
   .skip-link {
     position: absolute;
@@ -1081,18 +1131,24 @@
 <body>
 
 <!-- Skip-Link (Barrierefreiheit: WCAG 2.4.1) -->
-<a href="#main-content" class="skip-link">Zum Inhalt springen</a>
+<a href="#main-content" class="skip-link" data-i18n="skip">Zum Inhalt springen</a>
 
 <!-- ═══════ NAVIGATION ═══════ -->
 <nav id="mainNav" aria-label="Hauptnavigation">
   <a href="#" class="nav-logo"><img src="./img/logo-header.webp" alt="da Enzo – Zurück zum Anfang" class="nav-logo-img"></a>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#ueber">Über uns</a></li>
-    <li><a href="#karte">Speisekarte</a></li>
-    <li><a href="#wochenkarte">Wochenkarte</a></li>
-    <li><a href="#reservieren">Reservieren</a></li>
-    <li><a href="#kontakt">Kontakt</a></li>
+    <li><a href="#ueber" data-i18n="nav.ueber">Über uns</a></li>
+    <li><a href="#karte" data-i18n="nav.karte">Speisekarte</a></li>
+    <li><a href="#wochenkarte" data-i18n="nav.wochenkarte">Wochenkarte</a></li>
+    <li><a href="#reservieren" data-i18n="nav.reservieren">Reservieren</a></li>
+    <li><a href="#kontakt" data-i18n="nav.kontakt">Kontakt</a></li>
   </ul>
+  <div class="lang-switcher" role="group" aria-label="Sprache wählen">
+    <button class="lang-btn active" data-lang="de" aria-pressed="true" onclick="setLang('de')">DE</button>
+    <button class="lang-btn" data-lang="en" aria-pressed="false" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" data-lang="it" aria-pressed="false" onclick="setLang('it')">IT</button>
+    <button class="lang-btn" data-lang="ls" aria-pressed="false" onclick="setLang('ls')">Leicht</button>
+  </div>
   <button class="nav-burger" id="navBurger" aria-label="Menü öffnen" aria-expanded="false" onclick="toggleNav()">
     <span></span><span></span><span></span>
   </button>
@@ -1103,12 +1159,12 @@
 <!-- ═══════ HERO ═══════ -->
 <header class="hero">
   <div class="hero-content">
-    <div class="hero-tag">München · Laim · Zschokkestraße 34</div>
-    <h1>Buon appetito <em>in Laim.</em></h1>
-    <p>Italienische Küche, wie sie sein soll – ehrlich, frisch und mit Liebe gemacht. Ein Stück Italien mitten in München.</p>
+    <div class="hero-tag" data-i18n="hero.tag">München · Laim · Zschokkestraße 34</div>
+    <h1 data-i18n="hero.title">Buon appetito <em>in Laim.</em></h1>
+    <p data-i18n="hero.text">Italienische Küche, wie sie sein soll – ehrlich, frisch und mit Liebe gemacht. Ein Stück Italien mitten in München.</p>
     <div class="hero-actions">
-      <a href="#reservieren" class="btn btn-primary">Tisch reservieren</a>
-      <a href="#karte" class="btn btn-outline">Speisekarte</a>
+      <a href="#reservieren" class="btn btn-primary" data-i18n="hero.btn.reserv">Tisch reservieren</a>
+      <a href="#karte" class="btn btn-outline" data-i18n="hero.btn.karte">Speisekarte</a>
     </div>
   </div>
 </header>
@@ -1117,11 +1173,11 @@
 <section id="ueber" aria-labelledby="ueber-title">
   <div class="about">
     <div class="about-text reveal">
-      <div class="section-label">Benvenuti</div>
-      <h2 id="ueber-title" class="section-title">Willkommen <em>bei da Enzo.</em></h2>
-      <p>Wir sind eine italienische Familie, die die authentischen Aromen unserer Heimat nach München bringt. Unsere Küche basiert auf der Liebe zu traditionellen Rezepten, frischen Zutaten und echter Gastfreundschaft.</p>
-      <p>Jedes Gericht erzählt ein Stück unserer Geschichte. Ich heiße Sie herzlich willkommen und hoffe, dass Sie sich bei uns wohlfühlen und uns oft besuchen werden.</p>
-      <p>Buon Appetito!</p>
+      <div class="section-label" data-i18n="ueber.label">Benvenuti</div>
+      <h2 id="ueber-title" class="section-title" data-i18n="ueber.title">Willkommen <em>bei da Enzo.</em></h2>
+      <p data-i18n="ueber.p1">Wir sind eine italienische Familie, die die authentischen Aromen unserer Heimat nach München bringt. Unsere Küche basiert auf der Liebe zu traditionellen Rezepten, frischen Zutaten und echter Gastfreundschaft.</p>
+      <p data-i18n="ueber.p2">Jedes Gericht erzählt ein Stück unserer Geschichte. Ich heiße Sie herzlich willkommen und hoffe, dass Sie sich bei uns wohlfühlen und uns oft besuchen werden.</p>
+      <p data-i18n="ueber.p3">Buon Appetito!</p>
       <div class="about-sig">– Enzo Curatolo</div>
     </div>
     <div class="about-image reveal">
@@ -1135,23 +1191,23 @@
   <div class="highlights-grid">
     <div class="highlight-card reveal">
       <span class="highlight-icon" role="img" aria-hidden="true">🍝</span>
-      <h3>Frische Pasta</h3>
-      <p>Unsere Pasta machen wir selbst. Jeden Tag, von Hand. Punkt.</p>
+      <h3 data-i18n="hl.pasta.title">Frische Pasta</h3>
+      <p data-i18n="hl.pasta.text">Unsere Pasta machen wir selbst. Jeden Tag, von Hand. Punkt.</p>
     </div>
     <div class="highlight-card reveal">
       <span class="highlight-icon" role="img" aria-hidden="true">☕</span>
-      <h3>Caffé-Kultur</h3>
-      <p>Espresso, Cappuccino, Caffé Latte – bei uns wird der Kaffee noch so gemacht, wie er schmecken soll.</p>
+      <h3 data-i18n="hl.caffe.title">Caffé-Kultur</h3>
+      <p data-i18n="hl.caffe.text">Espresso, Cappuccino, Caffé Latte – bei uns wird der Kaffee noch so gemacht, wie er schmecken soll.</p>
     </div>
     <div class="highlight-card reveal">
       <span class="highlight-icon" role="img" aria-hidden="true">📋</span>
-      <h3>Mittagstisch</h3>
-      <p>Jeden Tag ein neues Gericht auf der Wochenkarte. Schnell, lecker und zum fairen Preis.</p>
+      <h3 data-i18n="hl.mittag.title">Mittagstisch</h3>
+      <p data-i18n="hl.mittag.text">Jeden Tag ein neues Gericht auf der Wochenkarte. Schnell, lecker und zum fairen Preis.</p>
     </div>
     <div class="highlight-card reveal">
       <span class="highlight-icon" role="img" aria-hidden="true">🍰</span>
-      <h3>Dolci & Kuchen</h3>
-      <p>Tiramisu, Panna Cotta oder unsere Torta della Nonna – das darf man sich gönnen.</p>
+      <h3 data-i18n="hl.dolci.title">Dolci & Kuchen</h3>
+      <p data-i18n="hl.dolci.text">Tiramisu, Panna Cotta oder unsere Torta della Nonna – das darf man sich gönnen.</p>
     </div>
   </div>
 </section>
@@ -1160,9 +1216,9 @@
 <section id="karte" aria-labelledby="karte-title">
   <div class="menu-section">
     <div class="reveal">
-      <div class="section-label">La Carta</div>
-      <h2 id="karte-title" class="section-title">Unsere <em>Speisekarte</em></h2>
-      <p class="menu-intro" id="menuIntro">Speisekarte wird geladen...</p>
+      <div class="section-label" data-i18n="karte.label">La Carta</div>
+      <h2 id="karte-title" class="section-title" data-i18n="karte.title">Unsere <em>Speisekarte</em></h2>
+      <p class="menu-intro" id="menuIntro" data-i18n="karte.loading">Speisekarte wird geladen...</p>
     </div>
     <div class="menu-categories" id="menuContent">
       <!-- Wird per JS aus speisekarte.json geladen -->
@@ -1177,12 +1233,12 @@
 <section class="wochenkarte-section" id="wochenkarte" aria-labelledby="wochenkarte-title">
   <div class="wochenkarte-inner">
     <div class="reveal">
-      <div class="section-label">Ogni settimana</div>
-      <h2 id="wochenkarte-title" class="section-title">Die <em>Wochenkarte</em></h2>
+      <div class="section-label" data-i18n="wk.label">Ogni settimana</div>
+      <h2 id="wochenkarte-title" class="section-title" data-i18n="wk.title">Die <em>Wochenkarte</em></h2>
     </div>
     <div id="wochenkarteContent" class="reveal">
       <!-- Wird per JS aus wochenkarte.json geladen -->
-      <p class="wochenkarte-empty">Die Wochenkarte wird geladen...</p>
+      <p class="wochenkarte-empty" data-i18n="wk.loading">Die Wochenkarte wird geladen...</p>
     </div>
   </div>
 </section>
@@ -1191,22 +1247,22 @@
 <section id="reservieren" aria-labelledby="reservieren-title">
   <div class="reservierung">
     <div class="reservierung-text reveal">
-      <div class="section-label">Prenotazione</div>
-      <h2 id="reservieren-title" class="section-title">Reservier dir <em>deinen Tisch.</em></h2>
-      <p>Wir sind ein kleines Lokal mit großem Herz, aber eben auch mit begrenzten Plätzen. Reservier am besten kurz vorher – per Formular, WhatsApp oder ruf einfach an.</p>
+      <div class="section-label" data-i18n="res.label">Prenotazione</div>
+      <h2 id="reservieren-title" class="section-title" data-i18n="res.title">Reservier dir <em>deinen Tisch.</em></h2>
+      <p data-i18n="res.text">Wir sind ein kleines Lokal mit großem Herz, aber eben auch mit begrenzten Plätzen. Reservier am besten kurz vorher – per Formular, WhatsApp oder ruf einfach an.</p>
 
       <div class="reservierung-channels">
         <a href="https://wa.me/491795456396?text=Hallo%20Enzo%2C%20ich%20möchte%20gerne%20einen%20Tisch%20reservieren." class="channel" target="_blank" rel="noopener noreferrer" aria-label="Per WhatsApp reservieren (öffnet neues Fenster)">
           <div class="channel-icon channel-wa">💬</div>
           <div>
-            <span>Per WhatsApp</span>
-            <small>Schnell und unkompliziert</small>
+            <span data-i18n="res.wa">Per WhatsApp</span>
+            <small data-i18n="res.wa.sub">Schnell und unkompliziert</small>
           </div>
         </a>
         <a href="tel:+498994432100" class="channel">
           <div class="channel-icon channel-phone">📞</div>
           <div>
-            <span>Per Telefon</span>
+            <span data-i18n="res.phone">Per Telefon</span>
             <small>+49 (0) 89 94432100</small>
           </div>
         </a>
@@ -1217,27 +1273,27 @@
       <form id="reservationForm" onsubmit="submitReservation(event)">
         <div class="form-row">
           <div class="form-group">
-            <label for="resName">Name *</label>
-            <input type="text" id="resName" name="your-name" required aria-required="true" placeholder="Dein Name">
+            <label for="resName" data-i18n="res.label.name">Name *</label>
+            <input type="text" id="resName" name="your-name" required aria-required="true" placeholder="Dein Name" data-i18n="res.ph.name">
           </div>
           <div class="form-group">
-            <label for="resPhone">Telefon *</label>
+            <label for="resPhone" data-i18n="res.label.phone">Telefon *</label>
             <input type="tel" id="resPhone" name="your-phone" required aria-required="true" placeholder="0176 ...">
           </div>
         </div>
         <div class="form-group">
-          <label for="resEmail">E-Mail *</label>
-          <input type="email" id="resEmail" name="your-email" required aria-required="true" placeholder="deine@email.de">
+          <label for="resEmail" data-i18n="res.label.email">E-Mail *</label>
+          <input type="email" id="resEmail" name="your-email" required aria-required="true" placeholder="deine@email.de" data-i18n="res.ph.email">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="resDate">Datum *</label>
+            <label for="resDate" data-i18n="res.label.date">Datum *</label>
             <input type="date" id="resDate" name="your-date" required aria-required="true">
           </div>
           <div class="form-group">
-            <label for="resTime">Uhrzeit *</label>
+            <label for="resTime" data-i18n="res.label.time">Uhrzeit *</label>
             <select id="resTime" name="your-time" required aria-required="true">
-              <option value="">Bitte wählen</option>
+              <option value="" data-i18n="res.select.default">Bitte wählen</option>
               <option>11:00</option><option>11:30</option>
               <option>12:00</option><option>12:30</option>
               <option>13:00</option><option>13:30</option>
@@ -1249,9 +1305,9 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="resGuests">Personen *</label>
+          <label for="resGuests" data-i18n="res.label.guests">Personen *</label>
           <select id="resGuests" name="your-guests" required aria-required="true">
-            <option value="">Bitte wählen</option>
+            <option value="" data-i18n="res.select.default">Bitte wählen</option>
             <option>1 Person</option><option>2 Personen</option>
             <option>3 Personen</option><option>4 Personen</option>
             <option>5 Personen</option><option>6 Personen</option>
@@ -1259,16 +1315,16 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="resMsg">Sonderwünsche</label>
-          <textarea id="resMsg" name="your-message" placeholder="Allergien, Kinderstuhl, besonderer Anlass..."></textarea>
+          <label for="resMsg" data-i18n="res.label.msg">Sonderwünsche</label>
+          <textarea id="resMsg" name="your-message" placeholder="Allergien, Kinderstuhl, besonderer Anlass..." data-i18n="res.ph.msg"></textarea>
         </div>
         <!-- Honeypot: unsichtbar für Menschen, Bots füllen es aus -->
         <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
           <input type="text" name="website" tabindex="-1" autocomplete="off">
         </div>
-        <button type="submit" class="form-submit" id="submitBtn">Tisch anfragen</button>
+        <button type="submit" class="form-submit" id="submitBtn" data-i18n="res.submit">Tisch anfragen</button>
         <div class="form-status" id="formStatus" role="alert" aria-live="polite"></div>
-        <p style="margin-top:12px;font-size:0.8rem;color:var(--col-text-muted);text-align:center;">
+        <p style="margin-top:12px;font-size:0.8rem;color:var(--col-text-muted);text-align:center;" data-i18n="res.hint">
           Dies ist eine Anfrage – wir bestätigen per Telefon, E-Mail oder WhatsApp.
         </p>
       </form>
@@ -1280,25 +1336,25 @@
 <section class="kontakt" id="kontakt" aria-labelledby="kontakt-title">
   <div class="kontakt-grid">
     <div class="reveal">
-      <div class="section-label">Trovarci</div>
-      <h2 id="kontakt-title" class="section-title">So findest du <em>zu uns.</em></h2>
+      <div class="section-label" data-i18n="kontakt.label">Trovarci</div>
+      <h2 id="kontakt-title" class="section-title" data-i18n="kontakt.title">So findest du <em>zu uns.</em></h2>
 
       <div class="kontakt-info">
-        <h3>Adresse</h3>
+        <h3 data-i18n="kontakt.adresse">Adresse</h3>
         <p>da Enzo – Caffé & Ristorante<br>Zschokkestraße 34<br>80686 München (Laim)</p>
 
-        <h3>Öffnungszeiten</h3>
-        <p>
+        <h3 data-i18n="kontakt.oeffnung">Öffnungszeiten</h3>
+        <p data-i18n="kontakt.zeiten">
           Montag: 9:00 – 17:00 Uhr<br>
           Dienstag – Fr: 9:00 – 18:00 Uhr<br>
 		  Sa: 10:00 – 14:00 Uhr<br>
           So: Ruhetag
         </p>
-        <p style="font-size:0.85rem;color:var(--col-terra);font-style:italic;margin-top:8px;">
+        <p style="font-size:0.85rem;color:var(--col-terra);font-style:italic;margin-top:8px;" data-i18n="kontakt.veranst">
           ⚠️ Für geschlossene Veranstaltungen können wir besondere Zeiten vereinbaren.
         </p>
 
-        <h3>Kontakt</h3>
+        <h3 data-i18n="kontakt.kontakt">Kontakt</h3>
         <p>
           Tel: +49 (0)89 9443 2100<br>
           E-Mail: <a href="#" class="email-protect">[E-Mail wird geladen]</a>
@@ -1327,7 +1383,7 @@
 <footer>
   <div class="footer-logo"><img src="./img/logo-footer.webp" alt="da Enzo" style="height:60px;width:auto;margin:0 auto;"></div>
   <p>Caffé & Ristorante · Zschokkestraße 34 · 80686 München</p>
-  <p>© 2026 da Enzo – Caffé & Ristorante</p>
+  <p data-i18n="footer.copy">© 2026 da Enzo – Caffé & Ristorante</p>
   <div class="footer-links">
     <a href="/impressum.html">Impressum</a>
     <a href="/datenschutz.html">Datenschutz</a>
@@ -1344,6 +1400,7 @@
 <!-- ═══════════════════════════════════════════
      JAVASCRIPT
      ═══════════════════════════════════════════ -->
+<script src="./i18n.js"></script>
 <script>
 /* ── CONFIG ──────────────────────────────── */
 const CONFIG = {
@@ -1540,6 +1597,13 @@ function toggleMenuCategory(header) {
 
 loadSpeisekarte();
 
+/* ── HILFSFUNKTION: Übersetzung holen ───── */
+function t(key) {
+  const entry = typeof I18N !== 'undefined' && I18N[key];
+  if (!entry) return key;
+  return entry[currentLang] || entry['de'] || key;
+}
+
 /* ── RESERVIERUNG ABSENDEN ───────────────── */
 async function submitReservation(e) {
   e.preventDefault();
@@ -1548,7 +1612,7 @@ async function submitReservation(e) {
   const form = document.getElementById('reservationForm');
 
   btn.disabled = true;
-  btn.textContent = 'Wird gesendet...';
+  btn.textContent = '...';
   status.className = 'form-status';
   status.style.display = 'none';
 
@@ -1558,11 +1622,11 @@ async function submitReservation(e) {
   // Honeypot-Check: wenn das versteckte Feld ausgefüllt ist → Bot
   if (data.website && data.website.length > 0) {
     status.className = 'form-status success';
-    status.textContent = '✅ Danke! Deine Anfrage ist eingegangen. Wir melden uns in Kürze bei dir.';
+    status.textContent = t('res.success');
     status.style.display = 'block';
     btn.disabled = false;
-    btn.textContent = 'Tisch anfragen';
-    return; // Nichts an n8n senden – Bot denkt es hat geklappt
+    btn.textContent = t('res.submit');
+    return;
   }
 
   // Honeypot-Feld aus den Daten entfernen
@@ -1577,7 +1641,7 @@ async function submitReservation(e) {
 
     if (res.ok) {
       status.className = 'form-status success';
-      status.textContent = '✅ Danke! Deine Anfrage ist eingegangen. Wir melden uns in Kürze bei dir.';
+      status.textContent = t('res.success');
       status.style.display = 'block';
       form.reset();
     } else {
@@ -1585,12 +1649,12 @@ async function submitReservation(e) {
     }
   } catch (err) {
     status.className = 'form-status error';
-    status.textContent = '❌ Leider hat etwas nicht geklappt. Ruf uns gerne an oder schreib per WhatsApp.';
+    status.textContent = t('res.error');
     status.style.display = 'block';
   }
 
   btn.disabled = false;
-  btn.textContent = 'Tisch anfragen';
+  btn.textContent = t('res.submit');
 }
 
 /* ── E-MAIL-SCHUTZ (Anti-Spam) ───────────── */
