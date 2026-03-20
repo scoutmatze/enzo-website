@@ -146,7 +146,7 @@
   Zschokkestraße 34<br>
   80686 München<br>
   Telefon: <a href="tel:+498994432100" style="color:inherit;">+49 (0)89 9443 2100</a><br>
-  E-Mail: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b9d0d7dfd6f9dcd7c3d694d4ccdcd7dad1dcd797dddc">[email&#160;protected]</a>
+  E-Mail: <a href="#" class="email-protect">[E-Mail wird geladen]</a>
 </p>
 
 
@@ -267,14 +267,16 @@
 <p>
   Auf unserer Website ist ein Kartendienst von Google Maps
   (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland)
-  eingebunden. Beim Laden der Karte wird eine Verbindung zu Googles Servern
-  hergestellt. Dabei wird Ihre IP-Adresse an Google übermittelt.
-  Google kann dabei Cookies setzen oder ähnliche Technologien verwenden.
+  eingebunden. Die Karte wird erst geladen, nachdem Sie aktiv auf
+  „Karte laden" geklickt haben (Zwei-Klick-Lösung). Erst dann wird
+  eine Verbindung zu Googles Servern hergestellt und Ihre IP-Adresse
+  an Google übermittelt. Google kann dabei Cookies setzen oder
+  ähnliche Technologien verwenden.
 </p>
 <p>
   Wir nutzen Google Maps, um Ihnen unseren Standort anschaulich darzustellen.
-  Die Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse
-  an einer nutzerfreundlichen Darstellung unseres Standorts).
+  Die Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO (Einwilligung durch
+  Klick auf „Karte laden").
 </p>
 <p>
   Google verarbeitet Ihre Daten ggf. auch in den USA. Für die
@@ -383,6 +385,19 @@
 </main>
 
 <footer>
-  <p>© 2026 Da Enzo – Caffé & Ristorante · Zschokkestraße 34 · 80686 München</p>
+  <p>© 2026 da Enzo – Caffé & Ristorante · Zschokkestraße 34 · 80686 München</p>
   <p style="margin-top:8px;">
-    <a href="/impressum.html">
+    <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a> · <a href="/barrierefreiheit.html">Barrierefreiheit</a> · <a href="/">Startseite</a>
+  </p>
+</footer>
+
+<script>
+document.querySelectorAll('.email-protect').forEach(el => {
+  const u = 'info'; const d = 'da-enzo-muenchen.de';
+  el.href = 'mailto:' + u + '@' + d;
+  el.textContent = u + '@' + d;
+});
+</script>
+
+</body>
+</html>

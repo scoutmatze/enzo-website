@@ -143,6 +143,17 @@ const I18N = {
                          ls: '⚠️ Für besondere Feiern können wir auch andere Zeiten ausmachen.' },
   'kontakt.kontakt':   { de: 'Kontakt',         en: 'Contact',       it: 'Contatti',        ls: 'Kontakt' },
 
+  // ── Maps Consent ──
+  'map.text':          { de: 'Beim Laden der Karte werden Daten an Google übertragen. <a href="/datenschutz.html">Datenschutzerklärung</a>',
+                         en: 'Loading the map transfers data to Google. <a href="/datenschutz.html">Privacy Policy</a>',
+                         it: 'Caricando la mappa, i dati vengono trasmessi a Google. <a href="/datenschutz.html">Informativa sulla privacy</a>',
+                         ls: 'Wenn die Karte geladen wird, werden Daten an Google geschickt. <a href="/datenschutz.html">Daten-Schutz</a>' },
+  'map.btn':           { de: 'Karte laden',     en: 'Load Map',      it: 'Carica Mappa',    ls: 'Karte laden' },
+  'map.link':          { de: 'Oder direkt in Google Maps öffnen ↗',
+                         en: 'Or open directly in Google Maps ↗',
+                         it: 'O apri direttamente in Google Maps ↗',
+                         ls: 'Oder direkt in Google Maps öffnen ↗' },
+
   // ── Footer ──
   'footer.copy':       { de: '© 2026 da Enzo – Caffé & Ristorante',
                          en: '© 2026 da Enzo – Caffé & Ristorante',
