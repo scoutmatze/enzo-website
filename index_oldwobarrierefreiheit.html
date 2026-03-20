@@ -9,8 +9,8 @@
 <!-- Open Graph / Social Media -->
 <meta property="og:title" content="Enzo – Caffé & Ristorante | Italienisch essen in München-Laim">
 <meta property="og:description" content="Frische Pasta, echter Espresso und italienische Spezialitäten in München-Laim. Wochenkarte, Mittagstisch und Reservierung. Besuche uns in der Zschokkestraße 34.">
-<meta property="og:image" content="https://www.da-enzo-muenchen.de/img/og-image.jpg">
-<meta property="og:url" content="https://www.da-enzo-muenchen.de">
+<meta property="og:image" content="https://enzo-website.netlify.app/img/og-image.jpg">
+<meta property="og:url" content="https://www.enzo-muenchen.de">
 <meta property="og:type" content="restaurant">
 
 <!-- Fonts: lokal gehostet (DSGVO-konform) -->
@@ -25,7 +25,7 @@
      ═══════════════════════════════════════════ */
   :root {
     --col-terra: #B85A3A;
-    --col-terra-light: #A8613E;
+    --col-terra-light: #D4845E;
     --col-olive: #5C6B4E;
     --col-olive-light: #8A9A72;
     --col-cream: #FAF5EE;
@@ -33,7 +33,7 @@
     --col-espresso: #2A1F17;
     --col-espresso-mid: #4A3828;
     --col-text: #1E1E1E;
-    --col-text-muted: #635850;
+    --col-text-muted: #7A6E62;
     --col-gold: #C9A96E;
 
     --font-display: 'Cormorant Garamond', Georgia, serif;
@@ -337,7 +337,7 @@
     font-weight: 600;
     letter-spacing: 0.25em;
     text-transform: uppercase;
-    color: var(--col-espresso);
+    color: var(--col-terra);
     margin-bottom: var(--space-xs);
   }
 
@@ -1028,64 +1028,15 @@
 
     .wk-price { text-align: left; }
   }
-
-  /* ═══════════════════════════════════════════
-     BARRIEREFREIHEIT (WCAG 2.1 AA)
-     ═══════════════════════════════════════════ */
-
-  /* Skip-Link (WCAG 2.4.1) */
-  .skip-link {
-    position: absolute;
-    left: -9999px;
-    top: 0;
-    z-index: 10000;
-    background: var(--col-espresso);
-    color: var(--col-cream);
-    padding: 12px 24px;
-    font-family: var(--font-body);
-    font-size: 1rem;
-    text-decoration: none;
-  }
-  .skip-link:focus {
-    left: 0;
-  }
-
-  /* Focus-Visible auf allen interaktiven Elementen (WCAG 2.4.7) */
-  *:focus-visible {
-    outline: 2px solid var(--col-terra);
-    outline-offset: 2px;
-  }
-
-  /* Burger-Button: Browser-Reset (war vorher div) */
-  .nav-burger {
-    background: none;
-    border: none;
-    padding: 8px;
-  }
-
-  /* Reduzierte Bewegung (WCAG 2.3.3 Best Practice) */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-    .reveal {
-      opacity: 1 !important;
-      transform: none !important;
-    }
-  }
 </style>
 </head>
 
 <body>
 
-<!-- Skip-Link (Barrierefreiheit: WCAG 2.4.1) -->
-<a href="#main-content" class="skip-link">Zum Inhalt springen</a>
-
 <!-- ═══════ NAVIGATION ═══════ -->
-<nav id="mainNav" aria-label="Hauptnavigation">
-  <a href="#" class="nav-logo"><img src="./img/logo-header.webp" alt="da Enzo – Zurück zum Anfang" class="nav-logo-img"></a>
+<nav id="mainNav">
+  <a href="#" class="nav-logo"><img src="./img/logo-header.webp" alt="da Enzo" class="nav-logo-img"></a>
+  <a href="#" class="nav-logo">da Enzo</a>
   <ul class="nav-links" id="navLinks">
     <li><a href="#ueber">Über uns</a></li>
     <li><a href="#karte">Speisekarte</a></li>
@@ -1093,12 +1044,10 @@
     <li><a href="#reservieren">Reservieren</a></li>
     <li><a href="#kontakt">Kontakt</a></li>
   </ul>
-  <button class="nav-burger" id="navBurger" aria-label="Menü öffnen" aria-expanded="false" onclick="toggleNav()">
+  <div class="nav-burger" id="navBurger" onclick="toggleNav()">
     <span></span><span></span><span></span>
-  </button>
+  </div>
 </nav>
-
-<main id="main-content">
 
 <!-- ═══════ HERO ═══════ -->
 <header class="hero">
@@ -1114,11 +1063,11 @@
 </header>
 
 <!-- ═══════ ÜBER ENZO ═══════ -->
-<section id="ueber" aria-labelledby="ueber-title">
+<section id="ueber">
   <div class="about">
     <div class="about-text reveal">
       <div class="section-label">Benvenuti</div>
-      <h2 id="ueber-title" class="section-title">Willkommen <em>bei da Enzo.</em></h2>
+      <h2 class="section-title">Willkommen <em>bei da Enzo.</em></h2>
       <p>Wir sind eine italienische Familie, die die authentischen Aromen unserer Heimat nach München bringt. Unsere Küche basiert auf der Liebe zu traditionellen Rezepten, frischen Zutaten und echter Gastfreundschaft.</p>
       <p>Jedes Gericht erzählt ein Stück unserer Geschichte. Ich heiße Sie herzlich willkommen und hoffe, dass Sie sich bei uns wohlfühlen und uns oft besuchen werden.</p>
       <p>Buon Appetito!</p>
@@ -1134,22 +1083,22 @@
 <section class="highlights" id="highlights">
   <div class="highlights-grid">
     <div class="highlight-card reveal">
-      <span class="highlight-icon" role="img" aria-hidden="true">🍝</span>
+      <span class="highlight-icon">🍝</span>
       <h3>Frische Pasta</h3>
       <p>Unsere Pasta machen wir selbst. Jeden Tag, von Hand. Punkt.</p>
     </div>
     <div class="highlight-card reveal">
-      <span class="highlight-icon" role="img" aria-hidden="true">☕</span>
+      <span class="highlight-icon">☕</span>
       <h3>Caffé-Kultur</h3>
       <p>Espresso, Cappuccino, Caffé Latte – bei uns wird der Kaffee noch so gemacht, wie er schmecken soll.</p>
     </div>
     <div class="highlight-card reveal">
-      <span class="highlight-icon" role="img" aria-hidden="true">📋</span>
+      <span class="highlight-icon">📋</span>
       <h3>Mittagstisch</h3>
       <p>Jeden Tag ein neues Gericht auf der Wochenkarte. Schnell, lecker und zum fairen Preis.</p>
     </div>
     <div class="highlight-card reveal">
-      <span class="highlight-icon" role="img" aria-hidden="true">🍰</span>
+      <span class="highlight-icon">🍰</span>
       <h3>Dolci & Kuchen</h3>
       <p>Tiramisu, Panna Cotta oder unsere Torta della Nonna – das darf man sich gönnen.</p>
     </div>
@@ -1157,11 +1106,11 @@
 </section>
 
 <!-- ═══════ SPEISEKARTE ═══════ -->
-<section id="karte" aria-labelledby="karte-title">
+<section id="karte">
   <div class="menu-section">
     <div class="reveal">
       <div class="section-label">La Carta</div>
-      <h2 id="karte-title" class="section-title">Unsere <em>Speisekarte</em></h2>
+      <h2 class="section-title">Unsere <em>Speisekarte</em></h2>
       <p class="menu-intro" id="menuIntro">Speisekarte wird geladen...</p>
     </div>
     <div class="menu-categories" id="menuContent">
@@ -1174,11 +1123,11 @@
 <div class="divider">· · ·</div>
 
 <!-- ═══════ WOCHENKARTE ═══════ -->
-<section class="wochenkarte-section" id="wochenkarte" aria-labelledby="wochenkarte-title">
+<section class="wochenkarte-section" id="wochenkarte">
   <div class="wochenkarte-inner">
     <div class="reveal">
       <div class="section-label">Ogni settimana</div>
-      <h2 id="wochenkarte-title" class="section-title">Die <em>Wochenkarte</em></h2>
+      <h2 class="section-title">Die <em>Wochenkarte</em></h2>
     </div>
     <div id="wochenkarteContent" class="reveal">
       <!-- Wird per JS aus wochenkarte.json geladen -->
@@ -1188,15 +1137,15 @@
 </section>
 
 <!-- ═══════ RESERVIERUNG ═══════ -->
-<section id="reservieren" aria-labelledby="reservieren-title">
+<section id="reservieren">
   <div class="reservierung">
     <div class="reservierung-text reveal">
       <div class="section-label">Prenotazione</div>
-      <h2 id="reservieren-title" class="section-title">Reservier dir <em>deinen Tisch.</em></h2>
+      <h2 class="section-title">Reservier dir <em>deinen Tisch.</em></h2>
       <p>Wir sind ein kleines Lokal mit großem Herz, aber eben auch mit begrenzten Plätzen. Reservier am besten kurz vorher – per Formular, WhatsApp oder ruf einfach an.</p>
 
       <div class="reservierung-channels">
-        <a href="https://wa.me/491795456396?text=Hallo%20Enzo%2C%20ich%20möchte%20gerne%20einen%20Tisch%20reservieren." class="channel" target="_blank" rel="noopener noreferrer" aria-label="Per WhatsApp reservieren (öffnet neues Fenster)">
+        <a href="https://wa.me/491795456396?text=Hallo%20Enzo%2C%20ich%20möchte%20gerne%20einen%20Tisch%20reservieren." class="channel" target="_blank">
           <div class="channel-icon channel-wa">💬</div>
           <div>
             <span>Per WhatsApp</span>
@@ -1218,25 +1167,25 @@
         <div class="form-row">
           <div class="form-group">
             <label for="resName">Name *</label>
-            <input type="text" id="resName" name="your-name" required aria-required="true" placeholder="Dein Name">
+            <input type="text" id="resName" name="your-name" required placeholder="Dein Name">
           </div>
           <div class="form-group">
             <label for="resPhone">Telefon *</label>
-            <input type="tel" id="resPhone" name="your-phone" required aria-required="true" placeholder="0176 ...">
+            <input type="tel" id="resPhone" name="your-phone" required placeholder="0176 ...">
           </div>
         </div>
         <div class="form-group">
           <label for="resEmail">E-Mail *</label>
-          <input type="email" id="resEmail" name="your-email" required aria-required="true" placeholder="deine@email.de">
+          <input type="email" id="resEmail" name="your-email" required placeholder="deine@email.de">
         </div>
         <div class="form-row">
           <div class="form-group">
             <label for="resDate">Datum *</label>
-            <input type="date" id="resDate" name="your-date" required aria-required="true">
+            <input type="date" id="resDate" name="your-date" required>
           </div>
           <div class="form-group">
             <label for="resTime">Uhrzeit *</label>
-            <select id="resTime" name="your-time" required aria-required="true">
+            <select id="resTime" name="your-time" required>
               <option value="">Bitte wählen</option>
               <option>11:00</option><option>11:30</option>
               <option>12:00</option><option>12:30</option>
@@ -1250,7 +1199,7 @@
         </div>
         <div class="form-group">
           <label for="resGuests">Personen *</label>
-          <select id="resGuests" name="your-guests" required aria-required="true">
+          <select id="resGuests" name="your-guests" required>
             <option value="">Bitte wählen</option>
             <option>1 Person</option><option>2 Personen</option>
             <option>3 Personen</option><option>4 Personen</option>
@@ -1267,7 +1216,7 @@
           <input type="text" name="website" tabindex="-1" autocomplete="off">
         </div>
         <button type="submit" class="form-submit" id="submitBtn">Tisch anfragen</button>
-        <div class="form-status" id="formStatus" role="alert" aria-live="polite"></div>
+        <div class="form-status" id="formStatus"></div>
         <p style="margin-top:12px;font-size:0.8rem;color:var(--col-text-muted);text-align:center;">
           Dies ist eine Anfrage – wir bestätigen per Telefon, E-Mail oder WhatsApp.
         </p>
@@ -1277,11 +1226,11 @@
 </section>
 
 <!-- ═══════ KONTAKT ═══════ -->
-<section class="kontakt" id="kontakt" aria-labelledby="kontakt-title">
+<section class="kontakt" id="kontakt">
   <div class="kontakt-grid">
     <div class="reveal">
       <div class="section-label">Trovarci</div>
-      <h2 id="kontakt-title" class="section-title">So findest du <em>zu uns.</em></h2>
+      <h2 class="section-title">So findest du <em>zu uns.</em></h2>
 
       <div class="kontakt-info">
         <h3>Adresse</h3>
@@ -1313,15 +1262,9 @@
         referrerpolicy="no-referrer-when-downgrade"
         title="da Enzo Restaurant auf Google Maps">
       </iframe>
-      <noscript>
-        <p style="padding:1rem;text-align:center;">Da Enzo – Zschokkestraße 34, 80686 München.
-        <a href="https://www.google.com/maps/place/ENZO+CAFFE+BAR/" target="_blank" rel="noopener noreferrer">In Google Maps öffnen</a></p>
-      </noscript>
     </div>
   </div>
 </section>
-
-</main>
 
 <!-- ═══════ FOOTER ═══════ -->
 <footer>
@@ -1331,12 +1274,11 @@
   <div class="footer-links">
     <a href="/impressum.html">Impressum</a>
     <a href="/datenschutz.html">Datenschutz</a>
-    <a href="/barrierefreiheit.html">Barrierefreiheit</a>
   </div>
 </footer>
 
 <!-- ═══════ WHATSAPP BUTTON ═══════ -->
-<a href="https://wa.me/49XXXXXXXXXXX?text=Hallo%20Enzo!" class="wa-float" target="_blank" rel="noopener noreferrer" aria-label="Per WhatsApp kontaktieren (öffnet neues Fenster)">
+<a href="https://wa.me/49XXXXXXXXXXX?text=Hallo%20Enzo!" class="wa-float" target="_blank" aria-label="WhatsApp">
   💬
 </a>
 
@@ -1360,21 +1302,14 @@ window.addEventListener('scroll', () => {
 
 function toggleNav() {
   document.getElementById('navLinks').classList.toggle('open');
-  const burger = document.getElementById('navBurger');
-  burger.classList.toggle('open');
-  const isOpen = burger.classList.contains('open');
-  burger.setAttribute('aria-expanded', isOpen);
-  burger.setAttribute('aria-label', isOpen ? 'Menü schließen' : 'Menü öffnen');
+  document.getElementById('navBurger').classList.toggle('open');
 }
 
 // Close mobile nav on link click
 document.querySelectorAll('.nav-links a').forEach(a => {
   a.addEventListener('click', () => {
     document.getElementById('navLinks').classList.remove('open');
-    const burger = document.getElementById('navBurger');
-    burger.classList.remove('open');
-    burger.setAttribute('aria-expanded', 'false');
-    burger.setAttribute('aria-label', 'Menü öffnen');
+    document.getElementById('navBurger').classList.remove('open');
   });
 });
 
@@ -1468,11 +1403,9 @@ async function loadSpeisekarte() {
       html += `<div class="menu-category reveal${isFirst ? ' open' : ''}">`;
 
       // Akkordeon-Header (nur auf Mobile sichtbar per CSS)
-      html += `<div class="menu-category-header" role="button" tabindex="0"`;
-      html += ` aria-expanded="${isFirst}" onclick="toggleMenuCategory(this)"`;
-      html += ` onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMenuCategory(this)}">`;
+      html += `<div class="menu-category-header" onclick="toggleMenuCategory(this)">`;
       html += `<span>${cat.name}</span>`;
-      html += `<span class="accordion-icon" aria-hidden="true">+</span>`;
+      html += `<span class="accordion-icon">+</span>`;
       html += `</div>`;
 
       // Originale h3 (nur auf Desktop sichtbar per CSS)
@@ -1516,22 +1449,16 @@ function toggleMenuCategory(header) {
   const category = header.parentElement;
   const allCategories = category.parentElement.querySelectorAll('.menu-category');
 
-  // Alle anderen schließen + aria updaten
+  // Alle anderen schließen
   allCategories.forEach(cat => {
-    if (cat !== category) {
-      cat.classList.remove('open');
-      const h = cat.querySelector('.menu-category-header');
-      if (h) h.setAttribute('aria-expanded', 'false');
-    }
+    if (cat !== category) cat.classList.remove('open');
   });
 
   // Aktuelle togglen
   category.classList.toggle('open');
-  const isOpen = category.classList.contains('open');
-  header.setAttribute('aria-expanded', isOpen);
 
   // Sanft zum geöffneten Element scrollen
-  if (isOpen) {
+  if (category.classList.contains('open')) {
     setTimeout(() => {
       category.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);

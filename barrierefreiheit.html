@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barrierefreiheit – da Enzo Caffé & Ristorante</title>
+<meta name="robots" content="noindex">
+
+<link rel="stylesheet" href="./fonts/fonts.css">
+<link rel="icon" type="image/png" href="./img/favicon.ico">
+<link rel="apple-touch-icon" href="./img/logo-header.webp">
+
+<style>
+  :root {
+    --col-terra: #B85A3A;
+    --col-terra-light: #A8613E;
+    --col-cream: #FAF5EE;
+    --col-cream-dark: #F0E8DB;
+    --col-espresso: #2A1F17;
+    --col-text: #1E1E1E;
+    --col-text-muted: #635850;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--col-text);
+    background: var(--col-cream);
+    line-height: 1.8;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--col-terra); }
+  a:hover { color: var(--col-terra-light); }
+
+  *:focus-visible {
+    outline: 2px solid var(--col-terra);
+    outline-offset: 2px;
+  }
+
+  nav {
+    background: var(--col-espresso);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--col-cream);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .nav-logo-img {
+    height: 44px;
+    width: auto;
+    transition: opacity 0.3s;
+  }
+
+  .nav-logo-img:hover { opacity: 0.85; }
+
+  .nav-back {
+    color: rgba(240,232,219,0.6);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .nav-back:hover { color: var(--col-cream); }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 2rem 4rem;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: var(--col-espresso);
+    margin-bottom: 2rem;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--col-espresso);
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p { margin-bottom: 0.75rem; color: var(--col-text-muted); }
+
+  ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+    color: var(--col-text-muted);
+  }
+
+  li { margin-bottom: 0.4rem; }
+
+  footer {
+    background: var(--col-espresso);
+    color: rgba(240,232,219,0.5);
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+
+  footer a { color: rgba(240,232,219,0.5); text-decoration: none; }
+  footer a:hover { color: var(--col-terra-light); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<nav aria-label="Seitennavigation">
+  <a href="/" class="nav-logo"><img src="./img/logo-header.webp" alt="da Enzo – Zurück zur Startseite" class="nav-logo-img"></a>
+  <a href="/" class="nav-back">← Zurück zur Startseite</a>
+</nav>
+
+<main id="main-content">
+
+<h1>Erklärung zur Barrierefreiheit</h1>
+
+<p>
+  Wir möchten, dass alle Menschen unsere Website nutzen können –
+  unabhängig von körperlichen, sensorischen oder technischen
+  Einschränkungen. Deshalb arbeiten wir kontinuierlich daran,
+  unser Webangebot barrierefrei zu gestalten.
+</p>
+
+<h2>Technischer Standard</h2>
+
+<p>
+  Diese Website orientiert sich an den Web Content Accessibility
+  Guidelines (WCAG) 2.1 auf Konformitätsstufe AA. Die WCAG sind
+  der internationale Standard für barrierefreie Webinhalte und
+  bilden die Grundlage der europäischen Norm EN 301 549 sowie
+  der deutschen Barrierefreie-Informationstechnik-Verordnung
+  (BITV 2.0).
+</p>
+
+<h2>Umgesetzte Maßnahmen</h2>
+
+<p>
+  Wir haben folgende Maßnahmen getroffen, um die Barrierefreiheit
+  unserer Website sicherzustellen:
+</p>
+
+<ul>
+  <li>Semantisches HTML mit korrekter Überschriften-Hierarchie und Landmarks (<code>nav</code>, <code>main</code>, <code>header</code>, <code>footer</code>)</li>
+  <li>Sprunglink „Zum Inhalt springen" für Tastaturnutzer</li>
+  <li>Alle interaktiven Elemente (Navigation, Menü-Akkordeon, Formulare) sind per Tastatur bedienbar</li>
+  <li>ARIA-Attribute für Zustandsanzeigen (z.B. <code>aria-expanded</code> im Menü und Akkordeon)</li>
+  <li>Farbkontraste erfüllen die WCAG-AA-Anforderung (mindestens 4,5:1 für Normtext)</li>
+  <li>Alle Bilder haben beschreibende Alternativtexte</li>
+  <li>Formularfelder sind mit Labels verknüpft und Pflichtfelder gekennzeichnet</li>
+  <li>Erfolgs- und Fehlermeldungen werden per <code>aria-live</code> an Screenreader übermittelt</li>
+  <li>Die Website respektiert die Systemeinstellung „Bewegung reduzieren" (<code>prefers-reduced-motion</code>)</li>
+  <li>Seitenzoom ist nicht eingeschränkt</li>
+  <li>Schriftarten werden lokal gehostet (kein Flash of Unstyled Text)</li>
+</ul>
+
+<h2>Bekannte Einschränkungen</h2>
+
+<p>
+  Trotz unserer Bemühungen sind uns folgende Einschränkungen bekannt:
+</p>
+
+<ul>
+  <li><strong>Google Maps Embed:</strong> Der eingebettete Kartenausschnitt
+  wird von Google bereitgestellt und unterliegt nicht unserer Kontrolle.
+  Alternativ finden Sie unsere Adresse als Text auf der Kontaktseite:
+  Zschokkestraße 34, 80686 München.</li>
+  <li><strong>Leichte Sprache / Gebärdensprache:</strong> Inhalte in
+  Leichter Sprache oder Deutscher Gebärdensprache stehen derzeit nicht
+  zur Verfügung.</li>
+</ul>
+
+<h2>Feedback und Kontakt</h2>
+
+<p>
+  Sollten Sie auf unserer Website auf Barrieren stoßen oder
+  Verbesserungsvorschläge haben, freuen wir uns über Ihre Rückmeldung.
+  Bitte kontaktieren Sie uns:
+</p>
+
+<p>
+  Enzo Curatolo<br>
+  Da Enzo – Caffé & Ristorante<br>
+  Telefon: +49 (0)89 9443 2100<br>
+  E-Mail: <a href="#" class="email-protect">[E-Mail wird geladen]</a>
+</p>
+
+<p>
+  Wir bemühen uns, Ihre Anfrage innerhalb von zwei Wochen zu beantworten
+  und gemeldete Barrieren zeitnah zu beheben.
+</p>
+
+<h2>Durchsetzungsverfahren</h2>
+
+<p>
+  Sollten Sie der Meinung sein, dass wir Ihre Anfrage nicht
+  zufriedenstellend bearbeitet haben, können Sie sich an die
+  zuständige Schlichtungsstelle wenden:
+</p>
+
+<p>
+  Schlichtungsstelle nach § 16 BGG<br>
+  beim Beauftragten der Bundesregierung für die Belange von Menschen mit Behinderungen<br>
+  Mauerstraße 53, 10117 Berlin<br>
+  Telefon: +49 (0)30 18 527 2805<br>
+  E-Mail: <a href="mailto:info@schlichtungsstelle-bgg.de">info@schlichtungsstelle-bgg.de</a><br>
+  Web: <a href="https://www.schlichtungsstelle-bgg.de" target="_blank" rel="noopener noreferrer">www.schlichtungsstelle-bgg.de</a>
+</p>
+
+<p style="margin-top: 2rem; font-size: 0.85rem; color: var(--col-text-muted); font-style: italic;">
+  Diese Erklärung wurde am 20. März 2026 erstellt.
+</p>
+
+</main>
+
+<footer>
+  <p>© 2026 da Enzo – Caffé & Ristorante · Zschokkestraße 34 · 80686 München</p>
+  <p style="margin-top:8px;">
+    <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a> · <a href="/barrierefreiheit.html">Barrierefreiheit</a> · <a href="/">Startseite</a>
+  </p>
+</footer>
+
+<script>
+document.querySelectorAll('.email-protect').forEach(el => {
+  const u = 'info'; const d = 'enzo-muenchen.de';
+  el.href = 'mailto:' + u + '@' + d;
+  el.textContent = u + '@' + d;
+});
+</script>
+
+</body>
+</html>
