@@ -1,0 +1,72 @@
+{
+  "name": "Enzo – Reservierung zu WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "enzo-reservierung",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-res-01",
+      "name": "Webhook Reservierung",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "enzo-reservierung"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json.body;\n\n// Datum formatieren\nlet dateStr = data['your-date'];\ntry {\n  const dateObj = new Date(data['your-date']);\n  dateStr = dateObj.toLocaleDateString('de-DE', {\n    weekday: 'short',\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric'\n  });\n} catch(e) {\n  // Falls Datum nicht parsbar, Rohwert verwenden\n}\n\n// WhatsApp-Nachricht zusammenbauen\nconst message = [\n  '\\ud83c\\udf7d\\ufe0f *Neue Reservierungsanfrage*',\n  '',\n  `\\ud83d\\udc64 *Name:* ${data['your-name'] || 'k.A.'}`,\n  `\\ud83d\\udcde *Telefon:* ${data['your-phone'] || 'k.A.'}`,\n  `\\ud83d\\udce7 *E-Mail:* ${data['your-email'] || 'k.A.'}`,\n  `\\ud83d\\udcc5 *Datum:* ${dateStr}`,\n  `\\ud83d\\udd50 *Uhrzeit:* ${data['your-time'] || 'k.A.'}`,\n  `\\ud83d\\udc65 *Personen:* ${data['your-guests'] || 'k.A.'}`,\n  data['your-message'] ? `\\ud83d\\udcac *Nachricht:* ${data['your-message']}` : '',\n  '',\n  `\\u23f0 Eingegangen: ${new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`\n].filter(l => l !== '').join('\\n');\n\nreturn [{\n  json: {\n    message,\n    customerPhone: data['your-phone'],\n    customerName: data['your-name'],\n    customerEmail: data['your-email']\n  }\n}];"
+      },
+      "id": "code-res-01",
+      "name": "Reservierung formatieren",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "sendTo": "PHONE_NUMBER_ID",
+        "recipientPhoneNumber": "ENZO_NUMMER",
+        "textBody": "={{ $json.message }}"
+      },
+      "id": "wa-send-res-01",
+      "name": "An WhatsApp senden",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'ok', message: 'Reservierung empfangen' }) }}"
+      },
+      "id": "respond-01",
+      "name": "OK an Website",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Reservierung": {
+      "main": [
+        [{ "node": "Reservierung formatieren", "type": "main", "index": 0 }]
+      ]
+    },
+    "Reservierung formatieren": {
+      "main": [
+        [{ "node": "An WhatsApp senden", "type": "main", "index": 0 }]
+      ]
+    },
+    "An WhatsApp senden": {
+      "main": [
+        [{ "node": "OK an Website", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

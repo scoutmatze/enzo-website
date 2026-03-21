@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-enzo
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      # Basis-Config
+      - N8N_HOST=n8n.da-enzo-muenchen.de
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.da-enzo-muenchen.de/
+
+      # Authentifizierung
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-BITTE_AENDERN}
+
+      # Zeitzone
+      - GENERIC_TIMEZONE=Europe/Berlin
+      - TZ=Europe/Berlin
+
+      # Datenbank (SQLite reicht fuer Enzos Volumen)
+      - DB_TYPE=sqlite
+
+      # Ausfuehrungen speichern
+      - EXECUTIONS_DATA_SAVE_ON_ERROR=all
+      - EXECUTIONS_DATA_SAVE_ON_SUCCESS=all
+      - EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS=true
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
+
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # Website-Verzeichnis mounten damit n8n direkt Dateien schreiben kann
+      - /var/www/enzo:/var/www/enzo
+
+volumes:
+  n8n_data:
+    driver: local
