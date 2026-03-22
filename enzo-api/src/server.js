@@ -66,10 +66,11 @@ app.get('/api/health', (req, res) => {
 
 // Statisches Admin-Frontend (React Build)
 app.use(express.static(path.join(__dirname, '../public')));
-app.get('*', (req, res) => {
-  if (!req.path.startsWith('/api/')) {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return next();
   }
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // ═══════════════════════════════════════════
