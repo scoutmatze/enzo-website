@@ -14,6 +14,8 @@ const menuRoutes = require('./routes/menu');
 const weeklyMenuRoutes = require('./routes/weeklyMenu');
 const settingsRoutes = require('./routes/settings');
 const exportRoutes = require('./routes/export');
+const reservationRoutes = require('./routes/reservations');
+const customerRoutes = require('./routes/customers');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,6 +56,8 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/weekly-menu', weeklyMenuRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/reservations', reservationRoutes);
+app.use('/api/customers', customerRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {

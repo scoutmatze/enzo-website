@@ -726,6 +726,95 @@
 
   .form-group textarea { resize: vertical; min-height: 80px; }
 
+  /* Time Slots */
+  .time-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .time-slot {
+    padding: 10px 6px;
+    text-align: center;
+    border: 1px solid var(--col-cream-dark);
+    border-radius: 4px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--col-cream);
+    color: var(--col-text);
+  }
+  .time-slot:hover { border-color: var(--col-terra); }
+  .time-slot.selected {
+    background: var(--col-terra);
+    color: white;
+    border-color: var(--col-terra);
+  }
+  .time-slot.unavailable {
+    opacity: 0.35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+  .time-slot .slot-free {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: var(--col-text-muted);
+    margin-top: 2px;
+  }
+  .time-slot.selected .slot-free { color: rgba(255,255,255,0.7); }
+
+  /* Guest Picker */
+  .guest-picker {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
+    padding: 8px;
+    background: var(--col-cream);
+    border-radius: 4px;
+    border: 1px solid var(--col-cream-dark);
+  }
+  .guest-picker span {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--col-espresso);
+    min-width: 40px;
+    text-align: center;
+  }
+  .guest-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--col-terra);
+    background: transparent;
+    color: var(--col-terra);
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .guest-btn:hover {
+    background: var(--col-terra);
+    color: white;
+  }
+
+  /* Date closed hint */
+  .date-closed {
+    padding: 12px;
+    background: #FBE9E7;
+    color: #C62828;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    text-align: center;
+    margin-top: 6px;
+  }
+
   .form-submit {
     width: 100%;
     padding: 16px;
@@ -1348,60 +1437,61 @@
 
     <div class="res-form reveal">
       <form id="reservationForm" onsubmit="submitReservation(event)">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="resName" data-i18n="res.label.name">Name *</label>
-            <input type="text" id="resName" name="your-name" required aria-required="true" placeholder="Dein Name" data-i18n="res.ph.name">
-          </div>
-          <div class="form-group">
-            <label for="resPhone" data-i18n="res.label.phone">Telefon *</label>
-            <input type="tel" id="resPhone" name="your-phone" required aria-required="true" placeholder="0176 ...">
-          </div>
-        </div>
+        <!-- Step 1: Datum wählen -->
         <div class="form-group">
-          <label for="resEmail" data-i18n="res.label.email">E-Mail *</label>
-          <input type="email" id="resEmail" name="your-email" required aria-required="true" placeholder="deine@email.de" data-i18n="res.ph.email">
+          <label data-i18n="res.label.date">Datum *</label>
+          <input type="date" id="resDate" name="your-date" required aria-required="true" onchange="loadTimeSlots()">
+          <div id="dateHint" style="margin-top:6px;font-size:0.82rem;color:var(--col-text-muted);" data-i18n="res.date.hint">Wähle ein Datum um verfügbare Uhrzeiten zu sehen.</div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="resDate" data-i18n="res.label.date">Datum *</label>
-            <input type="date" id="resDate" name="your-date" required aria-required="true">
-          </div>
-          <div class="form-group">
-            <label for="resTime" data-i18n="res.label.time">Uhrzeit *</label>
-            <select id="resTime" name="your-time" required aria-required="true">
-              <option value="" data-i18n="res.select.default">Bitte wählen</option>
-              <option>11:00</option><option>11:30</option>
-              <option>12:00</option><option>12:30</option>
-              <option>13:00</option><option>13:30</option>
-              <option>14:00</option><option>14:30</option>
-              <option>15:00</option><option>15:30</option>
-              <option>16:00</option><option>16:30</option>
-              <option>17:00</option><option>17:30</option>
-            </select>
-          </div>
+
+        <!-- Step 2: Uhrzeit (dynamisch aus API) -->
+        <div class="form-group" id="timeGroup" style="display:none">
+          <label data-i18n="res.label.time">Uhrzeit *</label>
+          <div id="timeSlots" class="time-slots"></div>
+          <input type="hidden" id="resTime" name="your-time" required>
         </div>
-        <div class="form-group">
+
+        <!-- Step 3: Personen -->
+        <div class="form-group" id="guestsGroup" style="display:none">
           <label for="resGuests" data-i18n="res.label.guests">Personen *</label>
-          <select id="resGuests" name="your-guests" required aria-required="true">
-            <option value="" data-i18n="res.select.default">Bitte wählen</option>
-            <option>1 Person</option><option>2 Personen</option>
-            <option>3 Personen</option><option>4 Personen</option>
-            <option>5 Personen</option><option>6 Personen</option>
-            <option>7 Personen</option><option>8 Personen</option>
-          </select>
+          <div class="guest-picker">
+            <button type="button" class="guest-btn" onclick="changeGuests(-1)">−</button>
+            <span id="guestCount">2</span>
+            <button type="button" class="guest-btn" onclick="changeGuests(1)">+</button>
+          </div>
+          <input type="hidden" id="resGuests" name="your-guests" value="2">
+          <div id="seatHint" style="margin-top:4px;font-size:0.78rem;color:var(--col-text-muted)"></div>
         </div>
-        <div class="form-group">
-          <label for="resMsg" data-i18n="res.label.msg">Sonderwünsche</label>
-          <textarea id="resMsg" name="your-message" placeholder="Allergien, Kinderstuhl, besonderer Anlass..." data-i18n="res.ph.msg"></textarea>
+
+        <!-- Step 4: Kontaktdaten (erscheint nach Datum+Zeit) -->
+        <div id="contactFields" style="display:none">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="resName" data-i18n="res.label.name">Name *</label>
+              <input type="text" id="resName" name="your-name" required aria-required="true" placeholder="Dein Name" data-i18n="res.ph.name">
+            </div>
+            <div class="form-group">
+              <label for="resPhone" data-i18n="res.label.phone">Telefon *</label>
+              <input type="tel" id="resPhone" name="your-phone" required aria-required="true" placeholder="0176 ...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="resEmail" data-i18n="res.label.email">E-Mail</label>
+            <input type="email" id="resEmail" name="your-email" placeholder="deine@email.de" data-i18n="res.ph.email">
+          </div>
+          <div class="form-group">
+            <label for="resMsg" data-i18n="res.label.msg">Sonderwünsche</label>
+            <textarea id="resMsg" name="your-message" placeholder="Allergien, Kinderstuhl, besonderer Anlass..." data-i18n="res.ph.msg"></textarea>
+          </div>
+          <!-- Honeypot -->
+          <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+            <input type="text" name="website" tabindex="-1" autocomplete="off">
+          </div>
+          <button type="submit" class="form-submit" id="submitBtn" data-i18n="res.submit">Tisch anfragen</button>
         </div>
-        <!-- Honeypot: unsichtbar für Menschen, Bots füllen es aus -->
-        <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
-          <input type="text" name="website" tabindex="-1" autocomplete="off">
-        </div>
-        <button type="submit" class="form-submit" id="submitBtn" data-i18n="res.submit">Tisch anfragen</button>
+
         <div class="form-status" id="formStatus" role="alert" aria-live="polite"></div>
-        <p style="margin-top:12px;font-size:0.8rem;color:var(--col-text-muted);text-align:center;" data-i18n="res.hint">
+        <p id="resHintText" style="margin-top:12px;font-size:0.8rem;color:var(--col-text-muted);text-align:center;" data-i18n="res.hint">
           Dies ist eine Anfrage – wir bestätigen per Telefon, E-Mail oder WhatsApp.
         </p>
       </form>
@@ -1475,7 +1565,7 @@
 </footer>
 
 <!-- ═══════ WHATSAPP BUTTON ═══════ -->
-<a href="https://wa.me/498994432100?text=Ciao%20Enzo!" class="wa-float" target="_blank" rel="noopener noreferrer" aria-label="Per WhatsApp kontaktieren (öffnet neues Fenster)">
+<a href="https://wa.me/498994432100?text=Hallo%20Enzo!" class="wa-float" target="_blank" rel="noopener noreferrer" aria-label="Per WhatsApp kontaktieren (öffnet neues Fenster)">
   💬
 </a>
 
@@ -1487,7 +1577,7 @@
 <script>
 /* ── CONFIG ──────────────────────────────── */
 const CONFIG = {
-  webhookUrl: 'https://enzo-website.app.n8n.cloud/webhook/enzo-reservierung',
+  apiUrl: '/api',
   wochenkarteUrl: './wochenkarte.json',
   speisekarteUrl: './speisekarte.json',
 };
@@ -1687,7 +1777,101 @@ function t(key) {
   return entry[currentLang] || entry['de'] || key;
 }
 
-/* ── RESERVIERUNG ABSENDEN ───────────────── */
+/* ── RESERVIERUNG: BUCHUNGSKALENDER ──────── */
+let selectedTime = '';
+let currentSlots = [];
+
+// Datum-Picker initialisieren: min=heute, max=30 Tage
+(function initDatePicker() {
+  const d = document.getElementById('resDate');
+  if (!d) return;
+  const today = new Date().toISOString().split('T')[0];
+  d.min = today;
+  const max = new Date();
+  max.setDate(max.getDate() + 30);
+  d.max = max.toISOString().split('T')[0];
+})();
+
+// Zeitslots laden wenn Datum gewählt wird
+async function loadTimeSlots() {
+  const date = document.getElementById('resDate').value;
+  if (!date) return;
+
+  const hint = document.getElementById('dateHint');
+  const timeGroup = document.getElementById('timeGroup');
+  const slotsEl = document.getElementById('timeSlots');
+
+  hint.textContent = 'Verfügbarkeit wird geprüft...';
+  selectedTime = '';
+  document.getElementById('resTime').value = '';
+
+  try {
+    const res = await fetch(CONFIG.apiUrl + '/reservations/public/availability?date=' + date);
+    const data = await res.json();
+
+    if (!data.available) {
+      hint.innerHTML = '<div class="date-closed">❌ ' + (data.reason || 'An diesem Tag nicht möglich.') + '</div>';
+      timeGroup.style.display = 'none';
+      document.getElementById('guestsGroup').style.display = 'none';
+      document.getElementById('contactFields').style.display = 'none';
+      return;
+    }
+
+    currentSlots = data.slots || [];
+    const available = currentSlots.filter(s => s.available);
+
+    if (available.length === 0) {
+      hint.innerHTML = '<div class="date-closed">Leider keine Plätze mehr frei an diesem Tag.</div>';
+      timeGroup.style.display = 'none';
+      return;
+    }
+
+    hint.textContent = available.length + ' Uhrzeiten verfügbar – wähle eine aus:';
+    timeGroup.style.display = 'block';
+
+    slotsEl.innerHTML = currentSlots.map(s =>
+      '<div class="time-slot' + (s.available ? '' : ' unavailable') + '" ' +
+      (s.available ? 'onclick="selectTime(\'' + s.time + '\', this)"' : '') + '>' +
+      s.time +
+      '<span class="slot-free">' + (s.available ? s.free + ' frei' : 'voll') + '</span>' +
+      '</div>'
+    ).join('');
+
+  } catch (e) {
+    hint.textContent = 'Fehler beim Laden der Verfügbarkeit.';
+    timeGroup.style.display = 'none';
+  }
+}
+
+function selectTime(time, el) {
+  selectedTime = time;
+  document.getElementById('resTime').value = time;
+
+  // Alle deselektieren, diesen markieren
+  document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+
+  // Personen und Kontaktfelder einblenden
+  document.getElementById('guestsGroup').style.display = 'block';
+  document.getElementById('contactFields').style.display = 'block';
+
+  // Freie Plätze anzeigen
+  const slot = currentSlots.find(s => s.time === time);
+  if (slot) {
+    document.getElementById('seatHint').textContent = slot.free + ' Plätze frei um ' + time + ' Uhr';
+  }
+}
+
+function changeGuests(delta) {
+  const el = document.getElementById('guestCount');
+  const input = document.getElementById('resGuests');
+  let val = parseInt(el.textContent) + delta;
+  if (val < 1) val = 1;
+  if (val > 8) val = 8;
+  el.textContent = val;
+  input.value = val;
+}
+
 async function submitReservation(e) {
   e.preventDefault();
   const btn = document.getElementById('submitBtn');
@@ -1699,11 +1883,9 @@ async function submitReservation(e) {
   status.className = 'form-status';
   status.style.display = 'none';
 
-  const formData = new FormData(form);
-  const data = Object.fromEntries(formData.entries());
-
-  // Honeypot-Check: wenn das versteckte Feld ausgefüllt ist → Bot
-  if (data.website && data.website.length > 0) {
+  // Honeypot
+  const hp = form.querySelector('[name="website"]');
+  if (hp && hp.value.length > 0) {
     status.className = 'form-status success';
     status.textContent = t('res.success');
     status.style.display = 'block';
@@ -1712,27 +1894,51 @@ async function submitReservation(e) {
     return;
   }
 
-  // Honeypot-Feld aus den Daten entfernen
-  delete data.website;
+  const data = {
+    guest_name: document.getElementById('resName').value,
+    guest_phone: document.getElementById('resPhone').value,
+    guest_email: document.getElementById('resEmail').value || null,
+    date: document.getElementById('resDate').value,
+    time: selectedTime,
+    party_size: parseInt(document.getElementById('resGuests').value),
+    message: document.getElementById('resMsg').value || null,
+  };
+
+  if (!data.guest_name || !data.date || !data.time || !data.party_size) {
+    status.className = 'form-status error';
+    status.textContent = 'Bitte alle Pflichtfelder ausfüllen.';
+    status.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = t('res.submit');
+    return;
+  }
 
   try {
-    const res = await fetch(CONFIG.webhookUrl, {
+    const res = await fetch(CONFIG.apiUrl + '/reservations/public/book', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
 
-    if (res.ok) {
+    const result = await res.json();
+
+    if (res.ok && result.status === 'ok') {
       status.className = 'form-status success';
-      status.textContent = t('res.success');
+      status.textContent = result.message || t('res.success');
       status.style.display = 'block';
       form.reset();
+      document.getElementById('guestCount').textContent = '2';
+      document.getElementById('timeGroup').style.display = 'none';
+      document.getElementById('guestsGroup').style.display = 'none';
+      document.getElementById('contactFields').style.display = 'none';
+      document.getElementById('dateHint').textContent = 'Wähle ein Datum um verfügbare Uhrzeiten zu sehen.';
+      selectedTime = '';
     } else {
-      throw new Error('Server-Fehler');
+      throw new Error(result.error || 'Fehler bei der Buchung.');
     }
   } catch (err) {
     status.className = 'form-status error';
-    status.textContent = t('res.error');
+    status.textContent = err.message || t('res.error');
     status.style.display = 'block';
   }
 

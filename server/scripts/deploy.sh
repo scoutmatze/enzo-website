@@ -10,7 +10,7 @@
 # ═══════════════════════════════════════════════════════
 
 # --- KONFIGURATION ---
-SERVER="root@DEINE_SERVER_IP"
+SERVER="root@88.99.171.196"
 # ↑↑↑ HIER DEINE SERVER-IP EINSETZEN ↑↑↑
 
 WEB_ROOT="/var/www/enzo"

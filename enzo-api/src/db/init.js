@@ -156,6 +156,72 @@ async function initDatabase() {
     );
 
     -- ═══════════════════════════════════════════
+    -- PHASE 2: KUNDEN
+    -- ═══════════════════════════════════════════
+
+    CREATE TABLE IF NOT EXISTS customers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT,
+      phone TEXT,
+      company TEXT,
+      is_business_customer INTEGER DEFAULT 0,
+      notes TEXT,
+      gdpr_consent_at DATETIME,
+      gdpr_consent_source TEXT,
+      gdpr_deleted_at DATETIME,
+      gdpr_deletion_requested_at DATETIME,
+      gdpr_retention_until DATE,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- ═══════════════════════════════════════════
+    -- PHASE 2: RESERVIERUNGEN
+    -- ═══════════════════════════════════════════
+
+    CREATE TABLE IF NOT EXISTS reservations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      customer_id INTEGER REFERENCES customers(id),
+      guest_name TEXT NOT NULL,
+      guest_email TEXT,
+      guest_phone TEXT,
+      date DATE NOT NULL,
+      time TEXT NOT NULL,
+      party_size INTEGER NOT NULL,
+      message TEXT,
+      status TEXT NOT NULL DEFAULT 'pending'
+        CHECK(status IN ('pending', 'confirmed', 'declined', 'cancelled', 'no_show', 'completed')),
+      source TEXT DEFAULT 'website'
+        CHECK(source IN ('website', 'phone', 'email', 'walkin', 'whatsapp')),
+      internal_notes TEXT,
+      confirmed_by INTEGER REFERENCES users(id),
+      confirmed_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS blocked_dates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date DATE NOT NULL,
+      reason TEXT NOT NULL,
+      is_full_day INTEGER DEFAULT 1,
+      blocked_from TEXT,
+      blocked_until TEXT,
+      created_by INTEGER REFERENCES users(id),
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- ═══════════════════════════════════════════
+    -- PHASE 2: INDIZES
+    -- ═══════════════════════════════════════════
+
+    CREATE INDEX IF NOT EXISTS idx_reservations_date ON reservations(date);
+    CREATE INDEX IF NOT EXISTS idx_reservations_status ON reservations(status);
+    CREATE INDEX IF NOT EXISTS idx_blocked_dates ON blocked_dates(date);
+    CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);
+
+    -- ═══════════════════════════════════════════
     -- VIEWS
     -- ═══════════════════════════════════════════
 
@@ -229,6 +295,10 @@ async function initDatabase() {
       ['max_party_size', '8'],
       ['menu_intro', 'Buon appetito! Unsere Gerichte werden täglich frisch zubereitet.'],
       ['allergen_note', 'Allergene: A Glutenhaltiges Getreide · B Krebstiere · C Eier · D Fisch · E Erdnüsse · F Soja · G Milch/Laktose · H Schalenfrüchte · L Sellerie · M Senf · N Weichtiere · O Sulfite · P Lupinen · Q Sesam. Bitte sprechen Sie uns bei Unverträglichkeiten an.'],
+      ['reservation_slot_minutes', '30'],
+      ['booking_advance_days', '30'],
+      ['booking_start_time', '11:00'],
+      ['booking_end_time', '21:00'],
     ];
     const insertSettings = db.transaction((items) => {
       for (const [k, v] of items) insertSetting.run(k, v);
@@ -236,6 +306,13 @@ async function initDatabase() {
     insertSettings(defaults);
     console.log('  ✅ Standard-Einstellungen eingefügt');
   }
+
+  // Reservierungs-Settings nachrüsten (für bestehende DBs)
+  const upsertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
+  upsertSetting.run('reservation_slot_minutes', '30');
+  upsertSetting.run('booking_advance_days', '30');
+  upsertSetting.run('booking_start_time', '11:00');
+  upsertSetting.run('booking_end_time', '21:00');
 
   // Admin-User erstellen (nur wenn keine User existieren)
   const userCount = db.prepare('SELECT COUNT(*) as c FROM users').get().c;

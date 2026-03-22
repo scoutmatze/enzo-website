@@ -1,33 +1,91 @@
 # ═══════════════════════════════════════════════════════
-# Enzo Website – Deploy auf Hetzner Server (Windows)
-# Ausfuehren in PowerShell
+# Da Enzo – Deploy Script (Windows PowerShell)
 #
-# Voraussetzung: ssh muss verfuegbar sein (Windows 10+ hat es)
+# Nutzung:
+#   .\deploy.ps1 dev       → deployed auf DEV (dev.da-enzo-muenchen.de)
+#   .\deploy.ps1 prod      → deployed auf PRODUKTION (www.da-enzo-muenchen.de)
+#   .\deploy.ps1 promote   → kopiert DEV → PRODUKTION auf dem Server
+#
+# DEV ist passwortgeschuetzt: enzo / Enz0Dev2026!
 # ═══════════════════════════════════════════════════════
 
-# --- KONFIGURATION ---
-$SERVER = "root@DEINE_SERVER_IP"
-# HIER DEINE SERVER-IP EINSETZEN
+param(
+    [Parameter(Mandatory=$true)]
+    [ValidateSet('dev', 'prod', 'promote')]
+    [string]$Environment
+)
 
-$WEB_ROOT = "/var/www/enzo"
-
-Write-Host "Enzo Website Deploy" -ForegroundColor Cyan
-
-# --- 1. Website-Dateien hochladen ---
-Write-Host "[1/3] Website-Dateien hochladen..." -ForegroundColor Yellow
-scp -r website/* "${SERVER}:${WEB_ROOT}/"
-
-# --- 2. Server-Configs hochladen ---
-Write-Host "[2/3] Server-Configs hochladen..." -ForegroundColor Yellow
-scp server/nginx/da-enzo-muenchen.de.conf "${SERVER}:/etc/nginx/sites-available/"
-scp server/nginx/n8n.da-enzo-muenchen.de.conf "${SERVER}:/etc/nginx/sites-available/"
-scp server/docker-compose.yml "${SERVER}:/opt/n8n/"
-
-# --- 3. Server-Dienste neuladen ---
-Write-Host "[3/3] Server-Dienste neuladen..." -ForegroundColor Yellow
-ssh $SERVER "ln -sf /etc/nginx/sites-available/da-enzo-muenchen.de.conf /etc/nginx/sites-enabled/ && ln -sf /etc/nginx/sites-available/n8n.da-enzo-muenchen.de.conf /etc/nginx/sites-enabled/ && nginx -t && systemctl reload nginx && cd /opt/n8n && docker compose up -d && chown -R www-data:www-data /var/www/enzo"
+$SSH = "hetzner"
+$WEB_ROOT_PROD = "/var/www/enzo"
+$WEB_ROOT_DEV = "/var/www/enzo-dev"
 
 Write-Host ""
-Write-Host "Deploy abgeschlossen!" -ForegroundColor Green
-Write-Host "Website: https://www.da-enzo-muenchen.de" -ForegroundColor Cyan
-Write-Host "n8n:     https://n8n.da-enzo-muenchen.de" -ForegroundColor Cyan
+Write-Host "Da Enzo Deploy: $($Environment.ToUpper())" -ForegroundColor Cyan
+Write-Host ""
+
+switch ($Environment) {
+    'dev' {
+        $TARGET = $WEB_ROOT_DEV
+        Write-Host "Deploying auf DEV..." -ForegroundColor Yellow
+
+        Write-Host "[1/4] HTML + JS + JSON..." -ForegroundColor Gray
+        scp website/index.html website/i18n.js website/impressum.html website/datenschutz.html website/barrierefreiheit.html website/404.html website/speisekarte.json website/wochenkarte.json "${SSH}:${TARGET}/"
+
+        Write-Host "[2/4] Fonts..." -ForegroundColor Gray
+        scp -r website/fonts "${SSH}:${TARGET}/"
+
+        Write-Host "[3/4] Bilder..." -ForegroundColor Gray
+        scp -r website/img "${SSH}:${TARGET}/"
+
+        Write-Host "[4/4] Rechte setzen..." -ForegroundColor Gray
+        ssh $SSH "chown -R www-data:www-data $TARGET && chmod -R 755 $TARGET"
+
+        Write-Host ""
+        Write-Host "DEV deployed!" -ForegroundColor Green
+        Write-Host "URL: https://dev.da-enzo-muenchen.de" -ForegroundColor Cyan
+        Write-Host "Login: enzo / Enz0Dev2026!" -ForegroundColor Cyan
+    }
+
+    'prod' {
+        Write-Host "ACHTUNG: Du deployest direkt auf PRODUKTION!" -ForegroundColor Red
+        $confirm = Read-Host "Bist du sicher? (ja/nein)"
+        if ($confirm -ne 'ja') {
+            Write-Host "Abgebrochen." -ForegroundColor Yellow
+            return
+        }
+
+        $TARGET = $WEB_ROOT_PROD
+        Write-Host "Deploying auf PRODUKTION..." -ForegroundColor Yellow
+
+        Write-Host "[1/4] HTML + JS + JSON..." -ForegroundColor Gray
+        scp website/index.html website/i18n.js website/impressum.html website/datenschutz.html website/barrierefreiheit.html website/404.html website/speisekarte.json website/wochenkarte.json "${SSH}:${TARGET}/"
+
+        Write-Host "[2/4] Fonts..." -ForegroundColor Gray
+        scp -r website/fonts "${SSH}:${TARGET}/"
+
+        Write-Host "[3/4] Bilder..." -ForegroundColor Gray
+        scp -r website/img "${SSH}:${TARGET}/"
+
+        Write-Host "[4/4] Rechte setzen..." -ForegroundColor Gray
+        ssh $SSH "chown -R www-data:www-data $TARGET && chmod -R 755 $TARGET"
+
+        Write-Host ""
+        Write-Host "PRODUKTION deployed!" -ForegroundColor Green
+        Write-Host "URL: https://www.da-enzo-muenchen.de" -ForegroundColor Cyan
+    }
+
+    'promote' {
+        Write-Host "Kopiere DEV nach PRODUKTION auf dem Server..." -ForegroundColor Yellow
+        Write-Host "ACHTUNG: Ueberschreibt die aktuelle Produktionsversion!" -ForegroundColor Red
+        $confirm = Read-Host "Bist du sicher? (ja/nein)"
+        if ($confirm -ne 'ja') {
+            Write-Host "Abgebrochen." -ForegroundColor Yellow
+            return
+        }
+
+        ssh $SSH "TIMESTAMP=`$(date +%Y%m%d_%H%M) && tar -czf /opt/backups/enzo_pre_promote_`${TIMESTAMP}.tar.gz $WEB_ROOT_PROD && rsync -av --delete $WEB_ROOT_DEV/ $WEB_ROOT_PROD/ && chown -R www-data:www-data $WEB_ROOT_PROD && echo Done"
+
+        Write-Host ""
+        Write-Host "DEV auf PRODUKTION promoted! Backup erstellt." -ForegroundColor Green
+    }
+}

@@ -170,6 +170,9 @@ tbody tr:hover { background: rgba(250,245,238,0.5); }
     <div class="sidebar-section">Karte</div>
     <div class="sidebar-link" onclick="showPage('menu')">📋 Speisekarte</div>
     <div class="sidebar-link" onclick="showPage('weekly')">📅 Wochenkarte</div>
+    <div class="sidebar-section">Gäste</div>
+    <div class="sidebar-link" onclick="showPage('reservations')">📆 Reservierungen</div>
+    <div class="sidebar-link" onclick="showPage('customers')">👥 Kunden</div>
     <div class="sidebar-section">System</div>
     <div class="sidebar-link" onclick="showPage('settings')">⚙️ Einstellungen</div>
     <div class="sidebar-footer">
@@ -260,13 +263,13 @@ document.getElementById('login-pw').addEventListener('keydown', e => { if (e.key
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
-const PAGE_TITLES = { dashboard: 'Dashboard', dishes: 'Kochbuch', ingredients: 'Zutaten & Allergene', menu: 'Speisekarte', weekly: 'Wochenkarte', settings: 'Einstellungen' };
+const PAGE_TITLES = { dashboard: 'Dashboard', dishes: 'Kochbuch', ingredients: 'Zutaten & Allergene', menu: 'Speisekarte', weekly: 'Wochenkarte', reservations: 'Reservierungen', customers: 'Kunden', settings: 'Einstellungen' };
 
 function showPage(page) {
   document.getElementById('page-title').textContent = PAGE_TITLES[page] || page;
   document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(el => { if (el.textContent.includes(PAGE_TITLES[page]?.split(' ')[0] || '###')) el.classList.add('active'); });
-  const fn = { dashboard: renderDashboard, dishes: renderDishes, ingredients: renderIngredients, menu: renderMenu, weekly: renderWeekly, settings: renderSettings };
+  const fn = { dashboard: renderDashboard, dishes: renderDishes, ingredients: renderIngredients, menu: renderMenu, weekly: renderWeekly, reservations: renderReservations, customers: renderCustomers, settings: renderSettings };
   if (fn[page]) fn[page]();
 }
 
@@ -284,6 +287,7 @@ function msg(text, ok = true) {
 // DASHBOARD
 // ═══════════════════════════════════════════
 async function renderDashboard() {
+  let resStats = { todayCount: 0, todayGuests: 0, pendingCount: 0, freeSeats: 30 };
   try {
     const [dishes, menu, ingredients] = await Promise.all([
       api('GET', '/dishes?active=true').catch(() => []),
@@ -293,20 +297,21 @@ async function renderDashboard() {
     CACHE.dishes = dishes || [];
     CACHE.menu = menu || [];
     CACHE.ingredients = ingredients || [];
+    resStats = await api('GET', '/reservations/stats').catch(() => resStats);
   } catch (e) {}
 
   document.getElementById('page-content').innerHTML = `
     <p style="color:var(--text-muted);margin-bottom:1rem">Ciao ${USER?.display_name || ''}! 👋</p>
     <div class="stats">
+      <div class="stat" onclick="showPage('reservations')"><div class="stat-icon">📆</div><div class="stat-val">${resStats.todayCount}</div><div class="stat-lbl">Reservierungen heute (${resStats.todayGuests} Gäste)</div></div>
+      <div class="stat" onclick="showPage('reservations')" style="${resStats.pendingCount > 0 ? 'border-color:var(--warning)' : ''}"><div class="stat-icon">⏳</div><div class="stat-val">${resStats.pendingCount}</div><div class="stat-lbl">Offene Anfragen</div></div>
       <div class="stat" onclick="showPage('dishes')"><div class="stat-icon">📖</div><div class="stat-val">${CACHE.dishes.length}</div><div class="stat-lbl">Gerichte im Kochbuch</div></div>
-      <div class="stat" onclick="showPage('menu')"><div class="stat-icon">📋</div><div class="stat-val">${CACHE.menu.length}</div><div class="stat-lbl">Kategorien auf der Karte</div></div>
-      <div class="stat" onclick="showPage('ingredients')"><div class="stat-icon">🧂</div><div class="stat-val">${CACHE.ingredients.length}</div><div class="stat-lbl">Zutaten erfasst</div></div>
-      <div class="stat" onclick="window.open('index.html','_blank')"><div class="stat-icon">🌐</div><div class="stat-val" style="font-size:1rem">Website</div><div class="stat-lbl">Statische Seite öffnen</div></div>
+      <div class="stat" onclick="window.open('index.html','_blank')"><div class="stat-icon">🌐</div><div class="stat-val" style="font-size:1rem">Website</div><div class="stat-lbl">da-enzo-muenchen.de öffnen</div></div>
     </div>
     <div class="card">
       <div class="card-h"><h3>Schnellaktionen</h3></div>
       <div class="btns">
-        <button class="btn btn-p" onclick="showPage('dishes')">📖 Neues Gericht</button>
+        <button class="btn btn-p" onclick="showPage('reservations')">📆 Reservierungen</button>
         <button class="btn btn-s" onclick="showPage('weekly')">📅 Wochenkarte</button>
         <button class="btn btn-ok" onclick="exportAll()">🔄 Website aktualisieren</button>
       </div>
@@ -705,6 +710,292 @@ async function saveWeekly() {
 
 async function publishWeekly(id) {
   try { const r = await api('POST', '/weekly-menu/' + id + '/publish'); msg(r.message); renderWeekly(); } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// RESERVIERUNGEN
+// ═══════════════════════════════════════════
+let resDateFilter = '';
+let resStatusFilter = '';
+
+async function renderReservations() {
+  if (!resDateFilter) resDateFilter = new Date().toISOString().split('T')[0];
+  let reservations = [];
+  let stats = {};
+  try {
+    const params = resDateFilter ? `?date=${resDateFilter}` : resStatusFilter ? `?status=${resStatusFilter}` : '';
+    reservations = await api('GET', '/reservations' + params);
+    stats = await api('GET', '/reservations/stats');
+  } catch (e) { msg(e.message, false); return; }
+
+  const statusBadge = (s) => {
+    const map = { pending: 'b-gold', confirmed: 'b-ok', declined: 'b-muted', cancelled: 'b-muted', no_show: 'badge b-terra', completed: 'b-ok' };
+    const labels = { pending: 'Offen', confirmed: 'Bestätigt', declined: 'Abgelehnt', cancelled: 'Storniert', no_show: 'No-Show', completed: 'Abgeschlossen' };
+    return `<span class="badge ${map[s] || 'b-muted'}">${labels[s] || s}</span>`;
+  };
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="stat-icon">📆</div><div class="stat-val">${stats.todayCount || 0}</div><div class="stat-lbl">Heute (${stats.todayGuests || 0} Gäste)</div></div>
+      <div class="stat" style="${stats.pendingCount > 0 ? 'border-color:var(--warning)' : ''}"><div class="stat-icon">⏳</div><div class="stat-val">${stats.pendingCount || 0}</div><div class="stat-lbl">Offene Anfragen</div></div>
+      <div class="stat"><div class="stat-icon">💺</div><div class="stat-val">${stats.freeSeats || 0}</div><div class="stat-lbl">Freie Plätze heute</div></div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h3>Reservierungen</h3>
+        <div class="btns">
+          <button class="btn btn-sm btn-s" onclick="resStatusFilter='pending';resDateFilter='';renderReservations()">⏳ Offene</button>
+          <button class="btn btn-sm btn-p" onclick="openNewReservation()">+ Neue Reservierung</button>
+        </div>
+      </div>
+      <div class="search">
+        <input id="res-date" type="date" value="${resDateFilter}" onchange="resDateFilter=this.value;resStatusFilter='';renderReservations()" style="width:170px">
+        <button class="btn btn-sm btn-s" onclick="resDateFilter=getTodayStr();resStatusFilter='';renderReservations()">Heute</button>
+        <button class="btn btn-sm btn-s" onclick="resDateFilter=getTomorrowStr();resStatusFilter='';renderReservations()">Morgen</button>
+        <button class="btn btn-sm btn-s" onclick="resDateFilter='';resStatusFilter='';renderReservations()">Alle</button>
+      </div>
+      <table>
+        <thead><tr><th>Zeit</th><th>Name</th><th>Personen</th><th>Kontakt</th><th>Wünsche</th><th>Status</th><th>Aktionen</th></tr></thead>
+        <tbody>${reservations.length === 0 ? '<tr><td colspan="7" class="empty">Keine Reservierungen für diesen Zeitraum.</td></tr>' :
+    reservations.map(r => `<tr>
+          <td><strong>${r.time}</strong><br><span style="font-size:0.72rem;color:var(--text-muted)">${formatDateShort(r.date)}</span></td>
+          <td><strong>${esc(r.guest_name)}</strong></td>
+          <td style="text-align:center"><strong>${r.party_size}</strong></td>
+          <td style="font-size:0.78rem">${r.guest_phone ? esc(r.guest_phone) + '<br>' : ''}${r.guest_email ? esc(r.guest_email) : ''}</td>
+          <td style="font-size:0.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis">${esc(r.message || '–')}</td>
+          <td>${statusBadge(r.status)}<br><span class="badge b-muted">${r.source}</span></td>
+          <td>
+            <div class="btns" style="flex-wrap:nowrap">
+              ${r.status === 'pending' ? `<button class="btn btn-sm btn-ok" onclick="confirmRes(${r.id})">✓</button><button class="btn btn-sm btn-d" onclick="declineRes(${r.id})">✕</button>` : ''}
+              ${r.status === 'confirmed' ? `<button class="btn btn-sm btn-s" onclick="cancelRes(${r.id})">Storno</button>` : ''}
+            </div>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h3>Gesperrte Tage</h3>
+        <button class="btn btn-sm btn-p" onclick="openBlockDate()">+ Tag sperren</button>
+      </div>
+      <div id="blocked-dates-list">Laden...</div>
+    </div>
+    <div id="res-modal"></div>
+  `;
+  loadBlockedDates();
+}
+
+function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+function getTomorrowStr() { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; }
+function formatDateShort(d) { return new Date(d).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }); }
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function confirmRes(id) { try { await api('PUT', '/reservations/' + id + '/confirm'); msg('Reservierung bestätigt.'); renderReservations(); } catch (e) { msg(e.message, false); } }
+async function declineRes(id) { if (!confirm('Reservierung ablehnen?')) return; try { await api('PUT', '/reservations/' + id + '/decline'); msg('Abgelehnt.'); renderReservations(); } catch (e) { msg(e.message, false); } }
+async function cancelRes(id) { if (!confirm('Reservierung stornieren?')) return; try { await api('PUT', '/reservations/' + id + '/cancel'); msg('Storniert.'); renderReservations(); } catch (e) { msg(e.message, false); } }
+
+function openNewReservation() {
+  const today = getTodayStr();
+  document.getElementById('res-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Neue Reservierung</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Name *</label><input id="nr-name"></div>
+          <div class="row">
+            <div class="fg"><label>Telefon</label><input id="nr-phone"></div>
+            <div class="fg"><label>E-Mail</label><input id="nr-email" type="email"></div>
+          </div>
+          <div class="row3">
+            <div class="fg"><label>Datum *</label><input id="nr-date" type="date" value="${today}"></div>
+            <div class="fg"><label>Uhrzeit *</label><input id="nr-time" type="time" value="19:00"></div>
+            <div class="fg"><label>Personen *</label><input id="nr-size" type="number" value="2" min="1" max="20"></div>
+          </div>
+          <div class="fg"><label>Quelle</label><select id="nr-source"><option value="phone">Telefon</option><option value="email">E-Mail</option><option value="walkin">Walk-in</option><option value="whatsapp">WhatsApp</option></select></div>
+          <div class="fg"><label>Wünsche / Notizen</label><textarea id="nr-msg"></textarea></div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveNewReservation()">Reservierung eintragen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveNewReservation() {
+  try {
+    await api('POST', '/reservations', {
+      guest_name: $('nr-name').value,
+      guest_phone: $('nr-phone').value || null,
+      guest_email: $('nr-email').value || null,
+      date: $('nr-date').value,
+      time: $('nr-time').value,
+      party_size: parseInt($('nr-size').value),
+      source: $('nr-source').value,
+      message: $('nr-msg').value || null,
+      status: 'confirmed',
+    });
+    renderReservations();
+    msg('Reservierung eingetragen.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function loadBlockedDates() {
+  try {
+    const dates = await api('GET', '/reservations/blocked-dates/list');
+    $('blocked-dates-list').innerHTML = dates.length === 0 ? '<p style="color:var(--text-muted);font-size:0.82rem">Keine gesperrten Tage.</p>' :
+      '<table><thead><tr><th>Datum</th><th>Grund</th><th>Art</th><th></th></tr></thead><tbody>' +
+      dates.map(d => `<tr>
+        <td><strong>${formatDateShort(d.date)}</strong></td>
+        <td>${esc(d.reason)}</td>
+        <td>${d.is_full_day ? 'Ganzer Tag' : d.blocked_from + '–' + d.blocked_until}</td>
+        <td><button class="btn btn-sm btn-s" onclick="unblockDate(${d.id})">Aufheben</button></td>
+      </tr>`).join('') + '</tbody></table>';
+  } catch (e) { $('blocked-dates-list').innerHTML = 'Fehler'; }
+}
+
+function openBlockDate() {
+  document.getElementById('res-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Tag sperren</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="row">
+            <div class="fg"><label>Datum *</label><input id="bd-date" type="date"></div>
+            <div class="fg"><label>Grund *</label><input id="bd-reason" placeholder="Betriebsferien, Geschl. Gesellschaft..."></div>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveBlockDate()">Sperren</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveBlockDate() {
+  try {
+    await api('POST', '/reservations/blocked-dates', { date: $('bd-date').value, reason: $('bd-reason').value });
+    renderReservations();
+    msg('Tag gesperrt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function unblockDate(id) {
+  if (!confirm('Sperrung aufheben?')) return;
+  try { await api('DELETE', '/reservations/blocked-dates/' + id); loadBlockedDates(); msg('Sperrung aufgehoben.'); } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// KUNDEN
+// ═══════════════════════════════════════════
+async function renderCustomers() {
+  let customers = [];
+  try { customers = await api('GET', '/customers'); } catch (e) { msg(e.message, false); return; }
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Kunden – ${customers.length}</h3>
+        <button class="btn btn-p" onclick="openNewCustomer()">+ Neuer Kunde</button>
+      </div>
+      <div class="search">
+        <input id="cust-search" placeholder="Suche nach Name, E-Mail, Telefon..." oninput="filterCustomers()">
+      </div>
+      <div id="cust-table"></div>
+    </div>
+    <div id="cust-modal"></div>
+  `;
+  CACHE.customers = customers;
+  filterCustomers();
+}
+
+function filterCustomers() {
+  const q = ($('cust-search')?.value || '').toLowerCase();
+  const filtered = (CACHE.customers || []).filter(c => {
+    if (!q) return true;
+    return c.name.toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q) || (c.phone || '').includes(q) || (c.company || '').toLowerCase().includes(q);
+  });
+
+  $('cust-table').innerHTML = `<table>
+    <thead><tr><th>Name</th><th>E-Mail</th><th>Telefon</th><th>Firma</th><th>Notizen</th><th></th></tr></thead>
+    <tbody>${filtered.length === 0 ? '<tr><td colspan="6" class="empty">Keine Kunden gefunden.</td></tr>' :
+    filtered.map(c => `<tr>
+      <td><strong>${esc(c.name)}</strong>${c.is_business_customer ? ' <span class="badge b-gold">Geschäftskunde</span>' : ''}</td>
+      <td style="font-size:0.78rem">${esc(c.email || '–')}</td>
+      <td style="font-size:0.78rem">${esc(c.phone || '–')}</td>
+      <td style="font-size:0.78rem">${esc(c.company || '–')}</td>
+      <td style="font-size:0.78rem;max-width:120px;overflow:hidden;text-overflow:ellipsis">${esc(c.notes || '–')}</td>
+      <td><button class="btn btn-sm btn-s" onclick="editCustomer(${c.id})">✏️</button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function openNewCustomer() {
+  showCustomerModal(null);
+}
+
+function editCustomer(id) {
+  const c = (CACHE.customers || []).find(x => x.id === id);
+  showCustomerModal(c);
+}
+
+function showCustomerModal(c) {
+  const container = $('cust-modal') || document.getElementById('page-content');
+  container.insertAdjacentHTML('beforeend', `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>${c ? 'Kunde bearbeiten' : 'Neuer Kunde'}</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Name *</label><input id="c-name" value="${c?.name || ''}"></div>
+          <div class="row">
+            <div class="fg"><label>E-Mail</label><input id="c-email" value="${c?.email || ''}"></div>
+            <div class="fg"><label>Telefon</label><input id="c-phone" value="${c?.phone || ''}"></div>
+          </div>
+          <div class="row">
+            <div class="fg"><label>Firma</label><input id="c-company" value="${c?.company || ''}"></div>
+            <div class="fg" style="display:flex;align-items:flex-end">
+              <div class="check"><input type="checkbox" id="c-biz" ${c?.is_business_customer ? 'checked' : ''}><label for="c-biz">Geschäftskunde</label></div>
+            </div>
+          </div>
+          <div class="fg"><label>Notizen</label><textarea id="c-notes">${c?.notes || ''}</textarea></div>
+        </div>
+        <div class="modal-f">
+          ${c ? '<button class="btn btn-d btn-sm" onclick="gdprDelete(' + c.id + ')" style="margin-right:auto">🗑 DSGVO löschen</button>' : ''}
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveCustomer(${c?.id || 'null'})">${c ? 'Speichern' : 'Erstellen'}</button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+async function saveCustomer(id) {
+  const data = {
+    name: $('c-name').value,
+    email: $('c-email').value || null,
+    phone: $('c-phone').value || null,
+    company: $('c-company').value || null,
+    is_business_customer: $('c-biz').checked,
+    notes: $('c-notes').value || null,
+  };
+  if (!data.name) return;
+  try {
+    if (id) await api('PUT', '/customers/' + id, data);
+    else await api('POST', '/customers', data);
+    renderCustomers();
+    msg(id ? 'Kunde aktualisiert.' : 'Kunde erstellt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function gdprDelete(id) {
+  if (!confirm('ACHTUNG: Kundendaten werden DSGVO-konform pseudonymisiert.\n\nDas bedeutet:\n- Name, E-Mail, Telefon → gelöscht\n- Reservierungen → anonymisiert\n- Rechnungen → bleiben (Aufbewahrungspflicht)\n\nDieser Vorgang kann NICHT rückgängig gemacht werden!\n\nFortfahren?')) return;
+  try {
+    await api('DELETE', '/customers/' + id + '/gdpr');
+    renderCustomers();
+    msg('Kundendaten DSGVO-konform pseudonymisiert.');
+  } catch (e) { msg(e.message, false); }
 }
 
 // ═══════════════════════════════════════════
