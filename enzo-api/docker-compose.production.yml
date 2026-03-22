@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-enzo
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      - N8N_HOST=n8n.da-enzo-muenchen.de
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.da-enzo-muenchen.de/
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+      - GENERIC_TIMEZONE=Europe/Berlin
+      - TZ=Europe/Berlin
+      - DB_TYPE=sqlite
+      - EXECUTIONS_DATA_SAVE_ON_ERROR=all
+      - EXECUTIONS_DATA_SAVE_ON_SUCCESS=all
+      - EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS=true
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - /var/www/enzo:/var/www/enzo
+
+  api:
+    build:
+      context: ./enzo-api
+      dockerfile: Dockerfile
+    container_name: enzo-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=${API_JWT_SECRET}
+      - DB_PATH=/app/data/enzo.db
+      - WEBSITE_PATH=/var/www/enzo
+      - CORS_ORIGINS=https://admin.da-enzo-muenchen.de,https://www.da-enzo-muenchen.de,https://dev.da-enzo-muenchen.de
+      - ADMIN_EMAIL=${API_ADMIN_EMAIL:-admin@da-enzo-muenchen.de}
+      - ADMIN_PASSWORD=${API_ADMIN_PASSWORD:-BITTE_AENDERN}
+    volumes:
+      - api_data:/app/data
+      - /var/www/enzo:/var/www/enzo
+      - /var/www/enzo-dev:/var/www/enzo-dev
+
+volumes:
+  n8n_data:
+    driver: local
+  api_data:
+    driver: local
