@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const PDFDocument = require('pdfkit');
 const { getDb, logAudit } = require('../db/init');
 const { authenticate, requireRole } = require('../middleware/auth');
 
@@ -88,10 +89,11 @@ function exportWochenkarte() {
     };
   } else {
     const items = db.prepare(`
-      SELECT wmi.day_of_week, wmi.price, d.name, d.description,
-        COALESCE(das.allergens, '') AS allergens
+      SELECT wmi.day_of_week, wmi.price, wmi.custom_name, wmi.custom_description, wmi.custom_allergens,
+        d.name, d.description,
+        COALESCE(wmi.custom_allergens, das.allergens, '') AS allergens
       FROM weekly_menu_items wmi
-      JOIN dishes d ON wmi.dish_id = d.id
+      LEFT JOIN dishes d ON wmi.dish_id = d.id
       LEFT JOIN dish_allergen_string das ON d.id = das.dish_id
       WHERE wmi.weekly_menu_id = ?
       ORDER BY wmi.day_of_week, wmi.sort_order
@@ -105,22 +107,21 @@ function exportWochenkarte() {
         subtitle: formatWeekRange(menu.week_start),
         items: items.map(item => ({
           day: dayNames[item.day_of_week] || '',
-          name: item.name,
-          desc: item.description || '',
+          name: item.custom_name || item.name || '',
+          desc: item.custom_description || item.description || '',
           price: formatPrice(item.price),
           allergens: item.allergens || '',
         })),
         note: menu.note || '',
       };
     } else {
-      // weekly mode: ein Gericht fuer die ganze Woche
       result = {
         title: 'Wochenkarte',
         subtitle: formatWeekRange(menu.week_start),
         items: items.map(item => ({
           day: 'Wochengericht',
-          name: item.name,
-          desc: item.description || '',
+          name: item.custom_name || item.name || '',
+          desc: item.custom_description || item.description || '',
           price: formatPrice(item.price),
           allergens: item.allergens || '',
         })),
@@ -204,6 +205,196 @@ router.post('/all', authenticate, requireRole('inhaber', 'leitung'), (req, res) 
   } catch (err) {
     res.status(500).json({ error: 'Export fehlgeschlagen: ' + err.message });
   }
+});
+
+// ═══════════════════════════════════════════
+// DRUCK-PDFs
+// ═══════════════════════════════════════════
+
+const FOOD_CATS = ['antipasti', 'primi', 'secondi', 'pinse', 'dolci', 'sonstiges'];
+const DRINK_CATS = ['caffe', 'tee', 'alkoholfrei', 'bier', 'aperitivi', 'wein', 'digestivi'];
+
+function getSetting(db, key, def) {
+  return db.prepare('SELECT value FROM settings WHERE key = ?').get(key)?.value || def;
+}
+
+function drawMenuHeader(doc, title, subtitle) {
+  doc.fontSize(24).font('Helvetica-Bold').text(title, { align: 'center' });
+  doc.moveDown(0.3);
+  if (subtitle) { doc.fontSize(10).font('Helvetica').fillColor('#888').text(subtitle, { align: 'center' }); }
+  doc.fillColor('#000');
+  doc.moveDown(0.4);
+  doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.5).stroke();
+  doc.moveDown(0.6);
+}
+
+function drawCategory(doc, catName, items) {
+  // Estimate height: header(30) + items(22 each) + padding(20)
+  const estHeight = 30 + items.length * 22 + 20;
+  if (doc.y + estHeight > 760) doc.addPage();
+
+  doc.fontSize(14).font('Helvetica-Bold').text(catName);
+  doc.moveDown(0.3);
+
+  for (const item of items) {
+    if (doc.y > 740) doc.addPage();
+    const y = doc.y;
+    doc.fontSize(10).font('Helvetica-Bold').text(item.name, 50, y, { width: 340, continued: false });
+    if (item.allergens) {
+      doc.fontSize(7).font('Helvetica').fillColor('#999').text(' (' + item.allergens + ')', 50 + doc.widthOfString(item.name, { fontSize: 10 }) + 4, y + 1);
+      doc.fillColor('#000');
+    }
+    if (item.price) {
+      doc.fontSize(10).font('Helvetica').text(item.price, 460, y, { width: 85, align: 'right' });
+    }
+    if (item.desc) {
+      doc.fontSize(8).font('Helvetica').fillColor('#666').text(item.desc, 50, doc.y + 1, { width: 400 });
+      doc.fillColor('#000');
+    }
+    doc.moveDown(0.5);
+  }
+  doc.moveDown(0.4);
+}
+
+// GET /api/export/speisekarte-pdf
+router.get('/speisekarte-pdf', authenticate, (req, res) => {
+  try {
+    const data = exportSpeisekarte();
+    const db = getDb();
+    const restaurantName = getSetting(db, 'restaurant_name', 'Da Enzo');
+    const address = getSetting(db, 'address', '');
+    const allergenNote = getSetting(db, 'allergen_note', '');
+
+    const doc = new PDFDocument({ size: 'A4', margin: 50, bufferPages: true });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="Speisekarte.pdf"');
+    doc.pipe(res);
+
+    // ── ESSEN ──
+    doc.fontSize(9).font('Helvetica').fillColor('#888').text(restaurantName + ' · ' + address, { align: 'center' });
+    doc.fillColor('#000');
+    doc.moveDown(0.5);
+    drawMenuHeader(doc, 'Speisekarte', 'Essen');
+
+    if (data.intro) {
+      doc.fontSize(9).font('Helvetica').fillColor('#666').text(data.intro, { align: 'center' });
+      doc.fillColor('#000');
+      doc.moveDown(0.8);
+    }
+
+    const foodCats = data.categories.filter(c => {
+      const key = c.name.toLowerCase().replace(/[^a-zäöü]/g, '');
+      return !DRINK_CATS.some(d => key.includes(d));
+    });
+    const drinkCats = data.categories.filter(c => {
+      const key = c.name.toLowerCase().replace(/[^a-zäöü]/g, '');
+      return DRINK_CATS.some(d => key.includes(d));
+    });
+
+    for (const cat of foodCats) {
+      drawCategory(doc, cat.name, cat.items);
+    }
+
+    // Allergen-Hinweis am Ende der Essen-Seite
+    if (allergenNote) {
+      if (doc.y > 680) doc.addPage();
+      doc.moveDown(1);
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.3).stroke();
+      doc.moveDown(0.5);
+      doc.fontSize(6.5).font('Helvetica').fillColor('#999').text(allergenNote, { width: 495, lineGap: 2 });
+      doc.fillColor('#000');
+    }
+
+    // ── GETRÄNKE ──
+    if (drinkCats.length > 0) {
+      doc.addPage();
+      doc.fontSize(9).font('Helvetica').fillColor('#888').text(restaurantName + ' · ' + address, { align: 'center' });
+      doc.fillColor('#000');
+      doc.moveDown(0.5);
+      drawMenuHeader(doc, 'Getränkekarte', '');
+
+      for (const cat of drinkCats) {
+        drawCategory(doc, cat.name, cat.items);
+      }
+
+      if (allergenNote) {
+        if (doc.y > 680) doc.addPage();
+        doc.moveDown(1);
+        doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.3).stroke();
+        doc.moveDown(0.5);
+        doc.fontSize(6.5).font('Helvetica').fillColor('#999').text(allergenNote, { width: 495, lineGap: 2 });
+        doc.fillColor('#000');
+      }
+    }
+
+    doc.end();
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/export/wochenkarte-pdf
+router.get('/wochenkarte-pdf', authenticate, (req, res) => {
+  try {
+    const data = exportWochenkarte();
+    const db = getDb();
+    const restaurantName = getSetting(db, 'restaurant_name', 'Da Enzo');
+    const address = getSetting(db, 'address', '');
+    const allergenNote = getSetting(db, 'allergen_note', '');
+
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="Wochenkarte.pdf"');
+    doc.pipe(res);
+
+    doc.fontSize(9).font('Helvetica').fillColor('#888').text(restaurantName + ' · ' + address, { align: 'center' });
+    doc.fillColor('#000');
+    doc.moveDown(0.5);
+    drawMenuHeader(doc, 'Wochenkarte', data.subtitle || '');
+
+    for (const item of (data.items || [])) {
+      if (doc.y > 700) doc.addPage();
+      const y = doc.y;
+
+      if (item.day) {
+        doc.fontSize(11).font('Helvetica-Bold').text(item.day, 50, y, { width: 120 });
+      }
+
+      const nameX = item.day ? 170 : 50;
+      doc.fontSize(11).font('Helvetica-Bold').text(item.name || '', nameX, y, { width: 280 });
+      if (item.desc) {
+        doc.fontSize(8).font('Helvetica').fillColor('#666').text(item.desc, nameX, doc.y + 1, { width: 280 });
+        doc.fillColor('#000');
+      }
+      if (item.allergens) {
+        doc.fontSize(7).font('Helvetica').fillColor('#999').text('Allergene: ' + item.allergens, nameX, doc.y + 1);
+        doc.fillColor('#000');
+      }
+
+      if (item.price) {
+        doc.fontSize(11).font('Helvetica').text(item.price, 460, y, { width: 85, align: 'right' });
+      }
+
+      doc.moveDown(0.8);
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.2).strokeColor('#ddd').stroke();
+      doc.strokeColor('#000');
+      doc.moveDown(0.5);
+    }
+
+    if (data.note) {
+      doc.moveDown(0.5);
+      doc.fontSize(9).font('Helvetica').fillColor('#666').text(data.note, { align: 'center' });
+      doc.fillColor('#000');
+    }
+
+    if (allergenNote) {
+      doc.moveDown(2);
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.3).stroke();
+      doc.moveDown(0.5);
+      doc.fontSize(6.5).font('Helvetica').fillColor('#999').text(allergenNote, { width: 495, lineGap: 2 });
+      doc.fillColor('#000');
+    }
+
+    doc.end();
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;

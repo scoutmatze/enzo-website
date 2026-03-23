@@ -420,6 +420,16 @@ async function exportAll() {
   try { const r = await api('POST', '/export/all'); msg(r.message); } catch (e) { msg('Fehler: ' + e.message, false); }
 }
 
+async function printMenuPdf(type) {
+  try {
+    const res = await fetch(API + '/export/' + type + '-pdf', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
+    if (!res.ok) throw new Error('PDF konnte nicht generiert werden');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } catch (e) { msg(e.message, false); }
+}
+
 // ═══════════════════════════════════════════
 // ZUTATEN
 // ═══════════════════════════════════════════
@@ -637,7 +647,10 @@ async function renderMenu() {
     <div class="card">
       <div class="card-h">
         <h3>Speisekarte verwalten</h3>
-        <button class="btn btn-ok" onclick="exportSpeisekarte()">🔄 Auf Website exportieren</button>
+        <div class="btns">
+          <button class="btn btn-ok" onclick="exportSpeisekarte()">🔄 Exportieren</button>
+          <button class="btn btn-s" onclick="printMenuPdf('speisekarte')">🖨️ Drucken</button>
+        </div>
       </div>
       <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.8rem">Kategorien und Gerichte zusammenstellen. Nach Änderungen "Exportieren" klicken.</p>
     </div>
@@ -722,7 +735,10 @@ async function renderWeekly() {
     <div class="card">
       <div class="card-h">
         <h3>Wochenkarten</h3>
-        <button class="btn btn-p" onclick="openWeeklyModal()">+ Neue Wochenkarte</button>
+        <div class="btns">
+          <button class="btn btn-p" onclick="openWeeklyModal()">+ Neue Wochenkarte</button>
+          <button class="btn btn-s" onclick="printMenuPdf('wochenkarte')">🖨️ Drucken</button>
+        </div>
       </div>
       <table>
         <thead><tr><th>Woche</th><th>Modus</th><th>Gerichte</th><th>Status</th><th style="width:110px"></th></tr></thead>
@@ -2161,6 +2177,14 @@ async function renderSettings() {
       <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.8rem">JSON-Dateien auf der Website aktualisieren:</p>
       <div class="btns">
         <button class="btn btn-ok" onclick="exportAll()">🔄 Speisekarte + Wochenkarte exportieren</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Druckversion (PDF)</h3></div>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.8rem">Druckfertige PDFs generieren – Essen & Getränke getrennt, mit Allergenen.</p>
+      <div class="btns">
+        <button class="btn btn-p" onclick="printMenuPdf('speisekarte')">🖨️ Speisekarte drucken</button>
+        <button class="btn btn-p" onclick="printMenuPdf('wochenkarte')">🖨️ Wochenkarte drucken</button>
       </div>
     </div>
   `;
