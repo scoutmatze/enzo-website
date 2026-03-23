@@ -1004,6 +1004,12 @@ async function gdprDelete(id) {
 async function renderSettings() {
   let s = {};
   try { s = await api('GET', '/settings'); } catch (e) {}
+  const oh = typeof s.opening_hours === 'object' ? s.opening_hours : (function() { try { return JSON.parse(s.opening_hours || '{}'); } catch { return {}; } })();
+  const days = [
+    { key: 'mo', label: 'Montag' }, { key: 'di', label: 'Dienstag' }, { key: 'mi', label: 'Mittwoch' },
+    { key: 'do', label: 'Donnerstag' }, { key: 'fr', label: 'Freitag' }, { key: 'sa', label: 'Samstag' }, { key: 'so', label: 'Sonntag' }
+  ];
+
   document.getElementById('page-content').innerHTML = `
     <div class="card">
       <div class="card-h"><h3>Restaurant-Einstellungen</h3><button class="btn btn-p" onclick="saveSettings()">Speichern</button></div>
@@ -1016,11 +1022,47 @@ async function renderSettings() {
         <div class="fg"><label>E-Mail</label><input id="s-email" value="${s.email || ''}"></div>
       </div>
       <div class="fg"><label>Booking E-Mail</label><input id="s-booking" value="${s.booking_email || ''}"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>Öffnungszeiten</h3></div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.8rem">Tage ohne Uhrzeiten = Ruhetag. Format: HH:MM-HH:MM</p>
+      <table>
+        <thead><tr><th>Tag</th><th>Geöffnet</th><th>Von – Bis</th></tr></thead>
+        <tbody>
+          ${days.map(d => {
+            const val = oh[d.key] || '';
+            const isOpen = !!val;
+            const parts = val ? val.split('-') : ['', ''];
+            return '<tr>' +
+              '<td><strong>' + d.label + '</strong></td>' +
+              '<td><input type="checkbox" id="oh-open-' + d.key + '" ' + (isOpen ? 'checked' : '') + ' onchange="toggleDay(\'' + d.key + '\')" style="width:18px;height:18px;accent-color:var(--terra)"></td>' +
+              '<td><div style="display:flex;gap:6px;align-items:center;' + (isOpen ? '' : 'opacity:0.3;pointer-events:none;') + '" id="oh-times-' + d.key + '">' +
+              '<input type="time" id="oh-from-' + d.key + '" value="' + (parts[0] || '09:00') + '" style="width:110px">' +
+              '<span>–</span>' +
+              '<input type="time" id="oh-to-' + d.key + '" value="' + (parts[1] || '18:00') + '" style="width:110px">' +
+              '</div></td></tr>';
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>Reservierungs-Einstellungen</h3></div>
       <div class="row">
-        <div class="fg"><label>Sitzplätze</label><input id="s-seats" type="number" value="${s.total_seats || ''}"></div>
-        <div class="fg"><label>Max. Personenzahl</label><input id="s-maxparty" type="number" value="${s.max_party_size || ''}"></div>
+        <div class="fg"><label>Sitzplätze gesamt</label><input id="s-seats" type="number" value="${s.total_seats || '30'}"></div>
+        <div class="fg"><label>Max. Personen pro Reservierung</label><input id="s-maxparty" type="number" value="${s.max_party_size || '8'}"></div>
+      </div>
+      <div class="row">
+        <div class="fg"><label>Buchbare Uhrzeiten von</label><input id="s-bookstart" type="time" value="${s.booking_start_time || '11:00'}"></div>
+        <div class="fg"><label>Buchbare Uhrzeiten bis</label><input id="s-bookend" type="time" value="${s.booking_end_time || '21:00'}"></div>
+      </div>
+      <div class="row">
+        <div class="fg"><label>Zeitslot-Intervall (Minuten)</label><input id="s-slot" type="number" value="${s.reservation_slot_minutes || '30'}" min="15" max="120" step="15"></div>
+        <div class="fg"><label>Wie viele Tage im Voraus buchbar</label><input id="s-advance" type="number" value="${s.booking_advance_days || '30'}"></div>
       </div>
     </div>
+
     <div class="card">
       <div class="card-h"><h3>Speisekarten-Texte</h3></div>
       <div class="fg"><label>Einleitungstext</label><textarea id="s-intro">${s.menu_intro || ''}</textarea></div>
@@ -1036,7 +1078,27 @@ async function renderSettings() {
   `;
 }
 
+function toggleDay(key) {
+  const isOpen = $('oh-open-' + key).checked;
+  const timesEl = $('oh-times-' + key);
+  if (timesEl) {
+    timesEl.style.opacity = isOpen ? '1' : '0.3';
+    timesEl.style.pointerEvents = isOpen ? 'auto' : 'none';
+  }
+}
+
 async function saveSettings() {
+  // Öffnungszeiten zusammenbauen
+  const days = ['mo', 'di', 'mi', 'do', 'fr', 'sa', 'so'];
+  const oh = {};
+  for (const d of days) {
+    if ($('oh-open-' + d)?.checked) {
+      oh[d] = ($('oh-from-' + d)?.value || '09:00') + '-' + ($('oh-to-' + d)?.value || '18:00');
+    } else {
+      oh[d] = null;
+    }
+  }
+
   try {
     await api('PUT', '/settings', {
       restaurant_name: $('s-name').value,
@@ -1046,6 +1108,11 @@ async function saveSettings() {
       booking_email: $('s-booking').value,
       total_seats: $('s-seats').value,
       max_party_size: $('s-maxparty').value,
+      opening_hours: JSON.stringify(oh),
+      booking_start_time: $('s-bookstart').value,
+      booking_end_time: $('s-bookend').value,
+      reservation_slot_minutes: $('s-slot').value,
+      booking_advance_days: $('s-advance').value,
       menu_intro: $('s-intro').value,
       allergen_note: $('s-allergen').value,
     });
