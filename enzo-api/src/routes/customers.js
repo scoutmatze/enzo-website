@@ -60,6 +60,19 @@ router.put('/:id', authenticate, requireRole('inhaber', 'leitung'), (req, res) =
   res.json({ message: 'Kunde aktualisiert.' });
 });
 
+// DELETE /api/customers/:id – Komplett löschen (nur wenn keine Rechnungen)
+router.delete('/:id', authenticate, requireRole('inhaber', 'admin'), (req, res) => {
+  const db = getDb();
+  const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(req.params.id);
+  if (!customer) return res.status(404).json({ error: 'Nicht gefunden.' });
+  const invoiceCount = db.prepare('SELECT COUNT(*) as c FROM invoices WHERE customer_id = ?').get(req.params.id).c;
+  if (invoiceCount > 0) return res.status(400).json({ error: 'Kunde hat ' + invoiceCount + ' Rechnung(en). Bitte erst Rechnungen löschen oder DSGVO-Pseudonymisierung nutzen.' });
+  const resCount = db.prepare('SELECT COUNT(*) as c FROM reservations WHERE customer_id = ?').get(req.params.id).c;
+  db.prepare('DELETE FROM customers WHERE id = ?').run(req.params.id);
+  logAudit(req.user.id, 'delete', 'customer', req.params.id, { name: customer.name }, req.ip);
+  res.json({ message: 'Kunde ' + customer.name + ' gelöscht.' });
+});
+
 // DELETE /api/customers/:id/gdpr – DSGVO-Pseudonymisierung
 router.delete('/:id/gdpr', authenticate, requireRole('inhaber', 'admin'), (req, res) => {
   const db = getDb();

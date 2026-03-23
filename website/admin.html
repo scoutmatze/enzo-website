@@ -1125,7 +1125,7 @@ function showCustomerModal(c) {
           <div class="fg"><label>Notizen</label><textarea id="c-notes">${c?.notes || ''}</textarea></div>
         </div>
         <div class="modal-f">
-          ${c ? '<button class="btn btn-d btn-sm" onclick="gdprDelete(' + c.id + ')" style="margin-right:auto">🗑 DSGVO löschen</button>' : ''}
+          ${c ? '<button class="btn btn-d btn-sm" onclick="gdprDelete(' + c.id + ')" style="margin-right:auto">🗑 DSGVO</button><button class="btn btn-sm btn-s" onclick="fullDeleteCustomer(' + c.id + ',\'' + esc(c.name) + '\')">Löschen</button>' : ''}
           <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
           <button class="btn btn-p" onclick="saveCustomer(${c?.id || 'null'})">${c ? 'Speichern' : 'Erstellen'}</button>
         </div>
@@ -1160,6 +1160,14 @@ async function gdprDelete(id) {
     renderCustomers();
     msg('Kundendaten DSGVO-konform pseudonymisiert.');
   } catch (e) { msg(e.message, false); }
+}
+
+async function fullDeleteCustomer(id, name) {
+  if (!confirm('Kunde "' + name + '" komplett löschen?\n\nNur möglich wenn keine Rechnungen verknüpft sind.')) return;
+  try {
+    const r = await api('DELETE', '/customers/' + id);
+    renderCustomers(); msg(r.message);
+  } catch (e) { alert(e.message); }
 }
 
 // ═══════════════════════════════════════════
@@ -1352,6 +1360,7 @@ async function renderInvoices() {
         '<a class="btn btn-sm btn-s" href="javascript:void(0)" onclick="downloadPdf(' + inv.id + ',\'' + esc(inv.invoice_number) + '\')">PDF</a>' +
         (inv.status === 'draft' ? '<button class="btn btn-sm btn-p" onclick="editInvoice(' + inv.id + ')">Bearbeiten</button>' : '') +
         (inv.status === 'draft' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'sent\')">Versendet</button>' : '') +
+        (inv.status === 'draft' ? '<button class="btn btn-sm btn-d" onclick="deleteInvoice(' + inv.id + ',\'' + esc(inv.invoice_number) + '\')">🗑</button>' : '') +
         (inv.status === 'sent' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'paid\')">Bezahlt</button>' : '') +
       '</div></td></tr>').join('')}</tbody>
       </table>
@@ -1362,7 +1371,12 @@ async function renderInvoices() {
 }
 
 async function markInvoice(id, status) {
-  try { await api('PUT', '/invoices/' + id, { status }); renderInvoices(); msg('Status aktualisiert.'); } catch (e) { msg(e.message, false); }
+  try { await api('PUT', '/invoices/' + id, { status }); renderInvoices(); msg('Status aktualisiert.' + (status === 'sent' ? ' PDF wurde archiviert.' : '')); } catch (e) { msg(e.message, false); }
+}
+
+async function deleteInvoice(id, number) {
+  if (!confirm('Rechnung ' + number + ' wirklich löschen? Nur Entwürfe können gelöscht werden.')) return;
+  try { await api('DELETE', '/invoices/' + id); renderInvoices(); msg('Rechnung ' + number + ' gelöscht.'); } catch (e) { msg(e.message, false); }
 }
 
 async function downloadPdf(id, number) {

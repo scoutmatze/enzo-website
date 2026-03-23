@@ -7,6 +7,10 @@ const { authenticate, requireRole } = require('../middleware/auth');
 const { sendInvoiceEmail } = require('../utils/email');
 
 const router = express.Router();
+const INVOICE_DIR = path.join(__dirname, '../../data/invoices');
+
+// Archiv-Verzeichnis erstellen
+if (!fs.existsSync(INVOICE_DIR)) fs.mkdirSync(INVOICE_DIR, { recursive: true });
 
 // GET /api/invoices
 router.get('/', authenticate, requireRole('inhaber'), (req, res) => {
@@ -96,6 +100,12 @@ router.put('/:id', authenticate, requireRole('inhaber'), (req, res) => {
     params.push(req.params.id);
     db.prepare('UPDATE invoices SET ' + sets.join(', ') + ' WHERE id = ?').run(...params);
     logAudit(req.user.id, 'update', 'invoice', req.params.id, req.body, req.ip);
+
+    // PDF-Archiv: beim Finalisieren (→ sent) automatisch speichern
+    if (status === 'sent' || status === 'paid') {
+      archiveInvoicePdf(db, req.params.id).catch(e => console.error('[PDF archive]', e.message));
+    }
+
     res.json({ message: 'Rechnung aktualisiert.' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -301,5 +311,82 @@ router.post('/:id/send', authenticate, requireRole('inhaber'), async (req, res) 
     }
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+// DELETE /api/invoices/:id – Nur Entwürfe löschbar
+router.delete('/:id', authenticate, requireRole('inhaber'), (req, res) => {
+  try {
+    const db = getDb();
+    const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(req.params.id);
+    if (!invoice) return res.status(404).json({ error: 'Nicht gefunden.' });
+    if (invoice.status !== 'draft') return res.status(400).json({ error: 'Nur Entwürfe können gelöscht werden. Versendete Rechnungen müssen storniert werden.' });
+    db.prepare('DELETE FROM invoice_items WHERE invoice_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM invoices WHERE id = ?').run(req.params.id);
+    logAudit(req.user.id, 'delete', 'invoice', req.params.id, { invoice_number: invoice.invoice_number }, req.ip);
+    res.json({ message: 'Rechnung ' + invoice.invoice_number + ' gelöscht.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PDF-Archiv: Rechnung als PDF auf Disk speichern
+async function archiveInvoicePdf(db, invoiceId) {
+  const getSetting = (key, def) => db.prepare('SELECT value FROM settings WHERE key = ?').get(key)?.value || def;
+  const invoice = db.prepare('SELECT i.*, c.name as customer_name, c.company, c.address as customer_address FROM invoices i JOIN customers c ON i.customer_id = c.id WHERE i.id = ?').get(invoiceId);
+  if (!invoice) return;
+  invoice.items = db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY date, id').all(invoiceId);
+
+  return new Promise((resolve, reject) => {
+    const filePath = path.join(INVOICE_DIR, invoice.invoice_number + '.pdf');
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    doc.fontSize(20).font('Helvetica-Bold').text(getSetting('restaurant_name', 'Da Enzo'), 50, 50);
+    doc.fontSize(9).font('Helvetica').text(getSetting('address', ''), 50, 75);
+    doc.text('Tel: ' + getSetting('phone', '') + ' | E-Mail: ' + getSetting('email', ''), 50, 87);
+
+    doc.fontSize(11).text(invoice.company || invoice.customer_name, 50, 130);
+    if (invoice.company && invoice.customer_name !== invoice.company) doc.text(invoice.customer_name);
+    if (invoice.customer_address) doc.text(invoice.customer_address);
+
+    doc.fontSize(16).font('Helvetica-Bold').text('Rechnung ' + invoice.invoice_number, 50, 190);
+    doc.fontSize(10).font('Helvetica');
+    doc.text('Zeitraum: ' + invoice.period_from + ' bis ' + invoice.period_to, 50, 215);
+    doc.text('Rechnungsdatum: ' + new Date(invoice.created_at).toLocaleDateString('de-DE'), 50, 230);
+    if (invoice.due_date) doc.text('Fällig bis: ' + new Date(invoice.due_date).toLocaleDateString('de-DE'), 50, 245);
+
+    let y = 280;
+    doc.font('Helvetica-Bold').fontSize(9);
+    doc.text('Datum', 50, y); doc.text('Beschreibung', 120, y); doc.text('Anz.', 340, y, { width: 30, align: 'right' }); doc.text('MwSt.', 375, y, { width: 35, align: 'right' }); doc.text('Preis', 420, y, { width: 60, align: 'right' }); doc.text('Gesamt', 490, y, { width: 60, align: 'right' });
+    y += 15; doc.moveTo(50, y).lineTo(550, y).stroke(); y += 8;
+    doc.font('Helvetica').fontSize(9);
+    const taxTotals = {};
+    for (const item of invoice.items) {
+      if (y > 700) { doc.addPage(); y = 50; }
+      const d = new Date(item.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+      const rate = item.tax_rate || 19;
+      doc.text(d, 50, y); doc.text(item.description, 120, y, { width: 210 }); doc.text(String(item.quantity), 340, y, { width: 30, align: 'right' }); doc.text(rate + '%', 375, y, { width: 35, align: 'right' }); doc.text(item.unit_price.toFixed(2) + ' €', 420, y, { width: 60, align: 'right' }); doc.text(item.total.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });
+      if (!taxTotals[rate]) taxTotals[rate] = 0;
+      taxTotals[rate] += item.total;
+      y += 18;
+    }
+    y += 10; doc.moveTo(370, y).lineTo(550, y).stroke(); y += 10;
+    doc.text('Netto:', 370, y, { width: 110, align: 'right' }); doc.text(invoice.subtotal.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });
+    for (const [rate, base] of Object.entries(taxTotals).sort()) {
+      y += 15;
+      const taxAmt = Math.round(base * parseFloat(rate)) / 100;
+      doc.text('MwSt. ' + rate + '% (auf ' + base.toFixed(2) + ' €):', 310, y, { width: 170, align: 'right' }); doc.text(taxAmt.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });
+    }
+    y += 15; doc.font('Helvetica-Bold');
+    doc.text('Gesamt:', 370, y, { width: 110, align: 'right' }); doc.text(invoice.total.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });
+    if (invoice.notes) { y += 30; doc.font('Helvetica').fontSize(9).text('Hinweis: ' + invoice.notes, 50, y); }
+
+    doc.end();
+    stream.on('finish', () => {
+      db.prepare('UPDATE invoices SET pdf_path = ? WHERE id = ?').run(filePath, invoiceId);
+      console.log('[PDF archiviert] ' + filePath);
+      resolve(filePath);
+    });
+    stream.on('error', reject);
+  });
+}
 
 module.exports = router;
