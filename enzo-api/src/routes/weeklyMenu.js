@@ -17,10 +17,12 @@ router.get('/', authenticate, (req, res) => {
 
   for (const menu of menus) {
     menu.items = db.prepare(`
-      SELECT wmi.*, d.name AS dish_name, d.description AS dish_description,
-        COALESCE(das.allergens, '') AS allergens
+      SELECT wmi.*,
+        COALESCE(wmi.custom_name, d.name) AS dish_name,
+        COALESCE(wmi.custom_description, d.description) AS dish_description,
+        COALESCE(wmi.custom_allergens, das.allergens, '') AS allergens
       FROM weekly_menu_items wmi
-      JOIN dishes d ON wmi.dish_id = d.id
+      LEFT JOIN dishes d ON wmi.dish_id = d.id
       LEFT JOIN dish_allergen_string das ON d.id = das.dish_id
       WHERE wmi.weekly_menu_id = ?
       ORDER BY wmi.day_of_week, wmi.sort_order
@@ -44,10 +46,12 @@ router.get('/current', (req, res) => {
   if (!menu) return res.json(null);
 
   menu.items = db.prepare(`
-    SELECT wmi.*, d.name AS dish_name, d.description AS dish_description,
-      COALESCE(das.allergens, '') AS allergens
+    SELECT wmi.*,
+      COALESCE(wmi.custom_name, d.name) AS dish_name,
+      COALESCE(wmi.custom_description, d.description) AS dish_description,
+      COALESCE(wmi.custom_allergens, das.allergens, '') AS allergens
     FROM weekly_menu_items wmi
-    JOIN dishes d ON wmi.dish_id = d.id
+    LEFT JOIN dishes d ON wmi.dish_id = d.id
     LEFT JOIN dish_allergen_string das ON d.id = das.dish_id
     WHERE wmi.weekly_menu_id = ?
     ORDER BY wmi.day_of_week, wmi.sort_order
@@ -79,11 +83,11 @@ router.post('/', authenticate, requireRole('inhaber', 'leitung'), (req, res) => 
 
     if (items && items.length > 0) {
       const insertItem = db.prepare(`
-        INSERT INTO weekly_menu_items (weekly_menu_id, dish_id, day_of_week, price, sort_order)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO weekly_menu_items (weekly_menu_id, dish_id, day_of_week, price, sort_order, custom_name, custom_description, custom_allergens)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `);
       for (const item of items) {
-        insertItem.run(menuId, item.dish_id, item.day_of_week || null, item.price, item.sort_order || 0);
+        insertItem.run(menuId, item.dish_id || null, item.day_of_week || null, item.price || 0, item.sort_order || 0, item.custom_name || null, item.custom_description || null, item.custom_allergens || null);
       }
     }
 
@@ -114,11 +118,11 @@ router.put('/:id', authenticate, requireRole('inhaber', 'leitung'), (req, res) =
     if (items !== undefined) {
       db.prepare('DELETE FROM weekly_menu_items WHERE weekly_menu_id = ?').run(req.params.id);
       const insertItem = db.prepare(`
-        INSERT INTO weekly_menu_items (weekly_menu_id, dish_id, day_of_week, price, sort_order)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO weekly_menu_items (weekly_menu_id, dish_id, day_of_week, price, sort_order, custom_name, custom_description, custom_allergens)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `);
       for (const item of items) {
-        insertItem.run(req.params.id, item.dish_id, item.day_of_week || null, item.price, item.sort_order || 0);
+        insertItem.run(req.params.id, item.dish_id || null, item.day_of_week || null, item.price || 0, item.sort_order || 0, item.custom_name || null, item.custom_description || null, item.custom_allergens || null);
       }
     }
   });

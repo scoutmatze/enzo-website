@@ -730,7 +730,13 @@ async function renderWeekly() {
     CACHE.weeklyMenus.map(m => `<tr>
           <td><strong>ab ${new Date(m.week_start).toLocaleDateString('de-DE')}</strong></td>
           <td><span class="badge b-muted">${m.mode === 'daily' ? 'Tagesgerichte' : 'Wochengericht'}</span></td>
-          <td style="font-size:0.78rem">${(m.items || []).map(i => i.dish_name).join(', ') || '–'}</td>
+          <td style="font-size:0.78rem">${(m.items || []).map(i => {
+            const name = i.dish_name || i.custom_name || '?';
+            const price = i.price ? ' (' + parseFloat(i.price).toFixed(2).replace('.',',') + ' €)' : '';
+            const all = i.allergens ? ' <span style="color:var(--terra);font-size:0.68rem">[' + i.allergens + ']</span>' : '';
+            const day = i.day_of_week ? '<strong>' + DAY_NAMES[i.day_of_week] + ':</strong> ' : '';
+            return day + esc(name) + price + all;
+          }).join('<br>') || '–'}</td>
           <td>${m.is_published ? '<span class="badge b-ok">Veröffentlicht</span>' : '<span class="badge b-gold">Entwurf</span>'}</td>
           <td>${!m.is_published ? `<button class="btn btn-sm btn-ok" onclick="publishWeekly(${m.id})">Veröffentlichen</button>` : ''}</td>
         </tr>`).join('')}</tbody>
@@ -742,9 +748,13 @@ async function renderWeekly() {
 
 function openWeeklyModal() {
   const nextMon = getNextMonday();
+  // Allergene pro Gericht vorberechnen
+  window._dishAllergens = {};
+  for (const d of CACHE.dishes) { window._dishAllergens[d.id] = d.allergens || ''; }
+
   $('weekly-modal').innerHTML = `
     <div class="modal-bg" onclick="this.remove()">
-      <div class="modal" style="max-width:600px" onclick="event.stopPropagation()">
+      <div class="modal" style="max-width:700px" onclick="event.stopPropagation()">
         <div class="modal-h"><h3>Neue Wochenkarte</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
         <div class="modal-b">
           <div class="row">
@@ -752,16 +762,56 @@ function openWeeklyModal() {
             <div class="fg"><label>Modus</label><select id="wk-mode" onchange="toggleWeeklyMode()"><option value="daily">Jeden Tag ein Gericht</option><option value="weekly">Ganze Woche ein Gericht</option></select></div>
           </div>
           <div id="wk-days">
-            ${[1,2,3,4,5,6].map(d => `<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
-              <span style="width:24px;font-weight:600;font-size:0.78rem;color:var(--terra)">${DAY_NAMES[d]}</span>
-              <select id="wk-d${d}" style="flex:2"><option value="">– kein Gericht –</option>${CACHE.dishes.map(di => `<option value="${di.id}" data-price="${di.base_price||0}">${di.name}</option>`).join('')}</select>
-              <input id="wk-p${d}" type="number" step="0.10" style="width:70px" placeholder="€">
-            </div>`).join('')}
+            ${[1,2,3,4,5,6].map(d => `
+              <div class="wk-day-row" style="margin-bottom:10px;padding:8px;background:var(--cream);border-radius:4px">
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                  <span style="width:28px;font-weight:700;font-size:0.82rem;color:var(--terra)">${DAY_NAMES[d]}</span>
+                  <label style="font-size:0.72rem;display:flex;align-items:center;gap:3px;cursor:pointer;margin-left:auto">
+                    <input type="checkbox" id="wk-free${d}" onchange="toggleFreeText(${d})"> Freitext
+                  </label>
+                </div>
+                <div id="wk-dish-row${d}" style="display:flex;gap:6px;align-items:center;margin-top:4px">
+                  <select id="wk-d${d}" style="flex:2" onchange="wkDishChanged(${d})">
+                    <option value="">– kein Gericht –</option>
+                    ${CACHE.dishes.map(di => '<option value="' + di.id + '">' + esc(di.name) + (di.base_price ? ' (' + di.base_price.toFixed(2) + ' €)' : '') + '</option>').join('')}
+                  </select>
+                  <input id="wk-p${d}" type="number" step="0.10" style="width:75px" placeholder="Preis €">
+                </div>
+                <div id="wk-free-row${d}" style="display:none;margin-top:4px">
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <input id="wk-cn${d}" placeholder="Gerichtname" style="flex:2">
+                    <input id="wk-fp${d}" type="number" step="0.10" style="width:75px" placeholder="Preis €">
+                  </div>
+                  <input id="wk-cd${d}" placeholder="Beschreibung (optional)" style="width:100%;margin-top:4px">
+                  <input id="wk-ca${d}" placeholder="Allergene (z.B. A,C,G)" style="width:100%;margin-top:4px;font-size:0.82rem">
+                </div>
+                <div id="wk-info${d}" style="font-size:0.68rem;color:var(--text-muted);margin-top:3px"></div>
+              </div>
+            `).join('')}
           </div>
           <div id="wk-single" class="hidden">
-            <div style="display:flex;gap:6px;align-items:center">
-              <select id="wk-d0" style="flex:2"><option value="">Wochengericht wählen...</option>${CACHE.dishes.map(d => `<option value="${d.id}" data-price="${d.base_price||0}">${d.name}</option>`).join('')}</select>
-              <input id="wk-p0" type="number" step="0.10" style="width:70px" placeholder="€">
+            <div style="padding:8px;background:var(--cream);border-radius:4px">
+              <div style="display:flex;gap:6px;align-items:center">
+                <label style="font-size:0.72rem;display:flex;align-items:center;gap:3px;cursor:pointer;margin-left:auto">
+                  <input type="checkbox" id="wk-free0" onchange="toggleFreeText(0)"> Freitext
+                </label>
+              </div>
+              <div id="wk-dish-row0" style="display:flex;gap:6px;align-items:center;margin-top:4px">
+                <select id="wk-d0" style="flex:2" onchange="wkDishChanged(0)">
+                  <option value="">Wochengericht wählen...</option>
+                  ${CACHE.dishes.map(d => '<option value="' + d.id + '">' + esc(d.name) + (d.base_price ? ' (' + d.base_price.toFixed(2) + ' €)' : '') + '</option>').join('')}
+                </select>
+                <input id="wk-p0" type="number" step="0.10" style="width:75px" placeholder="Preis €">
+              </div>
+              <div id="wk-free-row0" style="display:none;margin-top:4px">
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input id="wk-cn0" placeholder="Gerichtname" style="flex:2">
+                  <input id="wk-fp0" type="number" step="0.10" style="width:75px" placeholder="Preis €">
+                </div>
+                <input id="wk-cd0" placeholder="Beschreibung (optional)" style="width:100%;margin-top:4px">
+                <input id="wk-ca0" placeholder="Allergene (z.B. A,C,G)" style="width:100%;margin-top:4px;font-size:0.82rem">
+              </div>
+              <div id="wk-info0" style="font-size:0.68rem;color:var(--text-muted);margin-top:3px"></div>
             </div>
           </div>
           <div class="fg" style="margin-top:0.8rem"><label>Fußnote (optional)</label><input id="wk-note" placeholder="z.B. Alle Gerichte inkl. Salat"></div>
@@ -773,6 +823,31 @@ function openWeeklyModal() {
       </div>
     </div>
   `;
+}
+
+function wkDishChanged(dayIdx) {
+  const sel = $('wk-d' + dayIdx);
+  const dishId = parseInt(sel.value);
+  const dish = CACHE.dishes.find(d => d.id === dishId);
+  const priceField = $('wk-p' + dayIdx);
+  const info = $('wk-info' + dayIdx);
+
+  if (dish) {
+    if (!priceField.value || priceField.value === '0') priceField.value = dish.base_price || '';
+    const allergens = window._dishAllergens[dish.id] || '';
+    info.innerHTML = allergens ? '<strong>Allergene:</strong> ' + allergens : '';
+  } else {
+    info.innerHTML = '';
+  }
+}
+
+function toggleFreeText(dayIdx) {
+  const isFree = $('wk-free' + dayIdx).checked;
+  const dishRow = $('wk-dish-row' + dayIdx);
+  const freeRow = $('wk-free-row' + dayIdx);
+  if (dishRow) dishRow.style.display = isFree ? 'none' : 'flex';
+  if (freeRow) freeRow.style.display = isFree ? 'block' : 'none';
+  $('wk-info' + dayIdx).innerHTML = isFree ? '<em>Allergene manuell eingeben (Buchstaben: A=Gluten, C=Ei, G=Milch, ...)</em>' : '';
 }
 
 function toggleWeeklyMode() {
@@ -789,15 +864,29 @@ function getNextMonday() {
 async function saveWeekly() {
   const mode = $('wk-mode').value;
   const items = [];
+
   if (mode === 'daily') {
     for (let d = 1; d <= 6; d++) {
-      const did = $('wk-d' + d)?.value;
-      if (did) items.push({ dish_id: parseInt(did), day_of_week: d, price: parseFloat($('wk-p' + d)?.value || 0) });
+      const isFree = $('wk-free' + d)?.checked;
+      if (isFree) {
+        const name = $('wk-cn' + d)?.value;
+        if (name) items.push({ day_of_week: d, price: parseFloat($('wk-fp' + d)?.value) || 0, custom_name: name, custom_description: $('wk-cd' + d)?.value || null, custom_allergens: $('wk-ca' + d)?.value || null });
+      } else {
+        const did = $('wk-d' + d)?.value;
+        if (did) items.push({ dish_id: parseInt(did), day_of_week: d, price: parseFloat($('wk-p' + d)?.value) || 0 });
+      }
     }
   } else {
-    const did = $('wk-d0')?.value;
-    if (did) items.push({ dish_id: parseInt(did), day_of_week: null, price: parseFloat($('wk-p0')?.value || 0) });
+    const isFree = $('wk-free0')?.checked;
+    if (isFree) {
+      const name = $('wk-cn0')?.value;
+      if (name) items.push({ day_of_week: null, price: parseFloat($('wk-fp0')?.value) || 0, custom_name: name, custom_description: $('wk-cd0')?.value || null, custom_allergens: $('wk-ca0')?.value || null });
+    } else {
+      const did = $('wk-d0')?.value;
+      if (did) items.push({ dish_id: parseInt(did), day_of_week: null, price: parseFloat($('wk-p0')?.value) || 0 });
+    }
   }
+
   try {
     await api('POST', '/weekly-menu', { week_start: $('wk-start').value, mode, note: $('wk-note').value, items });
     renderWeekly();

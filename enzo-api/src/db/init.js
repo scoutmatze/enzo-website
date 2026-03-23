@@ -147,10 +147,13 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS weekly_menu_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       weekly_menu_id INTEGER NOT NULL REFERENCES weekly_menu(id) ON DELETE CASCADE,
-      dish_id INTEGER NOT NULL REFERENCES dishes(id),
+      dish_id INTEGER REFERENCES dishes(id),
       day_of_week INTEGER,
-      price REAL NOT NULL,
-      sort_order INTEGER DEFAULT 0
+      price REAL,
+      sort_order INTEGER DEFAULT 0,
+      custom_name TEXT,
+      custom_description TEXT,
+      custom_allergens TEXT
     );
 
     -- ═══════════════════════════════════════════
@@ -174,6 +177,7 @@ async function initDatabase() {
       email TEXT,
       phone TEXT,
       company TEXT,
+      address TEXT,
       is_business_customer INTEGER DEFAULT 0,
       notes TEXT,
       gdpr_consent_at DATETIME,
@@ -273,6 +277,7 @@ async function initDatabase() {
       quantity INTEGER NOT NULL DEFAULT 1,
       unit_price REAL NOT NULL,
       total REAL NOT NULL,
+      tax_rate REAL NOT NULL DEFAULT 19.0,
       dish_id INTEGER REFERENCES dishes(id)
     );
 
@@ -478,6 +483,14 @@ async function initDatabase() {
 
   // Migration: is_orderable Spalte nachrüsten
   try { db.exec('ALTER TABLE dishes ADD COLUMN is_orderable INTEGER DEFAULT 0'); console.log('  ✅ dishes.is_orderable hinzugefügt'); } catch {}
+  // Migration: tax_rate pro Rechnungsposition
+  try { db.exec('ALTER TABLE invoice_items ADD COLUMN tax_rate REAL NOT NULL DEFAULT 19.0'); console.log('  ✅ invoice_items.tax_rate hinzugefügt'); } catch {}
+  // Migration: address in customers
+  try { db.exec('ALTER TABLE customers ADD COLUMN address TEXT'); console.log('  ✅ customers.address hinzugefügt'); } catch {}
+  // Migration: weekly_menu_items Freitext + Allergene
+  try { db.exec('ALTER TABLE weekly_menu_items ADD COLUMN custom_name TEXT'); } catch {}
+  try { db.exec('ALTER TABLE weekly_menu_items ADD COLUMN custom_description TEXT'); } catch {}
+  try { db.exec('ALTER TABLE weekly_menu_items ADD COLUMN custom_allergens TEXT'); } catch {}
   // Migration: order_extras Tabelle nachrüsten
   db.exec('CREATE TABLE IF NOT EXISTS order_extras (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, price REAL NOT NULL DEFAULT 0, is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0)');
 

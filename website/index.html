@@ -587,6 +587,9 @@
   }
 
   .wochenkarte-item:last-child { border-bottom: none; }
+  .wk-details { display: flex; flex-direction: column; flex: 1; }
+  .wk-desc { font-size: 0.8rem; color: rgba(250,245,238,0.6); margin-top: 2px; }
+  .wk-allergens { font-size: 0.7rem; color: var(--col-gold); margin-top: 2px; font-style: italic; }
 
   .wk-day {
     font-family: var(--font-display);
@@ -1759,17 +1762,36 @@ async function loadWochenkarte() {
 
 function renderWochenkarte(data, container) {
   let html = '';
-  if (data.title) {
+  if (data.subtitle) {
+    html += `<p class="wochenkarte-date">${data.subtitle}</p>`;
+  } else if (data.title && data.title !== 'Wochenkarte') {
     html += `<p class="wochenkarte-date">${data.title}</p>`;
   }
 
+  const items = data.items || [];
+  if (items.length === 0) {
+    html += '<p class="wochenkarte-empty">Aktuell keine Wochenkarte verfügbar.</p>';
+    container.innerHTML = html;
+    return;
+  }
+
   html += '<div class="wochenkarte-grid">';
-  for (const item of (data.items || [])) {
+  for (const item of items) {
+    const name = item.name || item.dish || '';
+    const desc = item.desc || item.description || '';
+    const price = item.price || '';
+    const allergens = item.allergens || '';
+    const day = item.day || '';
+
     html += `
       <div class="wochenkarte-item">
-        <span class="wk-day">${item.day}</span>
-        <span class="wk-dish">${item.dish}</span>
-        <span class="wk-price">${item.price}</span>
+        ${day ? `<span class="wk-day">${day}</span>` : ''}
+        <div class="wk-details">
+          <span class="wk-dish">${name}</span>
+          ${desc ? `<span class="wk-desc">${desc}</span>` : ''}
+          ${allergens ? `<span class="wk-allergens">Allergene: ${allergens}</span>` : ''}
+        </div>
+        ${price ? `<span class="wk-price">${price}</span>` : ''}
       </div>`;
   }
   html += '</div>';
