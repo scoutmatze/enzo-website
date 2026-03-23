@@ -42,6 +42,8 @@ a { color: var(--terra); text-decoration: none; }
 .main { margin-left: 220px; flex: 1; }
 .topbar { background: white; padding: 0.8rem 1.5rem; border-bottom: 1px solid var(--cream-dark); display: flex; justify-content: space-between; align-items: center; }
 .topbar h2 { font-size: 1.15rem; font-weight: 600; color: var(--espresso); }
+.hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; margin-right: 8px; }
+.hamburger span { display: block; width: 22px; height: 2.5px; background: var(--espresso); margin: 5px 0; border-radius: 2px; transition: 0.2s; }
 .page { padding: 1.25rem 1.5rem; max-width: 1100px; }
 
 /* Login */
@@ -128,10 +130,85 @@ tbody tr:hover { background: rgba(250,245,238,0.5); }
 .empty { text-align: center; padding: 2rem; color: var(--text-muted); }
 .hidden { display: none; }
 
+/* ═══ TABLET (iPad) ═══ */
+/* ═══ TABLET (iPad) ═══ */
+@media (max-width: 1024px) {
+  .row, .row3 { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  table { font-size: 0.85rem; }
+  .btn { min-height: 44px; padding: 10px 16px; font-size: 0.88rem; border-radius: 6px; }
+  .btn-sm { min-height: 40px; padding: 8px 14px; font-size: 0.84rem; }
+  input, select, textarea { min-height: 44px; font-size: 16px !important; padding: 10px 12px; border-radius: 6px; }
+  .fg label { font-size: 0.82rem; margin-bottom: 4px; }
+  .modal { max-width: 90vw; max-height: 90vh; overflow-y: auto; }
+  .stat { padding: 1rem; }
+  .stat-val { font-size: 2rem; }
+  .stat-lbl { font-size: 0.78rem; }
+  .sidebar-link { padding: 0.65rem 1rem; font-size: 0.9rem; }
+  td, th { padding: 10px 8px; }
+  .card { padding: 1rem; }
+  .badge { font-size: 0.72rem; padding: 3px 8px; }
+}
+
+/* ═══ MOBILE ═══ */
 @media (max-width: 768px) {
-  .sidebar { display: none; }
+  .sidebar { position: fixed; z-index: 999; transform: translateX(-100%); transition: transform 0.25s ease; width: 280px; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 998; }
+  .sidebar-overlay.open { display: block; }
   .main { margin-left: 0; }
   .row, .row3 { grid-template-columns: 1fr; }
+  .topbar { padding: 0.6rem 1rem; }
+  .topbar h2 { font-size: 1rem; }
+  .hamburger { display: flex !important; }
+  .stats { grid-template-columns: 1fr; }
+  .page-content { padding: 0.6rem; }
+  .card { padding: 0.8rem; margin-bottom: 0.6rem; }
+  .card-h { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .card-h h3 { font-size: 1rem; }
+  .card-h .btns { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+  .card-h .btns .btn { flex: 1; min-width: 0; text-align: center; }
+
+  /* Tabellen horizontal scrollbar */
+  table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  thead, tbody, tfoot { min-width: 600px; }
+
+  /* Touch-freundliche Buttons & Inputs */
+  .btn { min-height: 48px; padding: 12px 18px; font-size: 0.92rem; border-radius: 8px; }
+  .btn-sm { min-height: 44px; padding: 10px 14px; font-size: 0.86rem; border-radius: 6px; }
+  input, select, textarea { min-height: 48px; font-size: 16px !important; padding: 12px 14px; border-radius: 8px; }
+  select { appearance: auto; }
+
+  /* Touch checkbox/toggle größer */
+  input[type="checkbox"] { width: 22px; height: 22px; }
+
+  /* Modal fullscreen auf Mobile */
+  .modal { width: 100vw; max-width: 100vw; min-height: 100vh; border-radius: 0; margin: 0; }
+  .modal-bg { align-items: flex-start; }
+  .modal-b { padding: 1rem; }
+  .modal-f { padding: 0.8rem 1rem; gap: 8px; }
+  .modal-f .btn { flex: 1; }
+
+  /* Sidebar-Links größer für Touch */
+  .sidebar-link { padding: 0.85rem 1.2rem; font-size: 0.95rem; }
+  .sidebar-section { padding: 0.7rem 1.2rem 0.3rem; font-size: 0.72rem; }
+
+  /* Stats als Touch-Karten */
+  .stat { padding: 1rem; border-radius: 8px; }
+  .stat-val { font-size: 2.2rem; }
+  .stat-icon { font-size: 1.2rem; }
+
+  /* Rechnungs-Grid mobil */
+  div[style*="grid-template-columns: 120px 1fr 60px 80px 70px 36px"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Bestellkarte-Toggles größer */
+  .order-toggle-btn { min-width: 60px; min-height: 44px; }
+
+  /* Schichtplan-Zellen Touch-freundlich */
+  .shift-cell div { min-height: 32px; min-width: 60px; }
 }
 </style>
 </head>
@@ -157,7 +234,7 @@ tbody tr:hover { background: rgba(250,245,238,0.5); }
 
 <!-- ═══ APP ═══ -->
 <div id="app-view" class="app hidden">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <h1>da Enzo</h1>
       <small>Restaurant Backend</small>
@@ -186,10 +263,14 @@ tbody tr:hover { background: rgba(250,245,238,0.5); }
       <button onclick="doLogout()" style="margin-top:4px">Abmelden</button>
     </div>
   </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
   <div class="main">
     <div class="topbar">
-      <h2 id="page-title">Dashboard</h2>
+      <div style="display:flex;align-items:center">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Menü"><span></span><span></span><span></span></button>
+        <h2 id="page-title">Dashboard</h2>
+      </div>
       <span style="font-size:0.78rem;color:var(--text-muted)" id="today-date"></span>
     </div>
     <div class="page" id="page-content"></div>
@@ -271,7 +352,17 @@ document.getElementById('login-pw').addEventListener('keydown', e => { if (e.key
 // ═══════════════════════════════════════════
 const PAGE_TITLES = { dashboard: 'Dashboard', dishes: 'Kochbuch', ingredients: 'Zutaten & Allergene', menu: 'Speisekarte', weekly: 'Wochenkarte', reservations: 'Reservierungen', orders: 'Bestellungen', customers: 'Kunden', invoices: 'Rechnungen', shifts: 'Schichtplan', timeoff: 'Urlaub & Abwesenheit', users: 'Mitarbeiter', settings: 'Einstellungen' };
 
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
+
 function showPage(page) {
+  // Close mobile sidebar
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('open');
   document.getElementById('page-title').textContent = PAGE_TITLES[page] || page;
   document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(el => { if (el.textContent.includes(PAGE_TITLES[page]?.split(' ')[0] || '###')) el.classList.add('active'); });
@@ -1257,6 +1348,7 @@ async function renderInvoices() {
       '<td style="font-size:0.78rem">' + (inv.due_date || '–') + '</td>' +
       '<td><div class="btns">' +
         '<a class="btn btn-sm btn-s" href="javascript:void(0)" onclick="downloadPdf(' + inv.id + ',\'' + esc(inv.invoice_number) + '\')">PDF</a>' +
+        (inv.status === 'draft' ? '<button class="btn btn-sm btn-p" onclick="editInvoice(' + inv.id + ')">Bearbeiten</button>' : '') +
         (inv.status === 'draft' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'sent\')">Versendet</button>' : '') +
         (inv.status === 'sent' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'paid\')">Bezahlt</button>' : '') +
       '</div></td></tr>').join('')}</tbody>
@@ -1278,6 +1370,98 @@ async function downloadPdf(id, number) {
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function editInvoice(id) {
+  let invoice;
+  try { invoice = await api('GET', '/invoices/' + id); } catch (e) { msg(e.message, false); return; }
+  const today = getTodayStr();
+
+  // Summen berechnen
+  let netto = 0;
+  const taxGroups = {};
+  for (const it of invoice.items) {
+    netto += it.total;
+    const r = it.tax_rate || 19;
+    if (!taxGroups[r]) taxGroups[r] = 0;
+    taxGroups[r] += it.total;
+  }
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>✏️ ${esc(invoice.invoice_number)} bearbeiten</h3>
+        <div class="btns">
+          <button class="btn btn-s" onclick="renderInvoices()">← Zurück</button>
+          <button class="btn btn-ok" onclick="markInvoice(${id},'sent');setTimeout(renderInvoices,500)">Als versendet markieren</button>
+          <button class="btn btn-p" onclick="downloadPdf(${id},'${esc(invoice.invoice_number)}')">PDF</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:var(--space-md);flex-wrap:wrap;margin-bottom:var(--space-md)">
+        <div><strong>Kunde:</strong> ${esc(invoice.company || invoice.customer_name)}</div>
+        <div><strong>Zeitraum:</strong> ${invoice.period_from} – ${invoice.period_to}</div>
+        ${invoice.due_date ? '<div><strong>Fällig:</strong> ' + invoice.due_date + '</div>' : ''}
+      </div>
+
+      <h4 style="margin-bottom:8px">Positionen</h4>
+      <table>
+        <thead><tr><th>Datum</th><th>Beschreibung</th><th>Menge</th><th>MwSt.</th><th>Einzelpreis</th><th>Gesamt</th><th></th></tr></thead>
+        <tbody>
+          ${invoice.items.map(it => '<tr>' +
+            '<td>' + it.date + '</td>' +
+            '<td>' + esc(it.description) + '</td>' +
+            '<td style="text-align:center">' + it.quantity + '</td>' +
+            '<td><span class="badge b-muted">' + (it.tax_rate || 19) + '%</span></td>' +
+            '<td style="text-align:right">' + it.unit_price.toFixed(2).replace('.',',') + ' €</td>' +
+            '<td style="text-align:right;font-weight:600">' + it.total.toFixed(2).replace('.',',') + ' €</td>' +
+            '<td><button class="btn btn-sm btn-s" onclick="removeInvItem(${id},${it.id})">✕</button></td>' +
+          '</tr>').join('')}
+        </tbody>
+        <tfoot>
+          <tr><td colspan="5" style="text-align:right"><strong>Netto</strong></td><td style="text-align:right">${netto.toFixed(2).replace('.',',')} €</td><td></td></tr>
+          ${Object.entries(taxGroups).sort().map(([rate, base]) => {
+            const tax = Math.round(base * parseFloat(rate)) / 100;
+            return '<tr><td colspan="5" style="text-align:right;font-size:0.82rem;color:var(--text-muted)">MwSt. ' + rate + '% (auf ' + base.toFixed(2).replace('.',',') + ' €)</td><td style="text-align:right;font-size:0.82rem">' + tax.toFixed(2).replace('.',',') + ' €</td><td></td></tr>';
+          }).join('')}
+          <tr style="font-size:1.1rem"><td colspan="5" style="text-align:right"><strong>Gesamt</strong></td><td style="text-align:right"><strong>${invoice.total.toFixed(2).replace('.',',')} €</strong></td><td></td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>Positionen hinzufügen</h3></div>
+      <input id="inv-dish-search" placeholder="🔍 Gericht suchen..." oninput="filterInvDishes()" style="width:100%;padding:10px 12px;border:1px solid var(--cream-dark);border-radius:4px;font-family:var(--font);font-size:0.88rem;margin-bottom:6px">
+      <div id="inv-dish-results" style="max-height:160px;overflow-y:auto;border:1px solid var(--cream-dark);border-top:none;border-radius:0 0 4px 4px;display:none"></div>
+      <div id="inv-items"></div>
+      <div style="display:grid;grid-template-columns:120px 1fr 60px 80px 70px 36px;gap:6px;align-items:end;margin-top:8px">
+        <div class="fg" style="margin:0"><label style="font-size:0.65rem">Datum</label><input id="inv-item-date" type="date" value="${today}" style="font-size:0.82rem"></div>
+        <div class="fg" style="margin:0"><label style="font-size:0.65rem">Beschreibung</label><input id="inv-item-desc" style="font-size:0.82rem"></div>
+        <div class="fg" style="margin:0"><label style="font-size:0.65rem">Menge</label><input id="inv-item-qty" type="number" value="1" min="1" style="font-size:0.82rem;text-align:center"></div>
+        <div class="fg" style="margin:0"><label style="font-size:0.65rem">Preis</label><input id="inv-item-price" type="number" step="0.01" placeholder="€" style="font-size:0.82rem"></div>
+        <div class="fg" style="margin:0"><label style="font-size:0.65rem">MwSt.</label><select id="inv-item-tax" style="font-size:0.82rem"><option value="19">19 %</option><option value="7">7 %</option><option value="0">0 %</option></select></div>
+        <button class="btn btn-sm btn-p" onclick="addItemsToInvoice(${id})" style="height:34px">+</button>
+      </div>
+    </div>
+    <div id="inv-modal"></div>
+  `;
+  window._invItems = [];
+  window._invSelectedDishId = null;
+}
+
+async function removeInvItem(invoiceId, itemId) {
+  if (!confirm('Position entfernen?')) return;
+  try { await api('DELETE', '/invoices/' + invoiceId + '/items/' + itemId); editInvoice(invoiceId); msg('Position entfernt.'); } catch (e) { msg(e.message, false); }
+}
+
+async function addItemsToInvoice(invoiceId) {
+  const desc = $('inv-item-desc').value;
+  const price = parseFloat($('inv-item-price').value);
+  if (!desc || !price) { msg('Beschreibung und Preis erforderlich.', false); return; }
+  try {
+    await api('POST', '/invoices/' + invoiceId + '/items', { items: [{ date: $('inv-item-date').value, description: desc, quantity: parseInt($('inv-item-qty').value) || 1, unit_price: price, tax_rate: parseFloat($('inv-item-tax').value) || 19, dish_id: window._invSelectedDishId || null }] });
+    editInvoice(invoiceId);
+    msg('Position hinzugefügt.');
   } catch (e) { msg(e.message, false); }
 }
 
@@ -1418,6 +1602,69 @@ async function saveInvoice() {
     const r = await api('POST', '/invoices', { customer_id: parseInt($('inv-cust').value), period_from: $('inv-from').value, period_to: $('inv-to').value, due_date: $('inv-due').value || null, notes: $('inv-notes').value || null, items: window._invItems });
     window._invItems = [];
     renderInvoices(); msg(r.message + ' (' + r.invoice_number + ', ' + r.total.toFixed(2) + ' €)');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function editInvoice(id) {
+  let inv;
+  try { inv = await api('GET', '/invoices/' + id); } catch (e) { msg(e.message, false); return; }
+  const today = getTodayStr();
+  window._editInvId = id;
+  window._invItems = [];
+
+  $('inv-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" style="max-width:650px" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Rechnung ${esc(inv.invoice_number)} bearbeiten</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <p style="font-size:0.82rem;margin-bottom:4px"><strong>${esc(inv.company || inv.customer_name)}</strong> | ${inv.period_from} – ${inv.period_to}</p>
+          <div id="inv-edit-existing" style="margin-bottom:12px"></div>
+          <div style="border-top:2px solid var(--espresso);padding-top:12px;margin-top:8px">
+            <h4 style="font-size:0.88rem;margin-bottom:8px">Neue Positionen hinzufügen:</h4>
+            <div style="margin-bottom:6px">
+              <input id="inv-dish-search" placeholder="🔍 Gericht suchen..." oninput="filterInvDishes()" style="width:100%;padding:10px 12px;border:1px solid var(--cream-dark);border-radius:4px;font-family:var(--font);font-size:0.88rem">
+              <div id="inv-dish-results" style="max-height:160px;overflow-y:auto;border:1px solid var(--cream-dark);border-top:none;border-radius:0 0 4px 4px;display:none"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:120px 1fr 60px 80px 70px 36px;gap:6px;align-items:end">
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">Datum</label><input id="inv-item-date" type="date" value="${today}" style="font-size:0.82rem"></div>
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">Beschreibung</label><input id="inv-item-desc" style="font-size:0.82rem"></div>
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">Menge</label><input id="inv-item-qty" type="number" value="1" min="1" style="font-size:0.82rem;text-align:center"></div>
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">Preis</label><input id="inv-item-price" type="number" step="0.01" placeholder="€" style="font-size:0.82rem"></div>
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">MwSt.</label><select id="inv-item-tax" style="font-size:0.82rem"><option value="19">19 %</option><option value="7">7 %</option><option value="0">0 %</option></select></div>
+              <button class="btn btn-sm btn-p" onclick="addInvItem()" style="height:34px">+</button>
+            </div>
+            <div id="inv-items" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Schließen</button>
+          <button class="btn btn-p" onclick="saveInvoiceItems()">Positionen hinzufügen</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Bestehende Positionen rendern
+  $('inv-edit-existing').innerHTML = '<h4 style="font-size:0.88rem;margin-bottom:6px">Bestehende Positionen:</h4>' +
+    '<table style="font-size:0.82rem"><thead><tr><th>Datum</th><th>Beschreibung</th><th>Anz.</th><th>MwSt.</th><th>Gesamt</th><th></th></tr></thead><tbody>' +
+    (inv.items || []).map(it =>
+      '<tr><td>' + it.date + '</td><td>' + esc(it.description) + '</td><td style="text-align:center">' + it.quantity + '</td><td>' + (it.tax_rate || 19) + '%</td><td style="text-align:right">' + it.total.toFixed(2) + ' €</td>' +
+      '<td><button class="btn btn-sm" style="background:none;border:none;cursor:pointer;color:var(--text-muted)" onclick="deleteInvItem(' + id + ',' + it.id + ')">✕</button></td></tr>'
+    ).join('') + '</tbody></table>' +
+    '<div style="text-align:right;font-weight:700;margin-top:4px">Aktuell: ' + inv.total.toFixed(2).replace('.',',') + ' €</div>';
+}
+
+async function deleteInvItem(invoiceId, itemId) {
+  if (!confirm('Position löschen?')) return;
+  try { await api('DELETE', '/invoices/' + invoiceId + '/items/' + itemId); editInvoice(invoiceId); msg('Position gelöscht.'); } catch (e) { msg(e.message, false); }
+}
+
+async function saveInvoiceItems() {
+  if (window._invItems.length === 0) { msg('Keine neuen Positionen hinzugefügt.', false); return; }
+  try {
+    const r = await api('POST', '/invoices/' + window._editInvId + '/items', { items: window._invItems });
+    window._invItems = [];
+    renderInvoices(); msg(r.message + ' (Gesamt: ' + r.total.toFixed(2) + ' €)');
   } catch (e) { msg(e.message, false); }
 }
 

@@ -100,6 +100,58 @@ router.put('/:id', authenticate, requireRole('inhaber'), (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// POST /api/invoices/:id/items – Positionen zu bestehender Rechnung hinzufügen
+router.post('/:id/items', authenticate, requireRole('inhaber'), (req, res) => {
+  try {
+    const db = getDb();
+    const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(req.params.id);
+    if (!invoice) return res.status(404).json({ error: 'Nicht gefunden.' });
+    if (invoice.status !== 'draft') return res.status(400).json({ error: 'Nur Entwürfe können bearbeitet werden.' });
+
+    const { items } = req.body;
+    if (!items || items.length === 0) return res.status(400).json({ error: 'Keine Positionen.' });
+
+    const ins = db.prepare('INSERT INTO invoice_items (invoice_id, date, description, quantity, unit_price, total, tax_rate, dish_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    for (const item of items) {
+      const total = (item.quantity || 1) * item.unit_price;
+      ins.run(req.params.id, item.date, item.description, item.quantity || 1, item.unit_price, total, item.tax_rate || 19, item.dish_id || null);
+    }
+
+    // Totals neu berechnen
+    const subtotal = db.prepare('SELECT COALESCE(SUM(total),0) as s FROM invoice_items WHERE invoice_id = ?').get(req.params.id).s;
+    const taxGroups = db.prepare('SELECT tax_rate, SUM(total) as base FROM invoice_items WHERE invoice_id = ? GROUP BY tax_rate').all(req.params.id);
+    let tax_amount = 0;
+    for (const g of taxGroups) tax_amount += Math.round(g.base * g.tax_rate) / 100;
+    tax_amount = Math.round(tax_amount * 100) / 100;
+    const total = Math.round((subtotal + tax_amount) * 100) / 100;
+    db.prepare('UPDATE invoices SET subtotal = ?, tax_amount = ?, total = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(subtotal, tax_amount, total, req.params.id);
+
+    logAudit(req.user.id, 'update', 'invoice', req.params.id, { items_added: items.length }, req.ip);
+    res.json({ message: items.length + ' Position(en) hinzugefügt.', subtotal, tax_amount, total });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/invoices/:id/items/:itemId – Position löschen
+router.delete('/:id/items/:itemId', authenticate, requireRole('inhaber'), (req, res) => {
+  try {
+    const db = getDb();
+    const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(req.params.id);
+    if (!invoice || invoice.status !== 'draft') return res.status(400).json({ error: 'Nur Entwürfe bearbeitbar.' });
+    db.prepare('DELETE FROM invoice_items WHERE id = ? AND invoice_id = ?').run(req.params.itemId, req.params.id);
+
+    // Totals neu berechnen
+    const subtotal = db.prepare('SELECT COALESCE(SUM(total),0) as s FROM invoice_items WHERE invoice_id = ?').get(req.params.id).s;
+    const taxGroups = db.prepare('SELECT tax_rate, SUM(total) as base FROM invoice_items WHERE invoice_id = ? GROUP BY tax_rate').all(req.params.id);
+    let tax_amount = 0;
+    for (const g of taxGroups) tax_amount += Math.round(g.base * g.tax_rate) / 100;
+    tax_amount = Math.round(tax_amount * 100) / 100;
+    const total = Math.round((subtotal + tax_amount) * 100) / 100;
+    db.prepare('UPDATE invoices SET subtotal = ?, tax_amount = ?, total = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(subtotal, tax_amount, total, req.params.id);
+
+    res.json({ message: 'Position gelöscht.', subtotal, tax_amount, total });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // GET /api/invoices/:id/pdf
 router.get('/:id/pdf', authenticate, requireRole('inhaber'), (req, res) => {
   try {
@@ -172,6 +224,65 @@ router.get('/:id/pdf', authenticate, requireRole('inhaber'), (req, res) => {
     doc.end();
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+// POST /api/invoices/:id/items – Positionen zu bestehender Rechnung hinzufügen
+router.post('/:id/items', authenticate, requireRole('inhaber'), (req, res) => {
+  try {
+    const db = getDb();
+    const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(req.params.id);
+    if (!invoice) return res.status(404).json({ error: 'Rechnung nicht gefunden.' });
+    if (invoice.status !== 'draft') return res.status(400).json({ error: 'Nur Entwürfe können bearbeitet werden.' });
+
+    const { items } = req.body;
+    if (!items || items.length === 0) return res.status(400).json({ error: 'Mindestens eine Position erforderlich.' });
+
+    const ins = db.prepare('INSERT INTO invoice_items (invoice_id, date, description, quantity, unit_price, total, tax_rate, dish_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    for (const item of items) {
+      const total = (item.quantity || 1) * item.unit_price;
+      ins.run(req.params.id, item.date, item.description, item.quantity || 1, item.unit_price, total, item.tax_rate || 19, item.dish_id || null);
+    }
+
+    // Summen neu berechnen
+    recalcInvoice(db, req.params.id);
+    const updated = db.prepare('SELECT * FROM invoices WHERE id = ?').get(req.params.id);
+    logAudit(req.user.id, 'update', 'invoice', req.params.id, { action: 'items_added' }, req.ip);
+    res.json({ message: 'Positionen hinzugefügt.', total: updated.total });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/invoices/:id/items/:itemId
+router.delete('/:id/items/:itemId', authenticate, requireRole('inhaber'), (req, res) => {
+  try {
+    const db = getDb();
+    const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(req.params.id);
+    if (!invoice) return res.status(404).json({ error: 'Rechnung nicht gefunden.' });
+    if (invoice.status !== 'draft') return res.status(400).json({ error: 'Nur Entwürfe können bearbeitet werden.' });
+
+    db.prepare('DELETE FROM invoice_items WHERE id = ? AND invoice_id = ?').run(req.params.itemId, req.params.id);
+    recalcInvoice(db, req.params.id);
+    const updated = db.prepare('SELECT * FROM invoices WHERE id = ?').get(req.params.id);
+    res.json({ message: 'Position entfernt.', total: updated.total });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+function recalcInvoice(db, invoiceId) {
+  const items = db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(invoiceId);
+  let subtotal = 0;
+  const taxGroups = {};
+  for (const it of items) {
+    subtotal += it.total;
+    const rate = it.tax_rate || 19;
+    if (!taxGroups[rate]) taxGroups[rate] = 0;
+    taxGroups[rate] += it.total;
+  }
+  let tax_amount = 0;
+  for (const [rate, base] of Object.entries(taxGroups)) {
+    tax_amount += Math.round(base * parseFloat(rate)) / 100;
+  }
+  tax_amount = Math.round(tax_amount * 100) / 100;
+  const total = Math.round((subtotal + tax_amount) * 100) / 100;
+  db.prepare('UPDATE invoices SET subtotal = ?, tax_amount = ?, total = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(subtotal, tax_amount, total, invoiceId);
+}
 
 // POST /api/invoices/:id/send
 router.post('/:id/send', authenticate, requireRole('inhaber'), async (req, res) => {
