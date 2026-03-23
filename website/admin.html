@@ -1233,6 +1233,7 @@ async function renderInvoices() {
   try {
     invoices = await api('GET', '/invoices');
     customers = await api('GET', '/customers');
+    CACHE.dishes = await api('GET', '/dishes?active=true');
   } catch (e) { msg(e.message, false); return; }
 
   const statusLabel = { draft: 'Entwurf', sent: 'Versendet', paid: 'Bezahlt', overdue: 'Überfällig', cancelled: 'Storniert' };
@@ -1297,15 +1298,21 @@ function openNewInvoice() {
           </div>
           <div class="fg"><label>Fällig bis</label><input id="inv-due" type="date"></div>
           <div class="fg"><label>Positionen</label><div id="inv-items"></div>
-            <div style="display:flex;gap:6px;margin-top:6px">
+            <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
               <input id="inv-item-date" type="date" value="${today}" style="width:120px">
-              <input id="inv-item-desc" placeholder="Beschreibung" style="flex:2">
-              <input id="inv-item-qty" type="number" value="1" min="1" style="width:45px">
-              <input id="inv-item-price" type="number" step="0.01" placeholder="€" style="width:65px">
-              <select id="inv-item-tax" style="width:70px"><option value="19">19%</option><option value="7">7%</option><option value="0">0%</option></select>
+              <select id="inv-item-dish" style="flex:2" onchange="invDishChanged()">
+                <option value="">– Gericht wählen oder frei eingeben –</option>
+                ${(CACHE.dishes || []).map(d => '<option value="' + d.id + '" data-price="' + (d.base_price||0) + '" data-name="' + esc(d.name) + '">' + esc(d.name) + (d.base_price ? ' (' + d.base_price.toFixed(2) + ' €)' : '') + '</option>').join('')}
+              </select>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:4px;align-items:center">
+              <input id="inv-item-desc" placeholder="Oder Freitext-Beschreibung" style="flex:2">
+              <input id="inv-item-qty" type="number" value="1" min="1" style="width:40px" title="Anzahl">
+              <input id="inv-item-price" type="number" step="0.01" placeholder="€" style="width:65px" title="Einzelpreis">
+              <select id="inv-item-tax" style="width:60px" title="MwSt."><option value="19">19%</option><option value="7">7%</option><option value="0">0%</option></select>
               <button class="btn btn-sm btn-p" onclick="addInvItem()">+</button>
             </div>
-            <p style="font-size:0.68rem;color:var(--text-muted);margin-top:4px">19% = Getränke & Vor-Ort | 7% = Speisen zum Mitnehmen</p>
+            <p style="font-size:0.68rem;color:var(--text-muted);margin-top:3px">19% = Getränke & Vor-Ort | 7% = Speisen Mitnahme</p>
           </div>
           <div class="fg"><label>Notizen</label><input id="inv-notes" placeholder="Optional"></div>
         </div>
@@ -1320,10 +1327,65 @@ function openNewInvoice() {
 }
 
 window._invItems = [];
+
+function invDishChanged() {
+  const sel = $('inv-item-dish');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt.value) {
+    $('inv-item-desc').value = opt.dataset.name || '';
+    $('inv-item-price').value = opt.dataset.price || '';
+    // Getränke-Kategorien automatisch 19%, Speisen 19% (Vor-Ort Standard)
+  }
+}
+
 function addInvItem() {
-  window._invItems.push({ date: $('inv-item-date').value, description: $('inv-item-desc').value, quantity: parseInt($('inv-item-qty').value) || 1, unit_price: parseFloat($('inv-item-price').value) || 0, tax_rate: parseFloat($('inv-item-tax').value) || 19 });
-  $('inv-item-desc').value = ''; $('inv-item-price').value = '';
-  $('inv-items').innerHTML = window._invItems.map((it, i) => '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--cream-dark);font-size:0.82rem"><span>' + it.date + ' | ' + esc(it.description) + ' (' + it.quantity + 'x) <span class="badge b-muted">' + it.tax_rate + '%</span></span><span>' + (it.unit_price * it.quantity).toFixed(2) + ' € <button onclick="window._invItems.splice(' + i + ',1);addInvItem()" style="background:none;border:none;cursor:pointer">✕</button></span></div>').join('');
+  const desc = $('inv-item-desc').value || '';
+  const price = parseFloat($('inv-item-price').value) || 0;
+  if (!desc) { msg('Beschreibung erforderlich.', false); return; }
+  if (!price) { msg('Preis erforderlich.', false); return; }
+  const dishSel = $('inv-item-dish');
+  const dishId = dishSel.value ? parseInt(dishSel.value) : null;
+  window._invItems.push({
+    date: $('inv-item-date').value,
+    description: desc,
+    quantity: parseInt($('inv-item-qty').value) || 1,
+    unit_price: price,
+    tax_rate: parseFloat($('inv-item-tax').value) || 19,
+    dish_id: dishId,
+  });
+  $('inv-item-desc').value = ''; $('inv-item-price').value = ''; dishSel.selectedIndex = 0;
+  renderInvItems();
+}
+
+function renderInvItems() {
+  let netto = 0;
+  $('inv-items').innerHTML = window._invItems.map((it, i) => {
+    const lineTotal = it.unit_price * it.quantity;
+    netto += lineTotal;
+    return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--cream-dark);font-size:0.82rem">' +
+      '<span>' + it.date + ' | ' + esc(it.description) + ' (' + it.quantity + 'x) <span class="badge b-muted">' + it.tax_rate + '%</span></span>' +
+      '<span style="white-space:nowrap">' + lineTotal.toFixed(2) + ' € <button onclick="window._invItems.splice(' + i + ',1);renderInvItems()" style="background:none;border:none;cursor:pointer">✕</button></span></div>';
+  }).join('');
+  if (window._invItems.length > 0) {
+    // Summe anzeigen
+    const taxGroups = {};
+    for (const it of window._invItems) {
+      const r = it.tax_rate;
+      if (!taxGroups[r]) taxGroups[r] = 0;
+      taxGroups[r] += it.unit_price * it.quantity;
+    }
+    let taxTotal = 0;
+    let taxHtml = '';
+    for (const [rate, base] of Object.entries(taxGroups).sort()) {
+      const t = Math.round(base * parseFloat(rate)) / 100;
+      taxTotal += t;
+      taxHtml += '<div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-muted)"><span>MwSt. ' + rate + '% (auf ' + base.toFixed(2) + ' €)</span><span>' + t.toFixed(2) + ' €</span></div>';
+    }
+    $('inv-items').innerHTML += '<div style="margin-top:6px;padding-top:6px;border-top:2px solid var(--espresso)">' +
+      '<div style="display:flex;justify-content:space-between;font-size:0.82rem"><span>Netto</span><span>' + netto.toFixed(2) + ' €</span></div>' +
+      taxHtml +
+      '<div style="display:flex;justify-content:space-between;font-size:0.95rem;font-weight:700;margin-top:4px"><span>Gesamt</span><span>' + (netto + taxTotal).toFixed(2) + ' €</span></div></div>';
+  }
 }
 
 async function saveInvoice() {
