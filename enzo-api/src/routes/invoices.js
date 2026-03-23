@@ -53,16 +53,23 @@ router.post('/', authenticate, requireRole('inhaber'), (req, res) => {
       const invoiceId = result.lastInsertRowid;
 
       if (items && items.length > 0) {
-        const ins = db.prepare('INSERT INTO invoice_items (invoice_id, date, description, quantity, unit_price, total, dish_id) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        const ins = db.prepare('INSERT INTO invoice_items (invoice_id, date, description, quantity, unit_price, total, tax_rate, dish_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
         for (const item of items) {
           const total = (item.quantity || 1) * item.unit_price;
-          ins.run(invoiceId, item.date, item.description, item.quantity || 1, item.unit_price, total, item.dish_id || null);
+          const taxRate = item.tax_rate !== undefined ? item.tax_rate : 19.0;
+          ins.run(invoiceId, item.date, item.description, item.quantity || 1, item.unit_price, total, taxRate, item.dish_id || null);
           subtotal += total;
         }
       }
 
-      const tax_amount = Math.round(subtotal * 19) / 100;
-      const total = subtotal + tax_amount;
+      // MwSt. nach Steuersätzen berechnen
+      const taxGroups = db.prepare('SELECT tax_rate, SUM(total) as base FROM invoice_items WHERE invoice_id = ? GROUP BY tax_rate').all(invoiceId);
+      let tax_amount = 0;
+      for (const g of taxGroups) {
+        tax_amount += Math.round(g.base * g.tax_rate) / 100;
+      }
+      tax_amount = Math.round(tax_amount * 100) / 100;
+      const total = Math.round((subtotal + tax_amount) * 100) / 100;
       db.prepare('UPDATE invoices SET subtotal = ?, tax_amount = ?, total = ? WHERE id = ?').run(subtotal, tax_amount, total, invoiceId);
       return { invoiceId, invoice_number, total };
     });
@@ -128,16 +135,20 @@ router.get('/:id/pdf', authenticate, requireRole('inhaber'), (req, res) => {
     // Tabelle
     let y = 280;
     doc.font('Helvetica-Bold').fontSize(9);
-    doc.text('Datum', 50, y); doc.text('Beschreibung', 120, y); doc.text('Anz.', 370, y, { width: 40, align: 'right' }); doc.text('Preis', 420, y, { width: 60, align: 'right' }); doc.text('Gesamt', 490, y, { width: 60, align: 'right' });
+    doc.text('Datum', 50, y); doc.text('Beschreibung', 120, y); doc.text('Anz.', 340, y, { width: 30, align: 'right' }); doc.text('MwSt.', 375, y, { width: 35, align: 'right' }); doc.text('Preis', 420, y, { width: 60, align: 'right' }); doc.text('Gesamt', 490, y, { width: 60, align: 'right' });
     y += 15;
     doc.moveTo(50, y).lineTo(550, y).stroke();
     y += 8;
 
     doc.font('Helvetica').fontSize(9);
+    const taxTotals = {};
     for (const item of invoice.items) {
       if (y > 700) { doc.addPage(); y = 50; }
       const d = new Date(item.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-      doc.text(d, 50, y); doc.text(item.description, 120, y, { width: 240 }); doc.text(String(item.quantity), 370, y, { width: 40, align: 'right' }); doc.text(item.unit_price.toFixed(2) + ' €', 420, y, { width: 60, align: 'right' }); doc.text(item.total.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });
+      const rate = item.tax_rate || 19;
+      doc.text(d, 50, y); doc.text(item.description, 120, y, { width: 210 }); doc.text(String(item.quantity), 340, y, { width: 30, align: 'right' }); doc.text(rate + '%', 375, y, { width: 35, align: 'right' }); doc.text(item.unit_price.toFixed(2) + ' €', 420, y, { width: 60, align: 'right' }); doc.text(item.total.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });
+      if (!taxTotals[rate]) taxTotals[rate] = 0;
+      taxTotals[rate] += item.total;
       y += 18;
     }
 
@@ -146,8 +157,12 @@ router.get('/:id/pdf', authenticate, requireRole('inhaber'), (req, res) => {
     doc.moveTo(370, y).lineTo(550, y).stroke();
     y += 10;
     doc.text('Netto:', 370, y, { width: 110, align: 'right' }); doc.text(invoice.subtotal.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });
-    y += 15;
-    doc.text(`MwSt. ${invoice.tax_rate}%:`, 370, y, { width: 110, align: 'right' }); doc.text(invoice.tax_amount.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });
+    // MwSt. pro Satz
+    for (const [rate, base] of Object.entries(taxTotals).sort()) {
+      y += 15;
+      const taxAmt = Math.round(base * parseFloat(rate)) / 100;
+      doc.text('MwSt. ' + rate + '% (auf ' + base.toFixed(2) + ' €):', 310, y, { width: 170, align: 'right' }); doc.text(taxAmt.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });
+    }
     y += 15;
     doc.font('Helvetica-Bold');
     doc.text('Gesamt:', 370, y, { width: 110, align: 'right' }); doc.text(invoice.total.toFixed(2) + ' €', 490, y, { width: 60, align: 'right' });

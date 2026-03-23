@@ -1298,12 +1298,14 @@ function openNewInvoice() {
           <div class="fg"><label>Fällig bis</label><input id="inv-due" type="date"></div>
           <div class="fg"><label>Positionen</label><div id="inv-items"></div>
             <div style="display:flex;gap:6px;margin-top:6px">
-              <input id="inv-item-date" type="date" value="${today}" style="width:130px">
+              <input id="inv-item-date" type="date" value="${today}" style="width:120px">
               <input id="inv-item-desc" placeholder="Beschreibung" style="flex:2">
-              <input id="inv-item-qty" type="number" value="1" min="1" style="width:50px">
-              <input id="inv-item-price" type="number" step="0.01" placeholder="€" style="width:70px">
+              <input id="inv-item-qty" type="number" value="1" min="1" style="width:45px">
+              <input id="inv-item-price" type="number" step="0.01" placeholder="€" style="width:65px">
+              <select id="inv-item-tax" style="width:70px"><option value="19">19%</option><option value="7">7%</option><option value="0">0%</option></select>
               <button class="btn btn-sm btn-p" onclick="addInvItem()">+</button>
             </div>
+            <p style="font-size:0.68rem;color:var(--text-muted);margin-top:4px">19% = Getränke & Vor-Ort | 7% = Speisen zum Mitnehmen</p>
           </div>
           <div class="fg"><label>Notizen</label><input id="inv-notes" placeholder="Optional"></div>
         </div>
@@ -1319,9 +1321,9 @@ function openNewInvoice() {
 
 window._invItems = [];
 function addInvItem() {
-  window._invItems.push({ date: $('inv-item-date').value, description: $('inv-item-desc').value, quantity: parseInt($('inv-item-qty').value) || 1, unit_price: parseFloat($('inv-item-price').value) || 0 });
+  window._invItems.push({ date: $('inv-item-date').value, description: $('inv-item-desc').value, quantity: parseInt($('inv-item-qty').value) || 1, unit_price: parseFloat($('inv-item-price').value) || 0, tax_rate: parseFloat($('inv-item-tax').value) || 19 });
   $('inv-item-desc').value = ''; $('inv-item-price').value = '';
-  $('inv-items').innerHTML = window._invItems.map((it, i) => '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--cream-dark);font-size:0.82rem"><span>' + it.date + ' | ' + esc(it.description) + ' (' + it.quantity + 'x)</span><span>' + (it.unit_price * it.quantity).toFixed(2) + ' € <button onclick="window._invItems.splice(' + i + ',1);addInvItem()" style="background:none;border:none;cursor:pointer">✕</button></span></div>').join('');
+  $('inv-items').innerHTML = window._invItems.map((it, i) => '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--cream-dark);font-size:0.82rem"><span>' + it.date + ' | ' + esc(it.description) + ' (' + it.quantity + 'x) <span class="badge b-muted">' + it.tax_rate + '%</span></span><span>' + (it.unit_price * it.quantity).toFixed(2) + ' € <button onclick="window._invItems.splice(' + i + ',1);addInvItem()" style="background:none;border:none;cursor:pointer">✕</button></span></div>').join('');
 }
 
 async function saveInvoice() {
