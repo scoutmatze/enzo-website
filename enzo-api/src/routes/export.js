@@ -208,52 +208,148 @@ router.post('/all', authenticate, requireRole('inhaber', 'leitung'), (req, res) 
 });
 
 // ═══════════════════════════════════════════
-// DRUCK-PDFs
+// DRUCK-PDFs – Da Enzo Design
 // ═══════════════════════════════════════════
 
-const FOOD_CATS = ['antipasti', 'primi', 'secondi', 'pinse', 'dolci', 'sonstiges'];
 const DRINK_CATS = ['caffe', 'tee', 'alkoholfrei', 'bier', 'aperitivi', 'wein', 'digestivi'];
+
+// Design Tokens
+const C = {
+  terra: '#B85A3A',
+  espresso: '#2A1F17',
+  gold: '#C9A96E',
+  cream: '#FAF5EE',
+  olive: '#5C6B4E',
+  muted: '#8B7E74',
+  light: '#D4C9BC',
+};
 
 function getSetting(db, key, def) {
   return db.prepare('SELECT value FROM settings WHERE key = ?').get(key)?.value || def;
 }
 
-function drawMenuHeader(doc, title, subtitle) {
-  doc.fontSize(24).font('Helvetica-Bold').text(title, { align: 'center' });
+// Elegante Trennlinie mit Ornament
+function drawOrnament(doc, y) {
+  const cx = 297.5;
+  doc.lineWidth(0.4).strokeColor(C.gold);
+  doc.moveTo(100, y).lineTo(cx - 15, y).stroke();
+  doc.moveTo(cx + 15, y).lineTo(495, y).stroke();
+  // Kleiner Diamant in der Mitte
+  doc.save();
+  doc.moveTo(cx, y - 3).lineTo(cx + 4, y).lineTo(cx, y + 3).lineTo(cx - 4, y).closePath().fillColor(C.gold).fill();
+  doc.restore();
+  doc.strokeColor(C.espresso);
+}
+
+// Seiten-Header mit Restaurant-Name
+function drawPageHeader(doc, restaurantName, address) {
+  doc.fontSize(8).font('Helvetica').fillColor(C.muted);
+  doc.text(restaurantName, 50, 35, { align: 'center', width: 495 });
+  doc.text(address, 50, 46, { align: 'center', width: 495 });
+  doc.fillColor(C.espresso);
+  drawOrnament(doc, 62);
+  doc.y = 75;
+}
+
+// Großer Titel
+function drawMenuTitle(doc, title, subtitle) {
+  doc.moveDown(0.8);
+  doc.fontSize(28).font('Helvetica-Bold').fillColor(C.espresso);
+  doc.text(title, { align: 'center' });
+
+  if (subtitle) {
+    doc.moveDown(0.15);
+    doc.fontSize(10).font('Helvetica').fillColor(C.gold).text(subtitle, { align: 'center' });
+  }
+
+  doc.fillColor(C.espresso);
+  doc.moveDown(0.5);
+  drawOrnament(doc, doc.y);
+  doc.moveDown(1);
+}
+
+// Kategorie-Überschrift
+function drawCategoryHeader(doc, name) {
   doc.moveDown(0.3);
-  if (subtitle) { doc.fontSize(10).font('Helvetica').fillColor('#888').text(subtitle, { align: 'center' }); }
-  doc.fillColor('#000');
-  doc.moveDown(0.4);
-  doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.5).stroke();
+  doc.fontSize(14).font('Helvetica-Bold').fillColor(C.terra);
+  doc.text(name.toUpperCase(), { align: 'center', characterSpacing: 3 });
+  doc.fillColor(C.espresso);
+
+  // Dezente Linie unter der Kategorie
+  const lineY = doc.y + 4;
+  doc.lineWidth(0.3).strokeColor(C.light);
+  doc.moveTo(180, lineY).lineTo(415, lineY).stroke();
+  doc.strokeColor(C.espresso);
   doc.moveDown(0.6);
 }
 
-function drawCategory(doc, catName, items) {
-  // Estimate height: header(30) + items(22 each) + padding(20)
-  const estHeight = 30 + items.length * 22 + 20;
-  if (doc.y + estHeight > 760) doc.addPage();
+// Gericht mit Punkt-Linie zum Preis
+function drawDish(doc, item) {
+  if (doc.y > 720) doc.addPage();
+  const y = doc.y;
 
-  doc.fontSize(14).font('Helvetica-Bold').text(catName);
-  doc.moveDown(0.3);
+  // Name
+  doc.fontSize(10).font('Helvetica-Bold').fillColor(C.espresso);
+  const nameW = doc.widthOfString(item.name);
+  doc.text(item.name, 65, y);
 
-  for (const item of items) {
-    if (doc.y > 740) doc.addPage();
-    const y = doc.y;
-    doc.fontSize(10).font('Helvetica-Bold').text(item.name, 50, y, { width: 340, continued: false });
-    if (item.allergens) {
-      doc.fontSize(7).font('Helvetica').fillColor('#999').text(' (' + item.allergens + ')', 50 + doc.widthOfString(item.name, { fontSize: 10 }) + 4, y + 1);
-      doc.fillColor('#000');
-    }
-    if (item.price) {
-      doc.fontSize(10).font('Helvetica').text(item.price, 460, y, { width: 85, align: 'right' });
-    }
-    if (item.desc) {
-      doc.fontSize(8).font('Helvetica').fillColor('#666').text(item.desc, 50, doc.y + 1, { width: 400 });
-      doc.fillColor('#000');
-    }
-    doc.moveDown(0.5);
+  // Allergene direkt hinter dem Namen
+  if (item.allergens) {
+    const allergenX = 65 + nameW + 3;
+    doc.fontSize(6.5).font('Helvetica').fillColor(C.gold);
+    doc.text(item.allergens, allergenX, y + 2, { width: 100 });
   }
-  doc.moveDown(0.4);
+
+  // Preis rechts
+  if (item.price) {
+    doc.fontSize(10).font('Helvetica').fillColor(C.espresso);
+    const priceW = doc.widthOfString(item.price);
+    doc.text(item.price, 530 - priceW, y);
+
+    // Punkt-Linie zwischen Name und Preis
+    const dotsStart = 65 + nameW + (item.allergens ? doc.widthOfString(item.allergens, { fontSize: 6.5 }) + 10 : 5);
+    const dotsEnd = 530 - priceW - 8;
+    if (dotsEnd > dotsStart + 20) {
+      doc.fontSize(8).fillColor(C.light);
+      let dots = '';
+      const dotW = doc.widthOfString('.', { fontSize: 8 });
+      for (let x = dotsStart; x < dotsEnd; x += dotW + 1.5) dots += '.';
+      doc.text(dots, dotsStart, y + 1, { width: dotsEnd - dotsStart });
+    }
+  }
+
+  doc.fillColor(C.espresso);
+
+  // Beschreibung
+  if (item.desc) {
+    doc.fontSize(8).font('Helvetica').fillColor(C.muted);
+    doc.text(item.desc, 65, doc.y + 2, { width: 420 });
+    doc.fillColor(C.espresso);
+  }
+
+  doc.moveDown(0.6);
+}
+
+// Kategorie mit Seitenumbruch-Check
+function drawCategory(doc, catName, items) {
+  const estHeight = 40 + items.length * 28;
+  if (doc.y + Math.min(estHeight, 100) > 720) doc.addPage();
+
+  drawCategoryHeader(doc, catName);
+  for (const item of items) drawDish(doc, item);
+  doc.moveDown(0.3);
+}
+
+// Allergen-Fußnote
+function drawAllergenNote(doc, text) {
+  if (!text) return;
+  if (doc.y > 660) doc.addPage();
+  doc.moveDown(1.5);
+  drawOrnament(doc, doc.y);
+  doc.moveDown(0.6);
+  doc.fontSize(6).font('Helvetica').fillColor(C.muted);
+  doc.text(text, 65, doc.y, { width: 465, lineGap: 2, align: 'center' });
+  doc.fillColor(C.espresso);
 }
 
 // GET /api/export/speisekarte-pdf
@@ -261,8 +357,8 @@ router.get('/speisekarte-pdf', authenticate, (req, res) => {
   try {
     const data = exportSpeisekarte();
     const db = getDb();
-    const restaurantName = getSetting(db, 'restaurant_name', 'Da Enzo');
-    const address = getSetting(db, 'address', '');
+    const restaurantName = getSetting(db, 'restaurant_name', 'Da Enzo – Caffé & Ristorante');
+    const address = getSetting(db, 'address', 'Zschokkestraße 34, 80686 München');
     const allergenNote = getSetting(db, 'allergen_note', '');
 
     const doc = new PDFDocument({ size: 'A4', margin: 50, bufferPages: true });
@@ -270,18 +366,7 @@ router.get('/speisekarte-pdf', authenticate, (req, res) => {
     res.setHeader('Content-Disposition', 'inline; filename="Speisekarte.pdf"');
     doc.pipe(res);
 
-    // ── ESSEN ──
-    doc.fontSize(9).font('Helvetica').fillColor('#888').text(restaurantName + ' · ' + address, { align: 'center' });
-    doc.fillColor('#000');
-    doc.moveDown(0.5);
-    drawMenuHeader(doc, 'Speisekarte', 'Essen');
-
-    if (data.intro) {
-      doc.fontSize(9).font('Helvetica').fillColor('#666').text(data.intro, { align: 'center' });
-      doc.fillColor('#000');
-      doc.moveDown(0.8);
-    }
-
+    // Essen & Getränke trennen
     const foodCats = data.categories.filter(c => {
       const key = c.name.toLowerCase().replace(/[^a-zäöü]/g, '');
       return !DRINK_CATS.some(d => key.includes(d));
@@ -291,40 +376,27 @@ router.get('/speisekarte-pdf', authenticate, (req, res) => {
       return DRINK_CATS.some(d => key.includes(d));
     });
 
-    for (const cat of foodCats) {
-      drawCategory(doc, cat.name, cat.items);
-    }
+    // ── SEITE: ESSEN ──
+    drawPageHeader(doc, restaurantName, address);
+    drawMenuTitle(doc, 'Speisekarte', 'Buon Appetito');
 
-    // Allergen-Hinweis am Ende der Essen-Seite
-    if (allergenNote) {
-      if (doc.y > 680) doc.addPage();
+    if (data.intro) {
+      doc.fontSize(9).font('Helvetica').fillColor(C.muted).text(data.intro, 80, doc.y, { align: 'center', width: 435 });
+      doc.fillColor(C.espresso);
       doc.moveDown(1);
-      doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.3).stroke();
-      doc.moveDown(0.5);
-      doc.fontSize(6.5).font('Helvetica').fillColor('#999').text(allergenNote, { width: 495, lineGap: 2 });
-      doc.fillColor('#000');
     }
 
-    // ── GETRÄNKE ──
+    for (const cat of foodCats) drawCategory(doc, cat.name, cat.items);
+    drawAllergenNote(doc, allergenNote);
+
+    // ── SEITE: GETRÄNKE ──
     if (drinkCats.length > 0) {
       doc.addPage();
-      doc.fontSize(9).font('Helvetica').fillColor('#888').text(restaurantName + ' · ' + address, { align: 'center' });
-      doc.fillColor('#000');
-      doc.moveDown(0.5);
-      drawMenuHeader(doc, 'Getränkekarte', '');
+      drawPageHeader(doc, restaurantName, address);
+      drawMenuTitle(doc, 'Getränkekarte', 'Bevande');
 
-      for (const cat of drinkCats) {
-        drawCategory(doc, cat.name, cat.items);
-      }
-
-      if (allergenNote) {
-        if (doc.y > 680) doc.addPage();
-        doc.moveDown(1);
-        doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.3).stroke();
-        doc.moveDown(0.5);
-        doc.fontSize(6.5).font('Helvetica').fillColor('#999').text(allergenNote, { width: 495, lineGap: 2 });
-        doc.fillColor('#000');
-      }
+      for (const cat of drinkCats) drawCategory(doc, cat.name, cat.items);
+      drawAllergenNote(doc, allergenNote);
     }
 
     doc.end();
@@ -336,8 +408,8 @@ router.get('/wochenkarte-pdf', authenticate, (req, res) => {
   try {
     const data = exportWochenkarte();
     const db = getDb();
-    const restaurantName = getSetting(db, 'restaurant_name', 'Da Enzo');
-    const address = getSetting(db, 'address', '');
+    const restaurantName = getSetting(db, 'restaurant_name', 'Da Enzo – Caffé & Ristorante');
+    const address = getSetting(db, 'address', 'Zschokkestraße 34, 80686 München');
     const allergenNote = getSetting(db, 'allergen_note', '');
 
     const doc = new PDFDocument({ size: 'A4', margin: 50 });
@@ -345,54 +417,62 @@ router.get('/wochenkarte-pdf', authenticate, (req, res) => {
     res.setHeader('Content-Disposition', 'inline; filename="Wochenkarte.pdf"');
     doc.pipe(res);
 
-    doc.fontSize(9).font('Helvetica').fillColor('#888').text(restaurantName + ' · ' + address, { align: 'center' });
-    doc.fillColor('#000');
-    doc.moveDown(0.5);
-    drawMenuHeader(doc, 'Wochenkarte', data.subtitle || '');
+    drawPageHeader(doc, restaurantName, address);
+    drawMenuTitle(doc, 'Wochenkarte', data.subtitle || 'Ogni Settimana');
 
     for (const item of (data.items || [])) {
-      if (doc.y > 700) doc.addPage();
+      if (doc.y > 680) doc.addPage();
       const y = doc.y;
 
+      // Tag (links, in Terracotta)
       if (item.day) {
-        doc.fontSize(11).font('Helvetica-Bold').text(item.day, 50, y, { width: 120 });
+        doc.fontSize(11).font('Helvetica-Bold').fillColor(C.terra);
+        doc.text(item.day, 65, y, { width: 100 });
+        doc.fillColor(C.espresso);
       }
 
-      const nameX = item.day ? 170 : 50;
-      doc.fontSize(11).font('Helvetica-Bold').text(item.name || '', nameX, y, { width: 280 });
+      const nameX = item.day ? 175 : 65;
+
+      // Gerichtname
+      doc.fontSize(12).font('Helvetica-Bold').fillColor(C.espresso);
+      doc.text(item.name || '', nameX, y);
+
+      // Beschreibung
       if (item.desc) {
-        doc.fontSize(8).font('Helvetica').fillColor('#666').text(item.desc, nameX, doc.y + 1, { width: 280 });
-        doc.fillColor('#000');
+        doc.fontSize(8.5).font('Helvetica').fillColor(C.muted);
+        doc.text(item.desc, nameX, doc.y + 1, { width: 280 });
       }
+
+      // Allergene
       if (item.allergens) {
-        doc.fontSize(7).font('Helvetica').fillColor('#999').text('Allergene: ' + item.allergens, nameX, doc.y + 1);
-        doc.fillColor('#000');
+        doc.fontSize(7).font('Helvetica').fillColor(C.gold);
+        doc.text('Allergene: ' + item.allergens, nameX, doc.y + 1);
       }
 
+      // Preis (rechts oben auf gleicher Höhe wie Name)
       if (item.price) {
-        doc.fontSize(11).font('Helvetica').text(item.price, 460, y, { width: 85, align: 'right' });
+        doc.fontSize(12).font('Helvetica-Bold').fillColor(C.terra);
+        doc.text(item.price, 440, y, { width: 90, align: 'right' });
       }
 
-      doc.moveDown(0.8);
-      doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.2).strokeColor('#ddd').stroke();
-      doc.strokeColor('#000');
-      doc.moveDown(0.5);
+      doc.fillColor(C.espresso);
+      doc.moveDown(0.6);
+
+      // Trennlinie
+      doc.lineWidth(0.2).strokeColor(C.light);
+      doc.moveTo(65, doc.y).lineTo(530, doc.y).stroke();
+      doc.strokeColor(C.espresso);
+      doc.moveDown(0.6);
     }
 
+    // Fußnote
     if (data.note) {
-      doc.moveDown(0.5);
-      doc.fontSize(9).font('Helvetica').fillColor('#666').text(data.note, { align: 'center' });
-      doc.fillColor('#000');
+      doc.moveDown(0.8);
+      doc.fontSize(9).font('Helvetica').fillColor(C.muted).text(data.note, { align: 'center' });
+      doc.fillColor(C.espresso);
     }
 
-    if (allergenNote) {
-      doc.moveDown(2);
-      doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.3).stroke();
-      doc.moveDown(0.5);
-      doc.fontSize(6.5).font('Helvetica').fillColor('#999').text(allergenNote, { width: 495, lineGap: 2 });
-      doc.fillColor('#000');
-    }
-
+    drawAllergenNote(doc, allergenNote);
     doc.end();
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
