@@ -36,7 +36,13 @@ router.get('/public/availability', (req, res) => {
     const dayNames = ['so', 'mo', 'di', 'mi', 'do', 'fr', 'sa'];
     const dayOfWeek = new Date(date + 'T12:00:00').getDay();
     const dayKey = dayNames[dayOfWeek];
-    const hours = openingHours[dayKey];
+    let hours = openingHours[dayKey];
+
+    // Sonder-Öffnung? (z.B. Sonntag normalerweise zu, aber heute Privatfeier)
+    const specialOpen = db.prepare('SELECT * FROM special_open_dates WHERE date = ?').get(date);
+    if (!hours && specialOpen) {
+      hours = specialOpen.open_from + '-' + specialOpen.open_until;
+    }
     if (!hours) return res.json({ available: false, reason: 'An diesem Tag geschlossen.', closed: true });
 
     const blocked = db.prepare('SELECT * FROM blocked_dates WHERE date = ?').get(date);
@@ -77,15 +83,19 @@ router.get('/public/dates', (req, res) => {
     const totalSeats = parseInt(getSetting(db, 'total_seats', '30'));
     const blockedDates = db.prepare('SELECT date, reason, is_full_day FROM blocked_dates').all();
     const blockedMap = {}; for (const b of blockedDates) if (b.is_full_day) blockedMap[b.date] = b.reason;
+    const specialDates = db.prepare('SELECT date, reason, open_from, open_until FROM special_open_dates').all();
+    const specialMap = {}; for (const s of specialDates) specialMap[s.date] = s;
     const dayNames = ['so', 'mo', 'di', 'mi', 'do', 'fr', 'sa'];
     const dates = [];
     for (let i = 0; i <= maxAdvanceDays; i++) {
       const d = new Date(); d.setDate(d.getDate() + i);
       const dateStr = d.toISOString().split('T')[0];
       const dayKey = dayNames[d.getDay()];
-      const hours = openingHours[dayKey];
+      let hours = openingHours[dayKey];
+      const special = specialMap[dateStr];
+      if (!hours && special) hours = special.open_from + '-' + special.open_until;
       const booked = db.prepare("SELECT COALESCE(SUM(party_size),0) as s FROM reservations WHERE date = ? AND status NOT IN ('cancelled','declined')").get(dateStr).s;
-      dates.push({ date: dateStr, dayName: dayKey, open: !!hours, hours: hours || null, blocked: !!blockedMap[dateStr], blockedReason: blockedMap[dateStr] || null, bookedSeats: booked, freeSeats: hours ? totalSeats - booked : 0, available: !!hours && !blockedMap[dateStr] && (totalSeats - booked) > 0 });
+      dates.push({ date: dateStr, dayName: dayKey, open: !!hours, hours: hours || null, blocked: !!blockedMap[dateStr], blockedReason: blockedMap[dateStr] || null, special: !!special, specialReason: special?.reason || null, bookedSeats: booked, freeSeats: hours ? totalSeats - booked : 0, available: !!hours && !blockedMap[dateStr] && (totalSeats - booked) > 0 });
     }
     res.json(dates);
   } catch (err) { console.error('[dates]', err); res.status(500).json({ error: 'Fehler: ' + err.message }); }
@@ -119,8 +129,8 @@ router.get('/stats', authenticate, (req, res) => {
     const todayCount = db.prepare("SELECT COUNT(*) as c FROM reservations WHERE date = ? AND status NOT IN ('cancelled','declined')").get(today).c;
     const todayGuests = db.prepare("SELECT COALESCE(SUM(party_size),0) as s FROM reservations WHERE date = ? AND status NOT IN ('cancelled','declined')").get(today).s;
     const pendingCount = db.prepare("SELECT COUNT(*) as c FROM reservations WHERE status = 'pending'").get().c;
-    const totalSeats = parseInt(getSetting(db, 'total_seats', '30'));
-    res.json({ todayCount, todayGuests, pendingCount, totalSeats, freeSeats: totalSeats - todayGuests });
+    const peak = db.prepare("SELECT time, SUM(party_size) as guests FROM reservations WHERE date = ? AND status NOT IN ('cancelled','declined') GROUP BY time ORDER BY guests DESC LIMIT 1").get(today);
+    res.json({ todayCount, todayGuests, pendingCount, peakTime: peak?.time || null, peakGuests: peak?.guests || 0 });
   } catch (err) { console.error('[stats]', err); res.status(500).json({ error: 'Fehler: ' + err.message }); }
 });
 
@@ -156,6 +166,31 @@ router.delete('/blocked-dates/:id', authenticate, requireRole('inhaber', 'leitun
     getDb().prepare('DELETE FROM blocked_dates WHERE id = ?').run(req.params.id);
     logAudit(req.user.id, 'delete', 'blocked_date', req.params.id, null, req.ip);
     res.json({ message: 'Sperrung aufgehoben.' });
+  } catch (err) { res.status(500).json({ error: 'Fehler: ' + err.message }); }
+});
+
+// Sonder-Öffnungstage
+router.get('/special-open/list', authenticate, (req, res) => {
+  try { res.json(getDb().prepare('SELECT * FROM special_open_dates ORDER BY date ASC').all()); }
+  catch (err) { res.status(500).json({ error: 'Fehler: ' + err.message }); }
+});
+
+router.post('/special-open', authenticate, requireRole('inhaber', 'leitung'), (req, res) => {
+  try {
+    const { date, reason, open_from, open_until } = req.body;
+    if (!date || !reason) return res.status(400).json({ error: 'Datum und Grund erforderlich.' });
+    const db = getDb();
+    const result = db.prepare('INSERT INTO special_open_dates (date, reason, open_from, open_until, created_by) VALUES (?, ?, ?, ?, ?)').run(date, reason, open_from || '11:00', open_until || '22:00', req.user.id);
+    logAudit(req.user.id, 'create', 'special_open_date', result.lastInsertRowid, { date, reason }, req.ip);
+    res.status(201).json({ id: result.lastInsertRowid, message: 'Sonder-Öffnung eingetragen.' });
+  } catch (err) { res.status(500).json({ error: 'Fehler: ' + err.message }); }
+});
+
+router.delete('/special-open/:id', authenticate, requireRole('inhaber', 'leitung'), (req, res) => {
+  try {
+    getDb().prepare('DELETE FROM special_open_dates WHERE id = ?').run(req.params.id);
+    logAudit(req.user.id, 'delete', 'special_open_date', req.params.id, null, req.ip);
+    res.json({ message: 'Sonder-Öffnung entfernt.' });
   } catch (err) { res.status(500).json({ error: 'Fehler: ' + err.message }); }
 });
 
