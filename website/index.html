@@ -1460,7 +1460,6 @@
             <button type="button" class="guest-btn" onclick="changeGuests(1)">+</button>
           </div>
           <input type="hidden" id="resGuests" name="your-guests" value="2">
-          <div id="seatHint" style="margin-top:4px;font-size:0.78rem;color:var(--col-text-muted)"></div>
         </div>
 
         <!-- Step 4: Kontaktdaten (erscheint nach Datum+Zeit) -->
@@ -1821,19 +1820,19 @@ async function loadTimeSlots() {
     const available = currentSlots.filter(s => s.available);
 
     if (available.length === 0) {
-      hint.innerHTML = '<div class="date-closed">Leider keine Plätze mehr frei an diesem Tag.</div>';
+      hint.innerHTML = '<div class="date-closed">An diesem Tag sind leider keine Reservierungen mehr möglich.</div>';
       timeGroup.style.display = 'none';
       return;
     }
 
-    hint.textContent = available.length + ' Uhrzeiten verfügbar – wähle eine aus:';
+    hint.textContent = 'Wähle eine Uhrzeit:';
     timeGroup.style.display = 'block';
 
     slotsEl.innerHTML = currentSlots.map(s =>
       '<div class="time-slot' + (s.available ? '' : ' unavailable') + '" ' +
       (s.available ? 'onclick="selectTime(\'' + s.time + '\', this)"' : '') + '>' +
       s.time +
-      '<span class="slot-free">' + (s.available ? s.free + ' frei' : 'voll') + '</span>' +
+      (s.available ? '' : '<span class="slot-free">belegt</span>') +
       '</div>'
     ).join('');
 
@@ -1854,12 +1853,6 @@ function selectTime(time, el) {
   // Personen und Kontaktfelder einblenden
   document.getElementById('guestsGroup').style.display = 'block';
   document.getElementById('contactFields').style.display = 'block';
-
-  // Freie Plätze anzeigen
-  const slot = currentSlots.find(s => s.time === time);
-  if (slot) {
-    document.getElementById('seatHint').textContent = slot.free + ' Plätze frei um ' + time + ' Uhr';
-  }
 }
 
 function changeGuests(delta) {
