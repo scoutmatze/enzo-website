@@ -1298,21 +1298,20 @@ function openNewInvoice() {
           </div>
           <div class="fg"><label>Fällig bis</label><input id="inv-due" type="date"></div>
           <div class="fg"><label>Positionen</label><div id="inv-items"></div>
-            <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
-              <input id="inv-item-date" type="date" value="${today}" style="width:120px">
-              <select id="inv-item-dish" style="flex:2" onchange="invDishChanged()">
-                <option value="">– Gericht wählen oder frei eingeben –</option>
-                ${(CACHE.dishes || []).map(d => '<option value="' + d.id + '" data-price="' + (d.base_price||0) + '" data-name="' + esc(d.name) + '">' + esc(d.name) + (d.base_price ? ' (' + d.base_price.toFixed(2) + ' €)' : '') + '</option>').join('')}
-              </select>
+            <p style="font-size:0.72rem;color:var(--text-muted);margin-bottom:6px">Gericht suchen, Datum + MwSt. wählen, mit + hinzufügen.</p>
+            <div style="margin-bottom:6px">
+              <input id="inv-dish-search" placeholder="🔍 Gericht suchen (z.B. Bolognese, Cappuccino...)" oninput="filterInvDishes()" style="width:100%;padding:10px 12px;border:1px solid var(--cream-dark);border-radius:4px;font-family:var(--font);font-size:0.88rem">
+              <div id="inv-dish-results" style="max-height:160px;overflow-y:auto;border:1px solid var(--cream-dark);border-top:none;border-radius:0 0 4px 4px;display:none"></div>
             </div>
-            <div style="display:flex;gap:4px;margin-top:4px;align-items:center">
-              <input id="inv-item-desc" placeholder="Oder Freitext-Beschreibung" style="flex:2">
-              <input id="inv-item-qty" type="number" value="1" min="1" style="width:40px" title="Anzahl">
-              <input id="inv-item-price" type="number" step="0.01" placeholder="€" style="width:65px" title="Einzelpreis">
-              <select id="inv-item-tax" style="width:60px" title="MwSt."><option value="19">19%</option><option value="7">7%</option><option value="0">0%</option></select>
-              <button class="btn btn-sm btn-p" onclick="addInvItem()">+</button>
+            <div style="display:grid;grid-template-columns:120px 1fr 60px 80px 70px 36px;gap:6px;align-items:end;margin-top:4px">
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">Datum</label><input id="inv-item-date" type="date" value="${today}" style="font-size:0.82rem"></div>
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">Beschreibung</label><input id="inv-item-desc" placeholder="Oder Freitext" style="font-size:0.82rem"></div>
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">Menge</label><input id="inv-item-qty" type="number" value="1" min="1" style="font-size:0.82rem;text-align:center"></div>
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">Einzelpreis</label><input id="inv-item-price" type="number" step="0.01" placeholder="€" style="font-size:0.82rem"></div>
+              <div class="fg" style="margin:0"><label style="font-size:0.65rem">MwSt.</label><select id="inv-item-tax" style="font-size:0.82rem"><option value="19">19 %</option><option value="7">7 %</option><option value="0">0 %</option></select></div>
+              <button class="btn btn-sm btn-p" onclick="addInvItem()" style="height:34px;margin-bottom:0">+</button>
             </div>
-            <p style="font-size:0.68rem;color:var(--text-muted);margin-top:3px">19% = Getränke & Vor-Ort | 7% = Speisen Mitnahme</p>
+            <p style="font-size:0.65rem;color:var(--text-muted);margin-top:3px">19% = Getränke & Vor-Ort-Verzehr | 7% = Speisen zur Mitnahme</p>
           </div>
           <div class="fg"><label>Notizen</label><input id="inv-notes" placeholder="Optional"></div>
         </div>
@@ -1327,15 +1326,37 @@ function openNewInvoice() {
 }
 
 window._invItems = [];
+window._invSelectedDishId = null;
 
-function invDishChanged() {
-  const sel = $('inv-item-dish');
-  const opt = sel.options[sel.selectedIndex];
-  if (opt.value) {
-    $('inv-item-desc').value = opt.dataset.name || '';
-    $('inv-item-price').value = opt.dataset.price || '';
-    // Getränke-Kategorien automatisch 19%, Speisen 19% (Vor-Ort Standard)
-  }
+function filterInvDishes() {
+  const q = ($('inv-dish-search')?.value || '').toLowerCase();
+  const results = $('inv-dish-results');
+  if (q.length < 1) { results.style.display = 'none'; return; }
+
+  const matches = (CACHE.dishes || []).filter(d => d.name.toLowerCase().includes(q) || (d.description || '').toLowerCase().includes(q));
+  if (matches.length === 0) { results.style.display = 'none'; return; }
+
+  results.style.display = 'block';
+  results.innerHTML = matches.slice(0, 12).map(d =>
+    '<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--cream);font-size:0.85rem;display:flex;justify-content:space-between" onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'" onclick="selectInvDish(' + d.id + ')">' +
+    '<span><strong>' + esc(d.name) + '</strong>' + (d.description ? ' <span style="color:var(--text-muted);font-size:0.75rem">' + esc(d.description) + '</span>' : '') + '</span>' +
+    '<span style="font-weight:600;color:var(--terra);white-space:nowrap;margin-left:8px">' + (d.base_price ? d.base_price.toFixed(2).replace('.',',') + ' €' : '–') + '</span>' +
+    '</div>'
+  ).join('');
+}
+
+function selectInvDish(id) {
+  const d = (CACHE.dishes || []).find(x => x.id === id);
+  if (!d) return;
+  window._invSelectedDishId = id;
+  $('inv-dish-search').value = d.name;
+  $('inv-item-desc').value = d.name;
+  $('inv-item-price').value = d.base_price || '';
+  $('inv-dish-results').style.display = 'none';
+  // Getränke-Kategorien → 19%
+  const getraenke = ['caffe', 'tee', 'alkoholfrei', 'bier', 'aperitivi', 'wein'];
+  if (getraenke.includes(d.category)) $('inv-item-tax').value = '19';
+  else $('inv-item-tax').value = '19'; // Vor-Ort Standard
 }
 
 function addInvItem() {
@@ -1343,17 +1364,20 @@ function addInvItem() {
   const price = parseFloat($('inv-item-price').value) || 0;
   if (!desc) { msg('Beschreibung erforderlich.', false); return; }
   if (!price) { msg('Preis erforderlich.', false); return; }
-  const dishSel = $('inv-item-dish');
-  const dishId = dishSel.value ? parseInt(dishSel.value) : null;
   window._invItems.push({
     date: $('inv-item-date').value,
     description: desc,
     quantity: parseInt($('inv-item-qty').value) || 1,
     unit_price: price,
     tax_rate: parseFloat($('inv-item-tax').value) || 19,
-    dish_id: dishId,
+    dish_id: window._invSelectedDishId || null,
   });
-  $('inv-item-desc').value = ''; $('inv-item-price').value = ''; dishSel.selectedIndex = 0;
+  // Reset
+  $('inv-item-desc').value = '';
+  $('inv-item-price').value = '';
+  $('inv-dish-search').value = '';
+  $('inv-item-qty').value = '1';
+  window._invSelectedDishId = null;
   renderInvItems();
 }
 
