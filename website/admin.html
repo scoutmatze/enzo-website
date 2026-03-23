@@ -1255,7 +1255,7 @@ async function renderInvoices() {
       '<td><span class="badge ' + (statusBadge[inv.status] || 'b-muted') + '">' + (statusLabel[inv.status] || inv.status) + '</span></td>' +
       '<td style="font-size:0.78rem">' + (inv.due_date || '–') + '</td>' +
       '<td><div class="btns">' +
-        '<a class="btn btn-sm btn-s" href="/api/invoices/' + inv.id + '/pdf" target="_blank">PDF</a>' +
+        '<a class="btn btn-sm btn-s" href="javascript:void(0)" onclick="downloadPdf(' + inv.id + ',\'' + esc(inv.invoice_number) + '\')">PDF</a>' +
         (inv.status === 'draft' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'sent\')">Versendet</button>' : '') +
         (inv.status === 'sent' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'paid\')">Bezahlt</button>' : '') +
       '</div></td></tr>').join('')}</tbody>
@@ -1268,6 +1268,16 @@ async function renderInvoices() {
 
 async function markInvoice(id, status) {
   try { await api('PUT', '/invoices/' + id, { status }); renderInvoices(); msg('Status aktualisiert.'); } catch (e) { msg(e.message, false); }
+}
+
+async function downloadPdf(id, number) {
+  try {
+    const res = await fetch(API + '/invoices/' + id + '/pdf', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
+    if (!res.ok) throw new Error('PDF konnte nicht geladen werden');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } catch (e) { msg(e.message, false); }
 }
 
 function openNewInvoice() {
