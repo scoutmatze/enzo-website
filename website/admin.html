@@ -172,7 +172,12 @@ tbody tr:hover { background: rgba(250,245,238,0.5); }
     <div class="sidebar-link" onclick="showPage('weekly')">📅 Wochenkarte</div>
     <div class="sidebar-section">Gäste</div>
     <div class="sidebar-link" onclick="showPage('reservations')">📆 Reservierungen</div>
-    <div class="sidebar-link" onclick="showPage('customers')">👥 Kunden</div>
+    <div class="sidebar-link" onclick="showPage('orders')">🛒 Bestellungen</div>
+    <div class="sidebar-link" onclick="showPage('customers')">👤 Kunden</div>
+    <div class="sidebar-link" onclick="showPage('invoices')">📄 Rechnungen</div>
+    <div class="sidebar-section">Personal</div>
+    <div class="sidebar-link" onclick="showPage('shifts')">📅 Schichtplan</div>
+    <div class="sidebar-link" onclick="showPage('timeoff')">🏖️ Urlaub</div>
     <div class="sidebar-section">System</div>
     <div class="sidebar-link" onclick="showPage('users')">👥 Mitarbeiter</div>
     <div class="sidebar-link" onclick="showPage('settings')">⚙️ Einstellungen</div>
@@ -264,13 +269,13 @@ document.getElementById('login-pw').addEventListener('keydown', e => { if (e.key
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
-const PAGE_TITLES = { dashboard: 'Dashboard', dishes: 'Kochbuch', ingredients: 'Zutaten & Allergene', menu: 'Speisekarte', weekly: 'Wochenkarte', reservations: 'Reservierungen', customers: 'Kunden', users: 'Mitarbeiter', settings: 'Einstellungen' };
+const PAGE_TITLES = { dashboard: 'Dashboard', dishes: 'Kochbuch', ingredients: 'Zutaten & Allergene', menu: 'Speisekarte', weekly: 'Wochenkarte', reservations: 'Reservierungen', orders: 'Bestellungen', customers: 'Kunden', invoices: 'Rechnungen', shifts: 'Schichtplan', timeoff: 'Urlaub & Abwesenheit', users: 'Mitarbeiter', settings: 'Einstellungen' };
 
 function showPage(page) {
   document.getElementById('page-title').textContent = PAGE_TITLES[page] || page;
   document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(el => { if (el.textContent.includes(PAGE_TITLES[page]?.split(' ')[0] || '###')) el.classList.add('active'); });
-  const fn = { dashboard: renderDashboard, dishes: renderDishes, ingredients: renderIngredients, menu: renderMenu, weekly: renderWeekly, reservations: renderReservations, customers: renderCustomers, users: renderUsers, settings: renderSettings };
+  const fn = { dashboard: renderDashboard, dishes: renderDishes, ingredients: renderIngredients, menu: renderMenu, weekly: renderWeekly, reservations: renderReservations, orders: renderOrders, customers: renderCustomers, invoices: renderInvoices, shifts: renderShifts, timeoff: renderTimeOff, users: renderUsers, settings: renderSettings };
   if (fn[page]) fn[page]();
 }
 
@@ -1065,6 +1070,470 @@ async function gdprDelete(id) {
 }
 
 // ═══════════════════════════════════════════
+// BESTELLUNGEN
+// ═══════════════════════════════════════════
+async function renderOrders() {
+  let orders = [], active = [];
+  try {
+    active = await api('GET', '/orders/active');
+    orders = await api('GET', '/orders');
+    CACHE.dishes = await api('GET', '/dishes?active=true');
+  } catch (e) { msg(e.message, false); return; }
+
+  const statusLabel = { 'new': '🔵 Neu', confirmed: '🟡 Bestätigt', preparing: '🟠 Zubereitung', ready: '🟢 Abholbereit', completed: '✅ Abgeschlossen', cancelled: '❌ Storniert' };
+  const statusBadge = { 'new': 'b-terra', confirmed: 'b-gold', preparing: 'b-gold', ready: 'b-ok', completed: 'b-muted', cancelled: 'b-muted' };
+
+  document.getElementById('page-content').innerHTML = `
+    ${active.length > 0 ? '<div class="card"><div class="card-h"><h3>🔴 Aktive Bestellungen (' + active.length + ')</h3></div>' +
+      '<table><thead><tr><th>#</th><th>Name</th><th>Gerichte</th><th>Abholung</th><th>Summe</th><th>Status</th><th></th></tr></thead><tbody>' +
+      active.map(o => '<tr>' +
+        '<td><strong>#' + o.id + '</strong></td>' +
+        '<td>' + esc(o.guest_name || 'Gast') + (o.guest_phone ? '<br><span style="font-size:0.72rem;color:var(--text-muted)">' + esc(o.guest_phone) + '</span>' : '') + '</td>' +
+        '<td style="font-size:0.78rem">' + (o.items || []).map(i => i.quantity + 'x ' + i.dish_name).join(', ') + '</td>' +
+        '<td>' + (o.pickup_time || '–') + '</td>' +
+        '<td><strong>' + (o.total?.toFixed(2).replace('.',',') || '0,00') + ' €</strong></td>' +
+        '<td><span class="badge ' + (statusBadge[o.status] || 'b-muted') + '">' + (statusLabel[o.status] || o.status) + '</span></td>' +
+        '<td><div class="btns">' + nextStatusButtons(o) + '</div></td>' +
+      '</tr>').join('') + '</tbody></table></div>' : ''}
+    <div class="card">
+      <div class="card-h">
+        <h3>Neue Bestellung aufnehmen</h3>
+      </div>
+      <div class="fg"><label>Name</label><input id="o-name" placeholder="Kundenname"></div>
+      <div class="row">
+        <div class="fg"><label>Telefon</label><input id="o-phone" placeholder="Für Rückruf"></div>
+        <div class="fg"><label>Abholzeit</label><input id="o-time" type="time"></div>
+      </div>
+      <div class="fg"><label>Gerichte hinzufügen</label>
+        <div id="o-items-list"></div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <select id="o-dish" style="flex:2">
+            ${CACHE.dishes.filter(d => ['pinse','sonstiges'].includes(d.category) || d.base_price).map(d => '<option value="' + d.id + '" data-price="' + (d.base_price||0) + '">' + d.name + (d.base_price ? ' (' + d.base_price.toFixed(2) + ' €)' : '') + '</option>').join('')}
+          </select>
+          <input id="o-qty" type="number" value="1" min="1" style="width:60px">
+          <button class="btn btn-sm btn-p" onclick="addOrderItem()">+</button>
+        </div>
+      </div>
+      <div style="margin-top:8px;font-size:0.9rem;font-weight:600">Summe: <span id="o-total">0,00</span> €</div>
+      <div class="fg" style="margin-top:8px"><label>Notizen</label><input id="o-notes" placeholder="Sonderwünsche..."></div>
+      <button class="btn btn-p" style="margin-top:8px" onclick="submitOrder()">Bestellung aufnehmen</button>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Letzte Bestellungen</h3></div>
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Gerichte</th><th>Summe</th><th>Status</th><th>Datum</th></tr></thead>
+        <tbody>${orders.filter(o => !['new','confirmed','preparing','ready'].includes(o.status)).slice(0,20).map(o => '<tr>' +
+          '<td>#' + o.id + '</td><td>' + esc(o.guest_name || 'Gast') + '</td>' +
+          '<td style="font-size:0.78rem">' + (o.items || []).map(i => i.quantity + 'x ' + i.dish_name).join(', ') + '</td>' +
+          '<td>' + (o.total?.toFixed(2).replace('.',',') || '0') + ' €</td>' +
+          '<td><span class="badge ' + (statusBadge[o.status] || 'b-muted') + '">' + (statusLabel[o.status] || o.status) + '</span></td>' +
+          '<td style="font-size:0.72rem">' + new Date(o.created_at).toLocaleDateString('de-DE') + '</td></tr>').join('') || '<tr><td colspan="6" class="empty">Keine Bestellungen.</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h3>Bestellkarte verwalten</h3>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.8rem">Wähle welche Gerichte auf der Website bestellbar sind. Nur Gerichte mit ✅ werden angezeigt.</p>
+      <div id="bestellkarte-list">Laden...</div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h3>Extras</h3>
+        <button class="btn btn-sm btn-p" onclick="openNewExtra()">+ Extra</button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.6rem">Zusatzoptionen die Kunden bei der Bestellung auswählen können (z.B. Extra Käse +1,50 €).</p>
+      <div id="extras-list">Laden...</div>
+    </div>
+  `;
+  window._orderItems = [];
+  loadBestellkarte();
+  loadExtras();
+}
+
+async function loadBestellkarte() {
+  try {
+    const dishes = await api('GET', '/orders/menu');
+    $('bestellkarte-list').innerHTML = '<table><thead><tr><th>Bestellbar</th><th>Gericht</th><th>Kategorie</th><th>Preis</th></tr></thead><tbody>' +
+      dishes.map(d => '<tr style="opacity:' + (d.is_orderable ? 1 : 0.5) + '">' +
+        '<td><button class="btn btn-sm ' + (d.is_orderable ? 'btn-ok' : 'btn-s') + '" onclick="toggleOrderable(' + d.id + ')" style="min-width:40px">' + (d.is_orderable ? '✅' : '–') + '</button></td>' +
+        '<td><strong>' + esc(d.name) + '</strong>' + (d.description ? '<div style="font-size:0.72rem;color:var(--text-muted)">' + esc(d.description) + '</div>' : '') + '</td>' +
+        '<td><span class="badge b-muted">' + d.category + '</span></td>' +
+        '<td>' + (d.base_price ? d.base_price.toFixed(2).replace('.',',') + ' €' : '–') + '</td></tr>').join('') + '</tbody></table>';
+  } catch (e) { $('bestellkarte-list').innerHTML = 'Fehler: ' + e.message; }
+}
+
+async function toggleOrderable(dishId) {
+  try { const r = await api('PUT', '/orders/menu/' + dishId + '/toggle'); loadBestellkarte(); msg(r.message); } catch (e) { msg(e.message, false); }
+}
+
+async function loadExtras() {
+  try {
+    const extras = await api('GET', '/orders/extras');
+    $('extras-list').innerHTML = extras.length === 0 ? '<p style="color:var(--text-muted);font-size:0.82rem">Keine Extras. Erstelle z.B. "Extra Käse" (+1,50 €).</p>' :
+      '<table><thead><tr><th>Name</th><th>Preis</th><th></th></tr></thead><tbody>' +
+      extras.map(e => '<tr><td>' + esc(e.name) + '</td><td>' + (e.price > 0 ? '+' + e.price.toFixed(2).replace('.',',') + ' €' : 'Kostenlos') + '</td><td><button class="btn btn-sm btn-s" onclick="deleteExtra(' + e.id + ')">✕</button></td></tr>').join('') + '</tbody></table>';
+  } catch (e) { $('extras-list').innerHTML = 'Fehler'; }
+}
+
+function openNewExtra() {
+  const html = prompt('Name des Extras (z.B. "Extra Käse"):');
+  if (!html) return;
+  const price = prompt('Aufpreis in Euro (z.B. 1.50, oder 0 für kostenlos):', '0');
+  if (price === null) return;
+  api('POST', '/orders/extras', { name: html, price: parseFloat(price) || 0 }).then(() => { loadExtras(); msg('Extra erstellt.'); }).catch(e => msg(e.message, false));
+}
+
+async function deleteExtra(id) {
+  if (!confirm('Extra löschen?')) return;
+  try { await api('DELETE', '/orders/extras/' + id); loadExtras(); msg('Gelöscht.'); } catch (e) { msg(e.message, false); }
+}
+
+function nextStatusButtons(o) {
+  const next = { 'new': 'confirmed', confirmed: 'preparing', preparing: 'ready', ready: 'completed' };
+  const labels = { confirmed: 'Bestätigen', preparing: 'In Zubereitung', ready: 'Abholbereit', completed: 'Abgeschlossen' };
+  let html = '';
+  if (next[o.status]) html += '<button class="btn btn-sm btn-ok" onclick="setOrderStatus(' + o.id + ',\'' + next[o.status] + '\')">' + labels[next[o.status]] + '</button>';
+  if (o.status !== 'completed' && o.status !== 'cancelled') html += '<button class="btn btn-sm btn-s" onclick="setOrderStatus(' + o.id + ',\'cancelled\')">Storno</button>';
+  return html;
+}
+
+async function setOrderStatus(id, status) {
+  try { await api('PUT', '/orders/' + id + '/status', { status }); renderOrders(); msg('Status aktualisiert.'); } catch (e) { msg(e.message, false); }
+}
+
+window._orderItems = [];
+function addOrderItem() {
+  const sel = $('o-dish'); const opt = sel.options[sel.selectedIndex];
+  const qty = parseInt($('o-qty').value) || 1;
+  window._orderItems.push({ dish_id: parseInt(sel.value), name: opt.text.split('(')[0].trim(), quantity: qty, price: parseFloat(opt.dataset.price) || 0 });
+  renderOrderItems();
+}
+function renderOrderItems() {
+  let total = 0;
+  $('o-items-list').innerHTML = window._orderItems.map((it, i) => { total += it.price * it.quantity; return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--cream-dark)"><span>' + it.quantity + 'x ' + esc(it.name) + '</span><span>' + (it.price * it.quantity).toFixed(2).replace('.',',') + ' € <button class="btn btn-sm" onclick="removeOrderItem(' + i + ')" style="background:none;border:none;cursor:pointer">✕</button></span></div>'; }).join('');
+  $('o-total').textContent = total.toFixed(2).replace('.',',');
+}
+function removeOrderItem(i) { window._orderItems.splice(i, 1); renderOrderItems(); }
+
+async function submitOrder() {
+  if (window._orderItems.length === 0) { msg('Füge mindestens ein Gericht hinzu.', false); return; }
+  try {
+    const r = await api('POST', '/orders', { guest_name: $('o-name').value || 'Gast', guest_phone: $('o-phone').value || null, pickup_time: $('o-time').value || null, notes: $('o-notes').value || null, items: window._orderItems.map(i => ({ dish_id: i.dish_id, quantity: i.quantity })) });
+    window._orderItems = [];
+    renderOrders(); msg(r.message);
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// RECHNUNGEN
+// ═══════════════════════════════════════════
+async function renderInvoices() {
+  let invoices = [], customers = [];
+  try {
+    invoices = await api('GET', '/invoices');
+    customers = await api('GET', '/customers');
+  } catch (e) { msg(e.message, false); return; }
+
+  const statusLabel = { draft: 'Entwurf', sent: 'Versendet', paid: 'Bezahlt', overdue: 'Überfällig', cancelled: 'Storniert' };
+  const statusBadge = { draft: 'b-muted', sent: 'b-gold', paid: 'b-ok', overdue: 'b-terra', cancelled: 'b-muted' };
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Rechnungen – ${invoices.length}</h3>
+        <button class="btn btn-p" onclick="openNewInvoice()">+ Neue Rechnung</button>
+      </div>
+      <table>
+        <thead><tr><th>Nr.</th><th>Kunde</th><th>Zeitraum</th><th>Summe</th><th>Status</th><th>Fällig</th><th></th></tr></thead>
+        <tbody>${invoices.length === 0 ? '<tr><td colspan="7" class="empty">Keine Rechnungen.</td></tr>' :
+    invoices.map(inv => '<tr>' +
+      '<td><strong>' + esc(inv.invoice_number) + '</strong></td>' +
+      '<td>' + esc(inv.company || inv.customer_name) + '</td>' +
+      '<td style="font-size:0.78rem">' + inv.period_from + ' – ' + inv.period_to + '</td>' +
+      '<td><strong>' + inv.total.toFixed(2).replace('.',',') + ' €</strong></td>' +
+      '<td><span class="badge ' + (statusBadge[inv.status] || 'b-muted') + '">' + (statusLabel[inv.status] || inv.status) + '</span></td>' +
+      '<td style="font-size:0.78rem">' + (inv.due_date || '–') + '</td>' +
+      '<td><div class="btns">' +
+        '<a class="btn btn-sm btn-s" href="/api/invoices/' + inv.id + '/pdf" target="_blank">PDF</a>' +
+        (inv.status === 'draft' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'sent\')">Versendet</button>' : '') +
+        (inv.status === 'sent' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'paid\')">Bezahlt</button>' : '') +
+      '</div></td></tr>').join('')}</tbody>
+      </table>
+    </div>
+    <div id="inv-modal"></div>
+  `;
+  CACHE.customers = customers;
+}
+
+async function markInvoice(id, status) {
+  try { await api('PUT', '/invoices/' + id, { status }); renderInvoices(); msg('Status aktualisiert.'); } catch (e) { msg(e.message, false); }
+}
+
+function openNewInvoice() {
+  const today = getTodayStr();
+  const firstOfMonth = today.substring(0, 8) + '01';
+  $('inv-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" style="max-width:600px" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Neue Rechnung</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Geschäftskunde *</label>
+            <select id="inv-cust">${(CACHE.customers || []).filter(c => c.is_business_customer).map(c => '<option value="' + c.id + '">' + esc(c.company || c.name) + '</option>').join('')}</select>
+          </div>
+          <div class="row">
+            <div class="fg"><label>Zeitraum von *</label><input id="inv-from" type="date" value="${firstOfMonth}"></div>
+            <div class="fg"><label>Zeitraum bis *</label><input id="inv-to" type="date" value="${today}"></div>
+          </div>
+          <div class="fg"><label>Fällig bis</label><input id="inv-due" type="date"></div>
+          <div class="fg"><label>Positionen</label><div id="inv-items"></div>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <input id="inv-item-date" type="date" value="${today}" style="width:130px">
+              <input id="inv-item-desc" placeholder="Beschreibung" style="flex:2">
+              <input id="inv-item-qty" type="number" value="1" min="1" style="width:50px">
+              <input id="inv-item-price" type="number" step="0.01" placeholder="€" style="width:70px">
+              <button class="btn btn-sm btn-p" onclick="addInvItem()">+</button>
+            </div>
+          </div>
+          <div class="fg"><label>Notizen</label><input id="inv-notes" placeholder="Optional"></div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveInvoice()">Rechnung erstellen</button>
+        </div>
+      </div>
+    </div>
+  `;
+  window._invItems = [];
+}
+
+window._invItems = [];
+function addInvItem() {
+  window._invItems.push({ date: $('inv-item-date').value, description: $('inv-item-desc').value, quantity: parseInt($('inv-item-qty').value) || 1, unit_price: parseFloat($('inv-item-price').value) || 0 });
+  $('inv-item-desc').value = ''; $('inv-item-price').value = '';
+  $('inv-items').innerHTML = window._invItems.map((it, i) => '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--cream-dark);font-size:0.82rem"><span>' + it.date + ' | ' + esc(it.description) + ' (' + it.quantity + 'x)</span><span>' + (it.unit_price * it.quantity).toFixed(2) + ' € <button onclick="window._invItems.splice(' + i + ',1);addInvItem()" style="background:none;border:none;cursor:pointer">✕</button></span></div>').join('');
+}
+
+async function saveInvoice() {
+  if (window._invItems.length === 0) { msg('Füge mindestens eine Position hinzu.', false); return; }
+  try {
+    const r = await api('POST', '/invoices', { customer_id: parseInt($('inv-cust').value), period_from: $('inv-from').value, period_to: $('inv-to').value, due_date: $('inv-due').value || null, notes: $('inv-notes').value || null, items: window._invItems });
+    window._invItems = [];
+    renderInvoices(); msg(r.message + ' (' + r.invoice_number + ', ' + r.total.toFixed(2) + ' €)');
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// SCHICHTPLAN
+// ═══════════════════════════════════════════
+let shiftWeek = '';
+function getMonday() { const d = new Date(); const day = d.getDay(); d.setDate(d.getDate() - (day === 0 ? 6 : day - 1)); return d.toISOString().split('T')[0]; }
+
+async function renderShifts() {
+  if (!shiftWeek) shiftWeek = getMonday();
+  let shifts = [], employees = [], templates = [];
+  try {
+    shifts = await api('GET', '/shifts?week=' + shiftWeek);
+    employees = await api('GET', '/shifts/employees');
+    templates = await api('GET', '/shifts/templates');
+  } catch (e) { msg(e.message, false); return; }
+
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(shiftWeek); d.setDate(d.getDate() + i);
+    days.push({ date: d.toISOString().split('T')[0], label: ['Mo','Di','Mi','Do','Fr','Sa','So'][i], full: d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) });
+  }
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Schichtplan – KW ${getKW(shiftWeek)}</h3>
+        <div class="btns">
+          <button class="btn btn-sm btn-s" onclick="shiftWeek=prevWeek(shiftWeek);renderShifts()">← Vorher</button>
+          <button class="btn btn-sm btn-s" onclick="shiftWeek=getMonday();renderShifts()">Heute</button>
+          <button class="btn btn-sm btn-s" onclick="shiftWeek=nextWeek(shiftWeek);renderShifts()">Weiter →</button>
+          <button class="btn btn-sm btn-p" onclick="openNewShift()">+ Schicht</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th style="width:100px">Mitarbeiter</th>${days.map(d => '<th style="text-align:center"><strong>' + d.label + '</strong><br><span style="font-size:0.68rem;color:var(--text-muted)">' + d.full + '</span></th>').join('')}</tr></thead>
+          <tbody>${employees.length === 0 ? '<tr><td colspan="8" class="empty">Keine Mitarbeiter. Erst unter System → Mitarbeiter + Schichtplan → Personal anlegen.</td></tr>' :
+    employees.map(emp => '<tr><td><strong>' + esc(emp.first_name) + '</strong><br><span style="font-size:0.68rem;color:var(--text-muted)">' + esc(emp.last_name) + '</span></td>' +
+      days.map(day => {
+        const dayShifts = shifts.filter(s => s.employee_id === emp.id && s.date === day.date);
+        return '<td style="text-align:center;font-size:0.78rem">' + (dayShifts.length === 0 ? '<span style="color:var(--cream-dark)">–</span>' :
+          dayShifts.map(s => '<div style="background:' + (s.color || 'var(--cream-dark)') + ';color:white;padding:2px 6px;border-radius:3px;margin:2px;font-size:0.7rem;cursor:pointer" onclick="deleteShift(' + s.id + ')" title="Klick zum Löschen">' + s.start_time + '-' + s.end_time + '</div>').join('')) + '</td>';
+      }).join('') + '</tr>').join('')}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Personal</h3><button class="btn btn-sm btn-p" onclick="openNewEmployee()">+ Mitarbeiter anlegen</button></div>
+      <table>
+        <thead><tr><th>Name</th><th>Typ</th><th>Stunden/Woche</th><th>Start</th></tr></thead>
+        <tbody>${employees.map(e => '<tr><td><strong>' + esc(e.first_name + ' ' + e.last_name) + '</strong></td><td><span class="badge b-muted">' + (e.employment_type || '–') + '</span></td><td>' + (e.weekly_hours || '–') + '</td><td>' + (e.start_date || '–') + '</td></tr>').join('') || '<tr><td colspan="4" class="empty">Keine Mitarbeiter.</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div id="shift-modal"></div>
+  `;
+  CACHE.employees = employees;
+  CACHE.shiftTemplates = templates;
+}
+
+function prevWeek(w) { const d = new Date(w); d.setDate(d.getDate() - 7); return d.toISOString().split('T')[0]; }
+function nextWeek(w) { const d = new Date(w); d.setDate(d.getDate() + 7); return d.toISOString().split('T')[0]; }
+function getKW(dateStr) { const d = new Date(dateStr); d.setHours(0,0,0,0); d.setDate(d.getDate()+3-(d.getDay()+6)%7); const y = new Date(d.getFullYear(),0,4); return Math.ceil((((d-y)/86400000)+y.getDay()+1)/7); }
+
+function openNewShift() {
+  $('shift-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Schicht eintragen</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Mitarbeiter *</label><select id="sh-emp">${(CACHE.employees || []).map(e => '<option value="' + e.id + '">' + e.first_name + ' ' + e.last_name + '</option>').join('')}</select></div>
+          <div class="fg"><label>Datum *</label><input id="sh-date" type="date" value="${shiftWeek}"></div>
+          <div class="fg"><label>Vorlage</label><select id="sh-tmpl" onchange="applyTemplate()"><option value="">Manuell</option>${(CACHE.shiftTemplates || []).map(t => '<option value="' + t.id + '" data-start="' + t.start_time + '" data-end="' + t.end_time + '">' + t.name + ' (' + t.start_time + '–' + t.end_time + ')</option>').join('')}</select></div>
+          <div class="row">
+            <div class="fg"><label>Von</label><input id="sh-from" type="time" value="09:00"></div>
+            <div class="fg"><label>Bis</label><input id="sh-to" type="time" value="14:00"></div>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveShift()">Eintragen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function applyTemplate() {
+  const sel = $('sh-tmpl'); const opt = sel.options[sel.selectedIndex];
+  if (opt.dataset.start) { $('sh-from').value = opt.dataset.start; $('sh-to').value = opt.dataset.end; }
+}
+
+async function saveShift() {
+  try {
+    await api('POST', '/shifts', { employee_id: parseInt($('sh-emp').value), date: $('sh-date').value, template_id: $('sh-tmpl').value ? parseInt($('sh-tmpl').value) : null, start_time: $('sh-from').value, end_time: $('sh-to').value });
+    renderShifts(); msg('Schicht eingetragen.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function deleteShift(id) {
+  if (!confirm('Schicht löschen?')) return;
+  try { await api('DELETE', '/shifts/' + id); renderShifts(); } catch (e) { msg(e.message, false); }
+}
+
+function openNewEmployee() {
+  $('shift-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Mitarbeiter anlegen</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="row">
+            <div class="fg"><label>Vorname *</label><input id="emp-fn"></div>
+            <div class="fg"><label>Nachname *</label><input id="emp-ln"></div>
+          </div>
+          <div class="row">
+            <div class="fg"><label>Anstellungsart</label><select id="emp-type"><option value="vollzeit">Vollzeit</option><option value="teilzeit">Teilzeit</option><option value="minijob">Minijob</option><option value="aushilfe">Aushilfe</option></select></div>
+            <div class="fg"><label>Stunden/Woche</label><input id="emp-hours" type="number" step="0.5"></div>
+          </div>
+          <div class="row">
+            <div class="fg"><label>Telefon</label><input id="emp-phone"></div>
+            <div class="fg"><label>Startdatum</label><input id="emp-start" type="date"></div>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveEmployee()">Anlegen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveEmployee() {
+  try {
+    await api('POST', '/shifts/employees', { first_name: $('emp-fn').value, last_name: $('emp-ln').value, employment_type: $('emp-type').value, weekly_hours: $('emp-hours').value ? parseFloat($('emp-hours').value) : null, phone: $('emp-phone').value || null, start_date: $('emp-start').value || null });
+    renderShifts(); msg('Mitarbeiter angelegt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// URLAUB & ABWESENHEIT
+// ═══════════════════════════════════════════
+async function renderTimeOff() {
+  let requests = [], employees = [];
+  try {
+    requests = await api('GET', '/shifts/time-off');
+    employees = await api('GET', '/shifts/employees');
+  } catch (e) { msg(e.message, false); return; }
+
+  const typeLabel = { vacation: '🏖️ Urlaub', sick: '🤒 Krank', personal: '🏠 Persönlich', compensation: '⏰ Ausgleich' };
+  const statusBadge = { requested: 'b-gold', approved: 'b-ok', declined: 'b-terra', cancelled: 'b-muted' };
+  const statusLabel = { requested: 'Angefragt', approved: 'Genehmigt', declined: 'Abgelehnt', cancelled: 'Storniert' };
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Urlaub & Abwesenheit</h3>
+        <button class="btn btn-p" onclick="openNewTimeOff()">+ Neuer Antrag</button>
+      </div>
+      <table>
+        <thead><tr><th>Mitarbeiter</th><th>Art</th><th>Von</th><th>Bis</th><th>Tage</th><th>Grund</th><th>Status</th><th></th></tr></thead>
+        <tbody>${requests.length === 0 ? '<tr><td colspan="8" class="empty">Keine Anträge.</td></tr>' :
+    requests.map(r => '<tr>' +
+      '<td><strong>' + esc(r.first_name + ' ' + r.last_name) + '</strong></td>' +
+      '<td>' + (typeLabel[r.type] || r.type) + '</td>' +
+      '<td>' + formatDateShort(r.date_from) + '</td>' +
+      '<td>' + formatDateShort(r.date_to) + '</td>' +
+      '<td style="text-align:center">' + r.days_count + '</td>' +
+      '<td style="font-size:0.78rem">' + esc(r.reason || '–') + '</td>' +
+      '<td><span class="badge ' + (statusBadge[r.status] || 'b-muted') + '">' + (statusLabel[r.status] || r.status) + '</span></td>' +
+      '<td>' + (r.status === 'requested' ? '<div class="btns"><button class="btn btn-sm btn-ok" onclick="approveTimeOff(' + r.id + ')">✓</button><button class="btn btn-sm btn-d" onclick="declineTimeOff(' + r.id + ')">✕</button></div>' : '') + '</td></tr>').join('')}</tbody>
+      </table>
+    </div>
+    <div id="to-modal"></div>
+  `;
+  CACHE.employees = employees;
+}
+
+function openNewTimeOff() {
+  $('to-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Abwesenheit eintragen</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Mitarbeiter *</label><select id="to-emp">${(CACHE.employees || []).map(e => '<option value="' + e.id + '">' + e.first_name + ' ' + e.last_name + '</option>').join('')}</select></div>
+          <div class="fg"><label>Art *</label><select id="to-type"><option value="vacation">🏖️ Urlaub</option><option value="sick">🤒 Krank</option><option value="personal">🏠 Persönlich</option><option value="compensation">⏰ Freizeitausgleich</option></select></div>
+          <div class="row">
+            <div class="fg"><label>Von *</label><input id="to-from" type="date"></div>
+            <div class="fg"><label>Bis *</label><input id="to-to" type="date"></div>
+          </div>
+          <div class="fg"><label>Tage *</label><input id="to-days" type="number" step="0.5" value="1" min="0.5"></div>
+          <div class="fg"><label>Grund</label><input id="to-reason" placeholder="Optional"></div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveTimeOff()">Eintragen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveTimeOff() {
+  try {
+    await api('POST', '/shifts/time-off', { employee_id: parseInt($('to-emp').value), type: $('to-type').value, date_from: $('to-from').value, date_to: $('to-to').value, days_count: parseFloat($('to-days').value), reason: $('to-reason').value || null });
+    renderTimeOff(); msg('Antrag eingereicht.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function approveTimeOff(id) { try { await api('PUT', '/shifts/time-off/' + id + '/approve'); renderTimeOff(); msg('Genehmigt.'); } catch (e) { msg(e.message, false); } }
+async function declineTimeOff(id) { if (!confirm('Ablehnen?')) return; try { await api('PUT', '/shifts/time-off/' + id + '/decline'); renderTimeOff(); msg('Abgelehnt.'); } catch (e) { msg(e.message, false); } }
+
+// ═══════════════════════════════════════════
 // MITARBEITER
 // ═══════════════════════════════════════════
 async function renderUsers() {
@@ -1221,6 +1690,18 @@ async function renderSettings() {
     </div>
 
     <div class="card">
+      <div class="card-h"><h3>Bestellsystem (Pizza/Pinsa Abholung)</h3></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <label style="font-size:0.9rem;font-weight:600">Bestellungen auf der Website:</label>
+        <button id="s-orders-toggle" class="btn btn-sm ${(s.orders_enabled === 'true' || s.orders_enabled === true) ? 'btn-ok' : 'btn-s'}" onclick="toggleOrders()" style="min-width:100px">
+          ${(s.orders_enabled === 'true' || s.orders_enabled === true) ? '🟢 Aktiv' : '🔴 Deaktiviert'}
+        </button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px">Wenn aktiv, können Gäste auf der Website Pizza und Pinsa zur Abholung bestellen.</p>
+      <div class="fg"><label>Hinweis für Kunden</label><input id="s-orders-notice" value="${s.orders_notice || 'Abholung ca. 20 Minuten nach Bestellung.'}"></div>
+    </div>
+
+    <div class="card">
       <div class="card-h"><h3>Speisekarten-Texte</h3></div>
       <div class="fg"><label>Einleitungstext</label><textarea id="s-intro">${s.menu_intro || ''}</textarea></div>
       <div class="fg"><label>Allergen-Hinweis</label><textarea id="s-allergen" style="min-height:90px">${s.allergen_note || ''}</textarea></div>
@@ -1242,6 +1723,18 @@ function toggleDay(key) {
     timesEl.style.opacity = isOpen ? '1' : '0.3';
     timesEl.style.pointerEvents = isOpen ? 'auto' : 'none';
   }
+}
+
+async function toggleOrders() {
+  const btn = $('s-orders-toggle');
+  const isActive = btn.textContent.includes('Aktiv');
+  const newState = !isActive;
+  try {
+    await api('PUT', '/settings', { orders_enabled: newState ? 'true' : 'false' });
+    btn.className = 'btn btn-sm ' + (newState ? 'btn-ok' : 'btn-s');
+    btn.textContent = newState ? '🟢 Aktiv' : '🔴 Deaktiviert';
+    msg(newState ? 'Bestellsystem aktiviert.' : 'Bestellsystem deaktiviert.');
+  } catch (e) { msg(e.message, false); }
 }
 
 async function saveSettings() {
@@ -1272,6 +1765,7 @@ async function saveSettings() {
       booking_advance_days: $('s-advance').value,
       menu_intro: $('s-intro').value,
       allergen_note: $('s-allergen').value,
+      orders_notice: $('s-orders-notice')?.value || '',
     });
     msg('Einstellungen gespeichert.');
   } catch (e) { msg(e.message, false); }

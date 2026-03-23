@@ -10,19 +10,19 @@ router.get('/public/status', (req, res) => {
     const db = getDb();
     const enabled = db.prepare("SELECT value FROM settings WHERE key = 'orders_enabled'").get()?.value === 'true';
     const notice = db.prepare("SELECT value FROM settings WHERE key = 'orders_notice'").get()?.value || '';
-    // Verfügbare Gerichte für Bestellung (nur Pinse + Pizza Kategorie)
-    let menu = [];
+    let menu = [], extras = [];
     if (enabled) {
       menu = db.prepare(`
         SELECT d.id, d.name, d.description, d.base_price, d.category,
           COALESCE(das.allergens, '') as allergens
         FROM dishes d
         LEFT JOIN dish_allergen_string das ON d.id = das.dish_id
-        WHERE d.is_active = 1 AND d.category IN ('pinse', 'sonstiges')
+        WHERE d.is_active = 1 AND d.is_orderable = 1
         ORDER BY d.category, d.name
       `).all();
+      extras = db.prepare('SELECT * FROM order_extras WHERE is_active = 1 ORDER BY sort_order, name').all();
     }
-    res.json({ enabled, notice, menu });
+    res.json({ enabled, notice, menu, extras });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -129,7 +129,63 @@ router.put('/:id/status', authenticate, (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// GET /api/orders/:id
+// ═══════════════════════════════════════════
+// BESTELLKARTE (Admin)
+// ═══════════════════════════════════════════
+
+// GET /api/orders/menu – Alle bestellbaren Gerichte
+router.get('/menu', authenticate, (req, res) => {
+  try {
+    const db = getDb();
+    const dishes = db.prepare(`
+      SELECT d.*, COALESCE(das.allergens, '') as allergens
+      FROM dishes d
+      LEFT JOIN dish_allergen_string das ON d.id = das.dish_id
+      WHERE d.is_active = 1
+      ORDER BY d.is_orderable DESC, d.category, d.name
+    `).all();
+    res.json(dishes);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/orders/menu/:dishId/toggle – Bestellbar ein/aus
+router.put('/menu/:dishId/toggle', authenticate, requireRole('inhaber', 'leitung'), (req, res) => {
+  try {
+    const db = getDb();
+    const dish = db.prepare('SELECT is_orderable FROM dishes WHERE id = ?').get(req.params.dishId);
+    if (!dish) return res.status(404).json({ error: 'Gericht nicht gefunden.' });
+    const newVal = dish.is_orderable ? 0 : 1;
+    db.prepare('UPDATE dishes SET is_orderable = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(newVal, req.params.dishId);
+    logAudit(req.user.id, 'update', 'dish', req.params.dishId, { is_orderable: newVal }, req.ip);
+    res.json({ is_orderable: newVal, message: newVal ? 'Gericht ist jetzt bestellbar.' : 'Gericht nicht mehr bestellbar.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/orders/extras
+router.get('/extras', authenticate, (req, res) => {
+  try { res.json(getDb().prepare('SELECT * FROM order_extras ORDER BY sort_order, name').all()); }
+  catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/orders/extras
+router.post('/extras', authenticate, requireRole('inhaber', 'leitung'), (req, res) => {
+  try {
+    const { name, price, sort_order } = req.body;
+    if (!name) return res.status(400).json({ error: 'Name erforderlich.' });
+    const result = getDb().prepare('INSERT INTO order_extras (name, price, sort_order) VALUES (?, ?, ?)').run(name, price || 0, sort_order || 0);
+    res.status(201).json({ id: result.lastInsertRowid, message: 'Extra erstellt.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/orders/extras/:id
+router.delete('/extras/:id', authenticate, requireRole('inhaber', 'leitung'), (req, res) => {
+  try {
+    getDb().prepare('DELETE FROM order_extras WHERE id = ?').run(req.params.id);
+    res.json({ message: 'Extra gelöscht.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/orders/:id (MUSS am Ende stehen wegen /:id)
 router.get('/:id', authenticate, (req, res) => {
   try {
     const db = getDb();

@@ -1,6 +1,7 @@
 const express = require('express');
 const { getDb, logAudit } = require('../db/init');
 const { authenticate, requireRole } = require('../middleware/auth');
+const { sendReservationNotification } = require('../utils/email');
 
 const router = express.Router();
 
@@ -114,6 +115,8 @@ router.post('/public/book', (req, res) => {
     const blocked = db.prepare('SELECT * FROM blocked_dates WHERE date = ? AND is_full_day = 1').get(date);
     if (blocked) return res.status(409).json({ error: 'An diesem Tag sind leider keine Reservierungen möglich.' });
     const result = db.prepare("INSERT INTO reservations (guest_name, guest_email, guest_phone, date, time, party_size, message, source, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'website', 'pending')").run(guest_name, guest_email || null, guest_phone || null, date, time, party_size, message || null);
+    // E-Mail-Benachrichtigung (asynchron, blockiert nicht die Antwort)
+    sendReservationNotification({ guest_name, guest_email, guest_phone, date, time, party_size, message }).catch(e => console.error('[mail]', e.message));
     res.json({ status: 'ok', id: result.lastInsertRowid, message: 'Vielen Dank! Ihre Reservierung wurde empfangen und wird zeitnah bestätigt.' });
   } catch (err) { console.error('[book]', err); res.status(500).json({ error: 'Fehler: ' + err.message }); }
 });

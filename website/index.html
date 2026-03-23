@@ -865,6 +865,74 @@
   }
 
   /* ═══════════════════════════════════════════
+     BESTELLEN
+     ═══════════════════════════════════════════ */
+  #bestellen { background: var(--col-cream); }
+  .bestellen-wrap { max-width: 1100px; margin: 0 auto; }
+  .bestellen-intro { color: var(--col-text-muted); font-size: 1rem; margin-bottom: var(--space-md); }
+
+  .order-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: var(--space-lg);
+    align-items: start;
+  }
+  @media (max-width: 900px) { .order-grid { grid-template-columns: 1fr; } }
+
+  .order-menu-cat { margin-bottom: var(--space-sm); }
+  .order-menu-cat h4 { font-family: var(--font-display); font-size: 1.1rem; color: var(--col-espresso); margin-bottom: 6px; text-transform: capitalize; }
+
+  .order-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; background: white; border: 1px solid var(--col-cream-dark);
+    border-radius: 4px; margin-bottom: 6px; transition: border-color 0.2s;
+  }
+  .order-item:hover { border-color: var(--col-terra); }
+  .order-item-info { flex: 1; }
+  .order-item-name { font-weight: 600; font-size: 0.92rem; }
+  .order-item-desc { font-size: 0.78rem; color: var(--col-text-muted); }
+  .order-item-price { font-weight: 600; color: var(--col-terra); margin: 0 12px; white-space: nowrap; }
+  .order-item-add {
+    width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--col-terra);
+    background: transparent; color: var(--col-terra); font-size: 1.2rem; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .order-item-add:hover { background: var(--col-terra); color: white; }
+
+  .order-cart {
+    background: white; padding: var(--space-md); border-radius: 8px;
+    border: 1px solid var(--col-cream-dark); box-shadow: 0 4px 20px rgba(42,31,23,0.06);
+    position: sticky; top: 100px;
+  }
+  .order-cart h3 { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: var(--space-sm); color: var(--col-espresso); }
+  .order-cart-items { min-height: 40px; }
+  .order-cart-empty { color: var(--col-text-muted); font-size: 0.85rem; text-align: center; padding: 12px; }
+
+  .cart-line {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid var(--col-cream);
+    font-size: 0.88rem;
+  }
+  .cart-line-qty { display: flex; align-items: center; gap: 8px; }
+  .cart-qty-btn {
+    width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--col-cream-dark);
+    background: transparent; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
+  }
+  .cart-qty-btn:hover { background: var(--col-cream-dark); }
+  .cart-line-remove { background: none; border: none; cursor: pointer; color: var(--col-text-muted); font-size: 0.8rem; }
+
+  .order-extras { margin-top: var(--space-sm); }
+  .order-extras label { font-size: 0.82rem; display: flex; align-items: center; gap: 6px; padding: 4px 0; cursor: pointer; }
+  .order-extras input { accent-color: var(--col-terra); }
+
+  .order-cart-total {
+    margin-top: var(--space-sm); padding-top: var(--space-sm);
+    border-top: 2px solid var(--col-espresso); font-size: 1.1rem; text-align: right;
+  }
+
+  .order-contact { margin-top: var(--space-sm); }
+
+  /* ═══════════════════════════════════════════
      KONTAKT & MAP
      ═══════════════════════════════════════════ */
   .kontakt {
@@ -1306,6 +1374,7 @@
     <li><a href="#karte" data-i18n="nav.karte">Speisekarte</a></li>
     <li><a href="#wochenkarte" data-i18n="nav.wochenkarte">Wochenkarte</a></li>
     <li><a href="#reservieren" data-i18n="nav.reservieren">Reservieren</a></li>
+    <li id="nav-bestellen" style="display:none"><a href="#bestellen">Bestellen</a></li>
     <li><a href="#kontakt" data-i18n="nav.kontakt">Kontakt</a></li>
   </ul>
   <div class="lang-switcher" role="group" aria-label="Sprache wählen">
@@ -1494,6 +1563,50 @@
           Dies ist eine Anfrage – wir bestätigen per Telefon, E-Mail oder WhatsApp.
         </p>
       </form>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ BESTELLEN (nur sichtbar wenn aktiviert) ═══════ -->
+<section id="bestellen" style="display:none" aria-labelledby="bestellen-title">
+  <div class="bestellen-wrap">
+    <div class="section-label">Ordinare</div>
+    <h2 id="bestellen-title" class="section-title">Bestell dir <em>was Gutes.</em></h2>
+    <p class="bestellen-intro" id="orderNotice">Pizza und Pinsa zur Abholung – frisch aus dem Ofen.</p>
+
+    <div class="order-grid">
+      <div class="order-menu" id="orderMenu">Laden...</div>
+      <div class="order-cart">
+        <h3>🛒 Deine Bestellung</h3>
+        <div id="orderCartItems" class="order-cart-items">
+          <p class="order-cart-empty">Noch nichts ausgewählt.</p>
+        </div>
+        <div id="orderExtras" class="order-extras"></div>
+        <div class="order-cart-total">
+          Summe: <strong id="orderTotal">0,00 €</strong>
+        </div>
+        <div class="order-contact" id="orderContact" style="display:none">
+          <div class="form-group">
+            <label>Name *</label>
+            <input type="text" id="orderName" placeholder="Dein Name" required>
+          </div>
+          <div class="form-group">
+            <label>Telefon *</label>
+            <input type="tel" id="orderPhone" placeholder="Für Rückruf wenn abholbereit" required>
+          </div>
+          <div class="form-group">
+            <label>Gewünschte Abholzeit</label>
+            <input type="time" id="orderPickup">
+          </div>
+          <div class="form-group">
+            <label>Anmerkungen</label>
+            <input type="text" id="orderNotes" placeholder="Sonderwünsche...">
+          </div>
+          <div style="position:absolute;left:-9999px" aria-hidden="true"><input type="text" name="website" id="orderHoneypot" tabindex="-1" autocomplete="off"></div>
+          <button class="form-submit" id="orderSubmitBtn" onclick="submitPublicOrder()">Bestellung abschicken</button>
+          <div class="form-status" id="orderStatus" role="alert" aria-live="polite"></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1938,6 +2051,176 @@ async function submitReservation(e) {
   btn.disabled = false;
   btn.textContent = t('res.submit');
 }
+
+/* ── BESTELLSYSTEM ───────────────────────── */
+let orderCart = [];
+let orderMenuData = [];
+let orderExtrasData = [];
+
+async function initOrderSystem() {
+  try {
+    const data = await fetch(CONFIG.apiUrl + '/orders/public/status').then(r => r.json());
+    if (!data.enabled) return;
+
+    // Section und Nav-Link einblenden
+    document.getElementById('bestellen').style.display = '';
+    const navBestellen = document.getElementById('nav-bestellen');
+    if (navBestellen) navBestellen.style.display = '';
+
+    if (data.notice) document.getElementById('orderNotice').textContent = data.notice;
+
+    orderMenuData = data.menu || [];
+    orderExtrasData = data.extras || [];
+
+    renderOrderMenu();
+    renderOrderExtras();
+  } catch (e) { console.log('Bestellsystem nicht verfügbar'); }
+}
+
+function renderOrderMenu() {
+  const container = document.getElementById('orderMenu');
+  if (!orderMenuData.length) { container.innerHTML = '<p style="color:var(--col-text-muted)">Aktuell keine Gerichte zur Bestellung verfügbar.</p>'; return; }
+
+  const cats = {};
+  for (const d of orderMenuData) {
+    if (!cats[d.category]) cats[d.category] = [];
+    cats[d.category].push(d);
+  }
+
+  const catNames = { pinse: 'Pinse', antipasti: 'Antipasti', primi: 'Primi Piatti', secondi: 'Secondi', dolci: 'Dessert', sonstiges: 'Sonstiges' };
+  let html = '';
+  for (const [cat, dishes] of Object.entries(cats)) {
+    html += '<div class="order-menu-cat"><h4>' + (catNames[cat] || cat) + '</h4>';
+    for (const d of dishes) {
+      html += '<div class="order-item">' +
+        '<div class="order-item-info"><span class="order-item-name">' + d.name + '</span>' +
+        (d.description ? '<div class="order-item-desc">' + d.description + '</div>' : '') +
+        (d.allergens ? '<div class="order-item-desc">Allergene: ' + d.allergens + '</div>' : '') +
+        '</div>' +
+        '<span class="order-item-price">' + (d.base_price ? d.base_price.toFixed(2).replace('.', ',') + ' €' : '') + '</span>' +
+        '<button class="order-item-add" onclick="addToCart(' + d.id + ')" title="Hinzufügen">+</button>' +
+        '</div>';
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function renderOrderExtras() {
+  const container = document.getElementById('orderExtras');
+  if (!orderExtrasData.length) { container.innerHTML = ''; return; }
+  container.innerHTML = '<label style="font-weight:600;font-size:0.82rem;margin-bottom:4px;display:block">Extras:</label>' +
+    orderExtrasData.map(e => '<label><input type="checkbox" data-extra-id="' + e.id + '" data-extra-price="' + e.price + '" data-extra-name="' + e.name + '" onchange="updateCartTotal()"> ' + e.name + (e.price > 0 ? ' (+' + e.price.toFixed(2).replace('.', ',') + ' €)' : '') + '</label>').join('');
+}
+
+function addToCart(dishId) {
+  const dish = orderMenuData.find(d => d.id === dishId);
+  if (!dish) return;
+  const existing = orderCart.find(c => c.dish_id === dishId);
+  if (existing) { existing.quantity++; }
+  else { orderCart.push({ dish_id: dishId, name: dish.name, price: dish.base_price || 0, quantity: 1 }); }
+  renderCart();
+}
+
+function changeCartQty(dishId, delta) {
+  const item = orderCart.find(c => c.dish_id === dishId);
+  if (!item) return;
+  item.quantity += delta;
+  if (item.quantity <= 0) orderCart = orderCart.filter(c => c.dish_id !== dishId);
+  renderCart();
+}
+
+function renderCart() {
+  const container = document.getElementById('orderCartItems');
+  const contactEl = document.getElementById('orderContact');
+
+  if (orderCart.length === 0) {
+    container.innerHTML = '<p class="order-cart-empty">Noch nichts ausgewählt.</p>';
+    contactEl.style.display = 'none';
+    updateCartTotal();
+    return;
+  }
+
+  contactEl.style.display = 'block';
+  container.innerHTML = orderCart.map(c =>
+    '<div class="cart-line">' +
+    '<div class="cart-line-qty">' +
+    '<button class="cart-qty-btn" onclick="changeCartQty(' + c.dish_id + ',-1)">−</button>' +
+    '<span>' + c.quantity + '</span>' +
+    '<button class="cart-qty-btn" onclick="changeCartQty(' + c.dish_id + ',1)">+</button>' +
+    '</div>' +
+    '<span style="flex:1;margin:0 8px">' + c.name + '</span>' +
+    '<span style="font-weight:600;white-space:nowrap">' + (c.price * c.quantity).toFixed(2).replace('.', ',') + ' €</span>' +
+    '</div>'
+  ).join('');
+
+  updateCartTotal();
+}
+
+function updateCartTotal() {
+  let total = orderCart.reduce((sum, c) => sum + c.price * c.quantity, 0);
+  document.querySelectorAll('[data-extra-id]').forEach(cb => {
+    if (cb.checked) total += parseFloat(cb.dataset.extraPrice) || 0;
+  });
+  document.getElementById('orderTotal').textContent = total.toFixed(2).replace('.', ',') + ' €';
+}
+
+async function submitPublicOrder() {
+  const btn = document.getElementById('orderSubmitBtn');
+  const status = document.getElementById('orderStatus');
+  const hp = document.getElementById('orderHoneypot');
+
+  if (hp && hp.value) { status.className = 'form-status success'; status.textContent = 'Bestellung empfangen!'; status.style.display = 'block'; return; }
+
+  const name = document.getElementById('orderName').value;
+  const phone = document.getElementById('orderPhone').value;
+  if (!name || !phone) { status.className = 'form-status error'; status.textContent = 'Name und Telefon sind Pflichtfelder.'; status.style.display = 'block'; return; }
+  if (orderCart.length === 0) { status.className = 'form-status error'; status.textContent = 'Bitte wähle mindestens ein Gericht.'; status.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = '...';
+  status.style.display = 'none';
+
+  // Extras als Notizen sammeln
+  const selectedExtras = [];
+  document.querySelectorAll('[data-extra-id]').forEach(cb => { if (cb.checked) selectedExtras.push(cb.dataset.extraName); });
+
+  try {
+    const res = await fetch(CONFIG.apiUrl + '/orders/public/place', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guest_name: name,
+        guest_phone: phone,
+        pickup_time: document.getElementById('orderPickup').value || null,
+        notes: (document.getElementById('orderNotes').value + (selectedExtras.length ? ' | Extras: ' + selectedExtras.join(', ') : '')).trim() || null,
+        items: orderCart.map(c => ({ dish_id: c.dish_id, quantity: c.quantity })),
+      }),
+    });
+    const result = await res.json();
+    if (res.ok && result.status === 'ok') {
+      status.className = 'form-status success';
+      status.textContent = result.message || 'Bestellung aufgenommen!';
+      status.style.display = 'block';
+      orderCart = [];
+      renderCart();
+      document.getElementById('orderName').value = '';
+      document.getElementById('orderPhone').value = '';
+      document.getElementById('orderPickup').value = '';
+      document.getElementById('orderNotes').value = '';
+      document.querySelectorAll('[data-extra-id]').forEach(cb => cb.checked = false);
+    } else {
+      throw new Error(result.error || 'Fehler');
+    }
+  } catch (e) {
+    status.className = 'form-status error';
+    status.textContent = e.message;
+    status.style.display = 'block';
+  }
+  btn.disabled = false; btn.textContent = 'Bestellung abschicken';
+}
+
+// Beim Seitenstart prüfen
+initOrderSystem();
 
 /* ── GOOGLE MAPS CONSENT (Zwei-Klick) ────── */
 function loadMap() {

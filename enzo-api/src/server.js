@@ -3,10 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const path = require('path');
 
 const { initDatabase } = require('./db/init');
+const { initMail } = require('./utils/email');
 const authRoutes = require('./routes/auth');
 const dishRoutes = require('./routes/dishes');
 const ingredientRoutes = require('./routes/ingredients');
@@ -16,38 +15,17 @@ const settingsRoutes = require('./routes/settings');
 const exportRoutes = require('./routes/export');
 const reservationRoutes = require('./routes/reservations');
 const customerRoutes = require('./routes/customers');
+const invoiceRoutes = require('./routes/invoices');
+const orderRoutes = require('./routes/orders');
+const shiftRoutes = require('./routes/shifts');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ═══════════════════════════════════════════
-// MIDDLEWARE
-// ═══════════════════════════════════════════
-
 app.use(helmet());
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(morgan('dev'));
 app.use(express.json({ limit: '5mb' }));
-
-// CORS
-const origins = (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
-app.use(cors({
-  origin: origins.length > 0 ? origins : '*',
-  credentials: true,
-}));
-
-// Rate Limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX) || 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Zu viele Anfragen. Bitte warte einen Moment.' },
-});
-app.use('/api/', limiter);
-
-// ═══════════════════════════════════════════
-// ROUTES
-// ═══════════════════════════════════════════
+app.use(cors({ origin: '*', credentials: true }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dishes', dishRoutes);
@@ -58,48 +36,28 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/shifts', shiftRoutes);
 
-// Health Check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Statisches Admin-Frontend (React Build)
-app.use(express.static(path.join(__dirname, '../public')));
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
-
-// ═══════════════════════════════════════════
-// ERROR HANDLER
-// ═══════════════════════════════════════════
-
 app.use((err, req, res, next) => {
-  console.error(`[ERROR] ${err.message}`, err.stack);
-  res.status(err.status || 500).json({
-    error: process.env.NODE_ENV === 'production'
-      ? 'Ein Fehler ist aufgetreten.'
-      : err.message,
-  });
+  console.error('[ERROR]', err.message);
+  res.status(err.status || 500).json({ error: err.message });
 });
-
-// ═══════════════════════════════════════════
-// START
-// ═══════════════════════════════════════════
 
 async function start() {
   try {
     await initDatabase();
+    initMail();
     app.listen(PORT, '127.0.0.1', () => {
-      console.log(`\n🍝 Da Enzo API läuft auf Port ${PORT}`);
-      console.log(`   Umgebung: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`   Health:   http://127.0.0.1:${PORT}/api/health\n`);
+      console.log('Da Enzo API auf Port ' + PORT);
     });
   } catch (err) {
-    console.error('Server konnte nicht gestartet werden:', err);
+    console.error('Start fehlgeschlagen:', err);
     process.exit(1);
   }
 }
