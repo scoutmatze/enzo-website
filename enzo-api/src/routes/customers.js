@@ -30,14 +30,14 @@ router.get('/:id', authenticate, requireRole('inhaber', 'leitung'), (req, res) =
 
 // POST /api/customers
 router.post('/', authenticate, requireRole('inhaber', 'leitung'), (req, res) => {
-  const { name, email, phone, company, is_business_customer, notes } = req.body;
+  const { name, email, phone, company, address, is_business_customer, notes } = req.body;
   if (!name) return res.status(400).json({ error: 'Name erforderlich.' });
 
   const db = getDb();
   const result = db.prepare(`
-    INSERT INTO customers (name, email, phone, company, is_business_customer, notes, gdpr_consent_at, gdpr_consent_source)
-    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 'manual')
-  `).run(name, email || null, phone || null, company || null, is_business_customer ? 1 : 0, notes || null);
+    INSERT INTO customers (name, email, phone, company, address, is_business_customer, notes, gdpr_consent_at, gdpr_consent_source)
+    VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 'manual')
+  `).run(name, email || null, phone || null, company || null, address || null, is_business_customer ? 1 : 0, notes || null);
 
   logAudit(req.user.id, 'create', 'customer', result.lastInsertRowid, { name }, req.ip);
   res.status(201).json({ id: result.lastInsertRowid, message: 'Kunde erstellt.' });
@@ -45,16 +45,16 @@ router.post('/', authenticate, requireRole('inhaber', 'leitung'), (req, res) => 
 
 // PUT /api/customers/:id
 router.put('/:id', authenticate, requireRole('inhaber', 'leitung'), (req, res) => {
-  const { name, email, phone, company, is_business_customer, notes } = req.body;
+  const { name, email, phone, company, address, is_business_customer, notes } = req.body;
   const db = getDb();
 
   db.prepare(`
     UPDATE customers SET
-      name = COALESCE(?, name), email = ?, phone = ?, company = ?,
+      name = COALESCE(?, name), email = ?, phone = ?, company = ?, address = ?,
       is_business_customer = COALESCE(?, is_business_customer),
       notes = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
-  `).run(name, email, phone, company, is_business_customer !== undefined ? (is_business_customer ? 1 : 0) : null, notes, req.params.id);
+  `).run(name, email, phone, company, address, is_business_customer !== undefined ? (is_business_customer ? 1 : 0) : null, notes, req.params.id);
 
   logAudit(req.user.id, 'update', 'customer', req.params.id, req.body, req.ip);
   res.json({ message: 'Kunde aktualisiert.' });

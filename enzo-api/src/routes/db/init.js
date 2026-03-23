@@ -174,6 +174,7 @@ async function initDatabase() {
       email TEXT,
       phone TEXT,
       company TEXT,
+      address TEXT,
       is_business_customer INTEGER DEFAULT 0,
       notes TEXT,
       gdpr_consent_at DATETIME,
@@ -481,6 +482,8 @@ async function initDatabase() {
   try { db.exec('ALTER TABLE dishes ADD COLUMN is_orderable INTEGER DEFAULT 0'); console.log('  ✅ dishes.is_orderable hinzugefügt'); } catch {}
   // Migration: tax_rate pro Rechnungsposition
   try { db.exec('ALTER TABLE invoice_items ADD COLUMN tax_rate REAL NOT NULL DEFAULT 19.0'); console.log('  ✅ invoice_items.tax_rate hinzugefügt'); } catch {}
+  // Migration: address in customers
+  try { db.exec('ALTER TABLE customers ADD COLUMN address TEXT'); console.log('  ✅ customers.address hinzugefügt'); } catch {}
   // Migration: order_extras Tabelle nachrüsten
   db.exec('CREATE TABLE IF NOT EXISTS order_extras (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, price REAL NOT NULL DEFAULT 0, is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0)');
 

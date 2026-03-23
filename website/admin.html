@@ -1121,6 +1121,7 @@ function showCustomerModal(c) {
               <div class="check"><input type="checkbox" id="c-biz" ${c?.is_business_customer ? 'checked' : ''}><label for="c-biz">Geschäftskunde</label></div>
             </div>
           </div>
+          <div class="fg"><label>Adresse (für Rechnungen)</label><input id="c-address" value="${c?.address || ''}" placeholder="Straße, PLZ Ort"></div>
           <div class="fg"><label>Notizen</label><textarea id="c-notes">${c?.notes || ''}</textarea></div>
         </div>
         <div class="modal-f">
@@ -1139,6 +1140,7 @@ async function saveCustomer(id) {
     email: $('c-email').value || null,
     phone: $('c-phone').value || null,
     company: $('c-company').value || null,
+    address: $('c-address').value || null,
     is_business_customer: $('c-biz').checked,
     notes: $('c-notes').value || null,
   };
@@ -1597,12 +1599,12 @@ function renderInvItems() {
 }
 
 async function saveInvoice() {
-  if (window._invItems.length === 0) { msg('Füge mindestens eine Position hinzu.', false); return; }
+  if (window._invItems.length === 0) { alert('Füge mindestens eine Position hinzu.'); return; }
   try {
     const r = await api('POST', '/invoices', { customer_id: parseInt($('inv-cust').value), period_from: $('inv-from').value, period_to: $('inv-to').value, due_date: $('inv-due').value || null, notes: $('inv-notes').value || null, items: window._invItems });
     window._invItems = [];
     renderInvoices(); msg(r.message + ' (' + r.invoice_number + ', ' + r.total.toFixed(2) + ' €)');
-  } catch (e) { msg(e.message, false); }
+  } catch (e) { alert('Fehler: ' + e.message); }
 }
 
 async function editInvoice(id) {
