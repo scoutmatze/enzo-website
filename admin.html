@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>da Enzo – Backend</title>
+<style>
+:root {
+  --terra: #B85A3A;
+  --terra-light: #D4845E;
+  --cream: #FAF5EE;
+  --cream-dark: #F0E8DB;
+  --espresso: #2A1F17;
+  --espresso-mid: #4A3F35;
+  --olive: #5C6B4E;
+  --gold: #C9A96E;
+  --text: #1E1E1E;
+  --text-muted: #635850;
+  --danger: #C0392B;
+  --success: #27AE60;
+  --warning: #F39C12;
+  --font: 'DM Sans', system-ui, -apple-system, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); background: var(--cream); color: var(--text); line-height: 1.5; font-size: 14px; }
+a { color: var(--terra); text-decoration: none; }
+
+/* Layout */
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: var(--espresso); color: var(--cream); position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; }
+.sidebar-brand { padding: 1.25rem 1rem; border-bottom: 1px solid rgba(240,232,219,0.1); }
+.sidebar-brand h1 { font-size: 1.05rem; color: var(--cream); }
+.sidebar-brand small { font-size: 0.65rem; color: rgba(240,232,219,0.4); text-transform: uppercase; letter-spacing: 0.1em; }
+.sidebar-section { padding: 0.5rem 1rem 0.2rem; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(240,232,219,0.3); margin-top: 0.5rem; }
+.sidebar-link { display: block; padding: 0.55rem 1rem; color: rgba(240,232,219,0.6); font-size: 0.82rem; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+.sidebar-link:hover { background: rgba(240,232,219,0.05); color: var(--cream); }
+.sidebar-link.active { color: var(--cream); background: rgba(184,90,58,0.2); border-left-color: var(--terra); }
+.sidebar-footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.75rem 1rem; border-top: 1px solid rgba(240,232,219,0.1); font-size: 0.7rem; color: rgba(240,232,219,0.4); }
+.sidebar-footer button { background: none; border: none; color: rgba(240,232,219,0.5); cursor: pointer; font-size: 0.7rem; }
+.sidebar-footer button:hover { color: var(--cream); }
+.main { margin-left: 220px; flex: 1; }
+.topbar { background: white; padding: 0.8rem 1.5rem; border-bottom: 1px solid var(--cream-dark); display: flex; justify-content: space-between; align-items: center; }
+.topbar h2 { font-size: 1.15rem; font-weight: 600; color: var(--espresso); }
+.page { padding: 1.25rem 1.5rem; max-width: 1100px; }
+
+/* Login */
+.login-wrap { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--espresso); }
+.login-card { background: white; padding: 2rem; border-radius: 8px; width: 340px; box-shadow: 0 16px 48px rgba(0,0,0,0.3); }
+.login-card h1 { font-size: 1.4rem; color: var(--espresso); margin-bottom: 0.2rem; }
+.login-card p { color: var(--text-muted); margin-bottom: 1.2rem; font-size: 0.8rem; }
+
+/* Forms */
+.fg { margin-bottom: 0.8rem; }
+.fg label { display: block; font-size: 0.72rem; font-weight: 600; color: var(--espresso-mid); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
+.fg input, .fg select, .fg textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--cream-dark); border-radius: 4px; font-family: var(--font); font-size: 0.85rem; background: white; }
+.fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: var(--terra); box-shadow: 0 0 0 2px rgba(184,90,58,0.1); }
+.fg textarea { resize: vertical; min-height: 70px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; }
+.check { display: flex; align-items: center; gap: 6px; margin-bottom: 0.5rem; }
+.check input { width: 16px; height: 16px; accent-color: var(--terra); }
+.check label { font-size: 0.82rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; font-family: var(--font); font-size: 0.8rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+.btn-p { background: var(--terra); color: white; }
+.btn-p:hover { background: var(--terra-light); }
+.btn-s { background: var(--cream-dark); color: var(--espresso); }
+.btn-s:hover { background: #e5ddd0; }
+.btn-ok { background: var(--success); color: white; }
+.btn-ok:hover { background: #219A52; }
+.btn-d { background: var(--danger); color: white; }
+.btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btns { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Card & Table */
+.card { background: white; border-radius: 6px; border: 1px solid var(--cream-dark); padding: 1.2rem; margin-bottom: 1rem; }
+.card-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+.card-h h3 { font-size: 0.95rem; font-weight: 600; color: var(--espresso); }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+thead th { text-align: left; padding: 8px 10px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 2px solid var(--cream-dark); }
+tbody td { padding: 8px 10px; border-bottom: 1px solid var(--cream); }
+tbody tr:hover { background: rgba(250,245,238,0.5); }
+
+/* Badges & Chips */
+.badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 0.65rem; font-weight: 600; }
+.b-terra { background: rgba(184,90,58,0.15); color: var(--terra); }
+.b-olive { background: rgba(92,107,78,0.15); color: var(--olive); }
+.b-gold { background: rgba(201,169,110,0.2); color: #8B7340; }
+.b-muted { background: var(--cream-dark); color: var(--text-muted); }
+.b-ok { background: rgba(39,174,96,0.15); color: var(--success); }
+.aller { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; font-size: 0.65rem; font-weight: 700; background: var(--terra); color: white; margin: 1px; }
+.aller-off { background: var(--cream-dark); color: var(--text-muted); cursor: pointer; }
+
+/* Alert */
+.alert { padding: 10px 14px; border-radius: 4px; margin-bottom: 0.8rem; font-size: 0.82rem; }
+.alert-ok { background: rgba(39,174,96,0.1); color: var(--success); border-left: 3px solid var(--success); }
+.alert-err { background: rgba(192,57,43,0.1); color: var(--danger); border-left: 3px solid var(--danger); }
+
+/* Modal */
+.modal-bg { position: fixed; inset: 0; background: rgba(42,31,23,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
+.modal { background: white; border-radius: 8px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.modal-h { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; border-bottom: 1px solid var(--cream-dark); }
+.modal-h h3 { font-size: 1rem; color: var(--espresso); }
+.modal-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
+.modal-b { padding: 1.2rem; }
+.modal-f { padding: 0.8rem 1.2rem; border-top: 1px solid var(--cream-dark); display: flex; justify-content: flex-end; gap: 6px; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-bottom: 1.2rem; }
+.stat { background: white; border: 1px solid var(--cream-dark); border-radius: 6px; padding: 1rem; cursor: pointer; transition: border-color 0.2s; }
+.stat:hover { border-color: var(--terra); }
+.stat-icon { font-size: 1.3rem; margin-bottom: 0.3rem; }
+.stat-val { font-size: 1.6rem; font-weight: 700; color: var(--espresso); }
+.stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Ingredient picker */
+.ing-pick { display: flex; flex-wrap: wrap; gap: 5px; max-height: 160px; overflow-y: auto; padding: 6px; background: var(--cream); border-radius: 4px; border: 1px solid var(--cream-dark); margin-top: 4px; }
+.ing-tag { padding: 4px 10px; border-radius: 3px; font-size: 0.72rem; font-weight: 600; cursor: pointer; border: none; font-family: var(--font); transition: all 0.1s; }
+.ing-tag-off { background: var(--cream-dark); color: var(--espresso); }
+.ing-tag-on { background: var(--terra); color: white; }
+
+.search { display: flex; gap: 6px; margin-bottom: 0.8rem; }
+.search input { flex: 1; padding: 8px 12px; border: 1px solid var(--cream-dark); border-radius: 4px; font-family: var(--font); font-size: 0.85rem; }
+.search input:focus { outline: none; border-color: var(--terra); }
+.empty { text-align: center; padding: 2rem; color: var(--text-muted); }
+.hidden { display: none; }
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .row, .row3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-view" class="login-wrap">
+  <div class="login-card">
+    <h1>da Enzo</h1>
+    <p>Restaurant Backend – bitte einloggen.</p>
+    <div id="login-error" class="alert alert-err hidden"></div>
+    <div class="fg">
+      <label>E-Mail</label>
+      <input id="login-email" type="email" placeholder="deine@email.de" autofocus>
+    </div>
+    <div class="fg">
+      <label>Passwort</label>
+      <input id="login-pw" type="password" placeholder="••••••••">
+    </div>
+    <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="doLogin()">Einloggen</button>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app-view" class="app hidden">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>da Enzo</h1>
+      <small>Restaurant Backend</small>
+    </div>
+    <div class="sidebar-section">Übersicht</div>
+    <div class="sidebar-link active" onclick="showPage('dashboard')">📊 Dashboard</div>
+    <div class="sidebar-section">Küche</div>
+    <div class="sidebar-link" onclick="showPage('dishes')">📖 Kochbuch</div>
+    <div class="sidebar-link" onclick="showPage('ingredients')">🧂 Zutaten</div>
+    <div class="sidebar-section">Karte</div>
+    <div class="sidebar-link" onclick="showPage('menu')">📋 Speisekarte</div>
+    <div class="sidebar-link" onclick="showPage('weekly')">📅 Wochenkarte</div>
+    <div class="sidebar-section">Gäste</div>
+    <div class="sidebar-link" onclick="showPage('reservations')">📆 Reservierungen</div>
+    <div class="sidebar-link" onclick="showPage('orders')">🛒 Bestellungen</div>
+    <div class="sidebar-link" onclick="showPage('customers')">👤 Kunden</div>
+    <div class="sidebar-link" onclick="showPage('invoices')">📄 Rechnungen</div>
+    <div class="sidebar-section">Personal</div>
+    <div class="sidebar-link" onclick="showPage('shifts')">📅 Schichtplan</div>
+    <div class="sidebar-link" onclick="showPage('timeoff')">🏖️ Urlaub</div>
+    <div class="sidebar-section">System</div>
+    <div class="sidebar-link" onclick="showPage('users')">👥 Mitarbeiter</div>
+    <div class="sidebar-link" onclick="showPage('settings')">⚙️ Einstellungen</div>
+    <div class="sidebar-footer">
+      <div id="user-name"></div>
+      <button onclick="doLogout()" style="margin-top:4px">Abmelden</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h2 id="page-title">Dashboard</h2>
+      <span style="font-size:0.78rem;color:var(--text-muted)" id="today-date"></span>
+    </div>
+    <div class="page" id="page-content"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const API = window.location.port === '5173' ? 'http://localhost:3000/api' : '/api';
+let TOKEN = localStorage.getItem('enzo_token');
+let USER = null;
+let CACHE = { dishes: [], ingredients: [], allergens: [], categories: [], menu: [], weeklyMenus: [] };
+
+// ═══════════════════════════════════════════
+// API CLIENT
+// ═══════════════════════════════════════════
+async function api(method, path, body) {
+  const h = { 'Content-Type': 'application/json' };
+  if (TOKEN) h['Authorization'] = 'Bearer ' + TOKEN;
+  const opts = { method, headers: h };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  const data = await res.json().catch(() => null);
+  if (res.status === 401) { doLogout(); throw new Error('Sitzung abgelaufen'); }
+  if (!res.ok) throw new Error(data?.error || 'Fehler ' + res.status);
+  return data;
+}
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const pw = document.getElementById('login-pw').value;
+  try {
+    const d = await api('POST', '/auth/login', { email, password: pw });
+    TOKEN = d.token;
+    USER = d.user;
+    localStorage.setItem('enzo_token', TOKEN);
+    document.getElementById('login-view').classList.add('hidden');
+    document.getElementById('app-view').classList.remove('hidden');
+    document.getElementById('user-name').textContent = USER.display_name;
+    document.getElementById('today-date').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    showPage('dashboard');
+  } catch (e) {
+    const el = document.getElementById('login-error');
+    el.textContent = e.message;
+    el.classList.remove('hidden');
+  }
+}
+
+function doLogout() {
+  TOKEN = null;
+  USER = null;
+  localStorage.removeItem('enzo_token');
+  document.getElementById('app-view').classList.add('hidden');
+  document.getElementById('login-view').classList.remove('hidden');
+  document.getElementById('login-error').classList.add('hidden');
+}
+
+// Auto-login
+if (TOKEN) {
+  api('GET', '/auth/me').then(d => {
+    USER = d.user;
+    document.getElementById('login-view').classList.add('hidden');
+    document.getElementById('app-view').classList.remove('hidden');
+    document.getElementById('user-name').textContent = USER.display_name;
+    document.getElementById('today-date').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    showPage('dashboard');
+  }).catch(doLogout);
+}
+
+document.getElementById('login-pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+const PAGE_TITLES = { dashboard: 'Dashboard', dishes: 'Kochbuch', ingredients: 'Zutaten & Allergene', menu: 'Speisekarte', weekly: 'Wochenkarte', reservations: 'Reservierungen', orders: 'Bestellungen', customers: 'Kunden', invoices: 'Rechnungen', shifts: 'Schichtplan', timeoff: 'Urlaub & Abwesenheit', users: 'Mitarbeiter', settings: 'Einstellungen' };
+
+function showPage(page) {
+  document.getElementById('page-title').textContent = PAGE_TITLES[page] || page;
+  document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(el => { if (el.textContent.includes(PAGE_TITLES[page]?.split(' ')[0] || '###')) el.classList.add('active'); });
+  const fn = { dashboard: renderDashboard, dishes: renderDishes, ingredients: renderIngredients, menu: renderMenu, weekly: renderWeekly, reservations: renderReservations, orders: renderOrders, customers: renderCustomers, invoices: renderInvoices, shifts: renderShifts, timeoff: renderTimeOff, users: renderUsers, settings: renderSettings };
+  if (fn[page]) fn[page]();
+}
+
+function $(id) { return document.getElementById(id); }
+function html(id, content) { $(id) ? $(id).innerHTML = content : (document.getElementById('page-content').innerHTML = content); }
+function msg(text, ok = true) {
+  const el = document.createElement('div');
+  el.className = 'alert ' + (ok ? 'alert-ok' : 'alert-err');
+  el.textContent = text;
+  document.getElementById('page-content').prepend(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+async function renderDashboard() {
+  let resStats = { todayCount: 0, todayGuests: 0, pendingCount: 0, peakTime: null, peakGuests: 0 };
+  try {
+    const [dishes, menu, ingredients] = await Promise.all([
+      api('GET', '/dishes?active=true').catch(() => []),
+      api('GET', '/menu').catch(() => []),
+      api('GET', '/ingredients').catch(() => []),
+    ]);
+    CACHE.dishes = dishes || [];
+    CACHE.menu = menu || [];
+    CACHE.ingredients = ingredients || [];
+    resStats = await api('GET', '/reservations/stats').catch(() => resStats);
+  } catch (e) {}
+
+  document.getElementById('page-content').innerHTML = `
+    <p style="color:var(--text-muted);margin-bottom:1rem">Ciao ${USER?.display_name || ''}! 👋</p>
+    <div class="stats">
+      <div class="stat" onclick="showPage('reservations')"><div class="stat-icon">📆</div><div class="stat-val">${resStats.todayCount}</div><div class="stat-lbl">Reservierungen heute (${resStats.todayGuests} Gäste)</div></div>
+      <div class="stat" onclick="showPage('reservations')" style="${resStats.pendingCount > 0 ? 'border-color:var(--warning)' : ''}"><div class="stat-icon">⏳</div><div class="stat-val">${resStats.pendingCount}</div><div class="stat-lbl">Offene Anfragen</div></div>
+      <div class="stat" onclick="showPage('dishes')"><div class="stat-icon">📖</div><div class="stat-val">${CACHE.dishes.length}</div><div class="stat-lbl">Gerichte im Kochbuch</div></div>
+      <div class="stat" onclick="window.open('index.html','_blank')"><div class="stat-icon">🌐</div><div class="stat-val" style="font-size:1rem">Website</div><div class="stat-lbl">da-enzo-muenchen.de öffnen</div></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Schnellaktionen</h3></div>
+      <div class="btns">
+        <button class="btn btn-p" onclick="showPage('reservations')">📆 Reservierungen</button>
+        <button class="btn btn-s" onclick="showPage('weekly')">📅 Wochenkarte</button>
+        <button class="btn btn-ok" onclick="exportAll()">🔄 Website aktualisieren</button>
+      </div>
+    </div>
+  `;
+}
+
+async function exportAll() {
+  try { const r = await api('POST', '/export/all'); msg(r.message); } catch (e) { msg('Fehler: ' + e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// ZUTATEN
+// ═══════════════════════════════════════════
+async function renderIngredients() {
+  try {
+    CACHE.ingredients = await api('GET', '/ingredients');
+    CACHE.allergens = await api('GET', '/ingredients/allergens');
+  } catch (e) { msg(e.message, false); return; }
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Zutaten – ${CACHE.ingredients.length} Einträge</h3>
+        <button class="btn btn-p" onclick="openIngredientModal()">+ Neue Zutat</button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.8rem">Jede Zutat einmal mit Allergenen anlegen. Gerichte erben die Allergene automatisch.</p>
+      <table>
+        <thead><tr><th>Zutat</th><th>Allergene</th><th style="width:50px"></th></tr></thead>
+        <tbody>${CACHE.ingredients.length === 0 ? '<tr><td colspan="3" class="empty">Noch keine Zutaten. Starte mit Mehl, Ei, Milch...</td></tr>' :
+    CACHE.ingredients.map(i => `<tr>
+          <td><strong>${i.name}</strong></td>
+          <td>${i.allergens ? i.allergens.split(', ').map(a => `<span class="aller">${a}</span>`).join('') : '<span style="color:var(--text-muted);font-size:0.78rem">–</span>'}</td>
+          <td><button class="btn btn-sm btn-s" onclick="openIngredientModal(${i.id})">✏️</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Allergen-Legende</h3></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">
+        ${CACHE.allergens.map(a => `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><span class="aller">${a.id}</span>${a.name_de}</div>`).join('')}
+      </div>
+    </div>
+    <div id="ing-modal"></div>
+  `;
+}
+
+function openIngredientModal(editId) {
+  const ing = editId ? CACHE.ingredients.find(i => i.id === editId) : null;
+  const selected = ing?.allergens ? ing.allergens.split(', ').filter(Boolean) : [];
+
+  $('ing-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>${ing ? 'Zutat bearbeiten' : 'Neue Zutat'}</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Name *</label><input id="ing-name" value="${ing?.name || ''}" placeholder="z.B. Weizenmehl, Parmesan, Ei..."></div>
+          <div class="fg"><label>Enthält Allergene:</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px">
+              ${CACHE.allergens.map(a => `<div class="check"><input type="checkbox" id="al-${a.id}" ${selected.includes(a.id) ? 'checked' : ''}><label for="al-${a.id}"><span class="aller" style="width:18px;height:18px;font-size:0.6rem;margin-right:3px">${a.id}</span>${a.name_de}</label></div>`).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveIngredient(${editId || 'null'})">${ing ? 'Speichern' : 'Erstellen'}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveIngredient(editId) {
+  const name = $('ing-name').value;
+  const allergen_ids = CACHE.allergens.filter(a => $('al-' + a.id)?.checked).map(a => a.id);
+  if (!name) return;
+  try {
+    if (editId) await api('PUT', '/ingredients/' + editId, { name, allergen_ids });
+    else await api('POST', '/ingredients', { name, allergen_ids });
+    renderIngredients();
+    msg(editId ? 'Zutat aktualisiert.' : 'Zutat erstellt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// KOCHBUCH (Gerichte)
+// ═══════════════════════════════════════════
+async function renderDishes() {
+  try {
+    CACHE.dishes = await api('GET', '/dishes');
+    CACHE.categories = await api('GET', '/dishes/categories');
+    CACHE.ingredients = await api('GET', '/ingredients');
+  } catch (e) { msg(e.message, false); return; }
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Kochbuch – ${CACHE.dishes.length} Gerichte</h3>
+        <button class="btn btn-p" onclick="openDishModal()">+ Neues Gericht</button>
+      </div>
+      <div class="search">
+        <input id="dish-search" placeholder="Suche..." oninput="filterDishes()">
+        <select id="dish-cat-filter" onchange="filterDishes()" style="width:170px">
+          <option value="">Alle Kategorien</option>
+          ${CACHE.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+        </select>
+      </div>
+      <div id="dishes-table"></div>
+    </div>
+    <div id="dish-modal"></div>
+  `;
+  filterDishes();
+}
+
+function filterDishes() {
+  const q = ($('dish-search')?.value || '').toLowerCase();
+  const cat = $('dish-cat-filter')?.value || '';
+  const filtered = CACHE.dishes.filter(d => {
+    if (cat && d.category !== cat) return false;
+    if (q && !d.name.toLowerCase().includes(q) && !(d.description || '').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const catName = (id) => CACHE.categories.find(c => c.id === id)?.name || id;
+
+  $('dishes-table').innerHTML = `<table>
+    <thead><tr><th>Name</th><th>Kategorie</th><th>Preis</th><th>Allergene</th><th style="width:50px"></th></tr></thead>
+    <tbody>${filtered.length === 0 ? '<tr><td colspan="5" class="empty">Keine Gerichte gefunden.</td></tr>' :
+    filtered.map(d => `<tr style="opacity:${d.is_active ? 1 : 0.4}">
+      <td><strong>${d.name}</strong>${d.description ? '<div style="font-size:0.72rem;color:var(--text-muted)">' + d.description + '</div>' : ''}</td>
+      <td><span class="badge b-muted">${catName(d.category)}</span></td>
+      <td>${d.base_price ? d.base_price.toFixed(2).replace('.', ',') + ' €' : '–'}</td>
+      <td>${d.allergens ? d.allergens.split(', ').map(a => '<span class="aller">' + a + '</span>').join('') : '–'}</td>
+      <td><div class="btns"><button class="btn btn-sm btn-s" onclick="openDishModal(${d.id})">✏️</button></div></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+async function openDishModal(editId) {
+  let dish = null;
+  if (editId) dish = await api('GET', '/dishes/' + editId);
+  const selIngs = dish ? (dish.ingredients || []).map(i => i.id) : [];
+
+  $('dish-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>${dish ? 'Gericht bearbeiten' : 'Neues Gericht'}</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="row">
+            <div class="fg"><label>Name *</label><input id="d-name" value="${dish?.name || ''}"></div>
+            <div class="fg"><label>Ital. Name</label><input id="d-name-it" value="${dish?.name_it || ''}"></div>
+          </div>
+          <div class="fg"><label>Beschreibung</label><input id="d-desc" value="${dish?.description || ''}" placeholder="Mit Guanciale, Ei und Pecorino"></div>
+          <div class="row3">
+            <div class="fg"><label>Kategorie *</label><select id="d-cat">${CACHE.categories.map(c => `<option value="${c.id}" ${dish?.category === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}</select></div>
+            <div class="fg"><label>Grundpreis (€)</label><input id="d-price" type="number" step="0.10" value="${dish?.base_price || ''}"></div>
+            <div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end;gap:3px">
+              <div class="check"><input type="checkbox" id="d-veg" ${dish?.is_vegetarian ? 'checked' : ''}><label for="d-veg">Vegetarisch</label></div>
+              <div class="check"><input type="checkbox" id="d-vegan" ${dish?.is_vegan ? 'checked' : ''}><label for="d-vegan">Vegan</label></div>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Zutaten auswählen → Allergene automatisch</label>
+            <div class="ing-pick" id="d-ing-pick">
+              ${CACHE.ingredients.map(i => `<button type="button" class="ing-tag ${selIngs.includes(i.id) ? 'ing-tag-on' : 'ing-tag-off'}" data-id="${i.id}" onclick="this.classList.toggle('ing-tag-on');this.classList.toggle('ing-tag-off');updateAutoAllergens()">${i.name}${i.allergens ? ' (' + i.allergens + ')' : ''}</button>`).join('')}
+              ${CACHE.ingredients.length === 0 ? '<span style="color:var(--text-muted);font-size:0.78rem">Erst Zutaten anlegen!</span>' : ''}
+            </div>
+          </div>
+          <div id="d-auto-allergens" style="margin-top:6px"></div>
+          <div class="fg" style="margin-top:0.8rem"><label>Interne Notizen</label><textarea id="d-notes">${dish?.notes || ''}</textarea></div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveDish(${editId || 'null'})">${dish ? 'Speichern' : 'Erstellen'}</button>
+        </div>
+      </div>
+    </div>
+  `;
+  updateAutoAllergens();
+}
+
+function updateAutoAllergens() {
+  const picks = document.querySelectorAll('#d-ing-pick .ing-tag-on');
+  const ids = [...picks].map(el => parseInt(el.dataset.id));
+  const allergens = [...new Set(ids.flatMap(id => {
+    const ing = CACHE.ingredients.find(i => i.id === id);
+    return ing?.allergens ? ing.allergens.split(', ').filter(Boolean) : [];
+  }))].sort();
+
+  const el = $('d-auto-allergens');
+  if (allergens.length > 0) {
+    el.innerHTML = `<div style="padding:6px 10px;background:rgba(184,90,58,0.08);border-radius:4px"><span style="font-size:0.72rem;font-weight:600;color:var(--terra)">Berechnete Allergene: </span>${allergens.map(a => '<span class="aller">' + a + '</span>').join('')}</div>`;
+  } else { el.innerHTML = ''; }
+}
+
+async function saveDish(editId) {
+  const picks = document.querySelectorAll('#d-ing-pick .ing-tag-on');
+  const data = {
+    name: $('d-name').value,
+    name_it: $('d-name-it').value || null,
+    description: $('d-desc').value || null,
+    category: $('d-cat').value,
+    base_price: $('d-price').value ? parseFloat($('d-price').value) : null,
+    is_vegetarian: $('d-veg').checked,
+    is_vegan: $('d-vegan').checked,
+    notes: $('d-notes').value || null,
+    ingredient_ids: [...picks].map(el => parseInt(el.dataset.id)),
+  };
+  if (!data.name) return;
+  try {
+    if (editId) await api('PUT', '/dishes/' + editId, data);
+    else await api('POST', '/dishes', data);
+    renderDishes();
+    msg(editId ? 'Gericht aktualisiert.' : 'Gericht erstellt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// SPEISEKARTE
+// ═══════════════════════════════════════════
+async function renderMenu() {
+  try {
+    CACHE.menu = await api('GET', '/menu');
+    CACHE.dishes = await api('GET', '/dishes?active=true');
+  } catch (e) { msg(e.message, false); return; }
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Speisekarte verwalten</h3>
+        <button class="btn btn-ok" onclick="exportSpeisekarte()">🔄 Auf Website exportieren</button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.8rem">Kategorien und Gerichte zusammenstellen. Nach Änderungen "Exportieren" klicken.</p>
+    </div>
+    ${CACHE.menu.map(cat => `
+      <div class="card">
+        <div class="card-h">
+          <h3>${cat.name} (${(cat.items || []).length})</h3>
+          <button class="btn btn-sm btn-p" onclick="toggleAddItem(${cat.id})">+ Gericht</button>
+        </div>
+        <div id="add-item-${cat.id}" class="hidden" style="margin-bottom:0.8rem"></div>
+        <table><thead><tr><th>Gericht</th><th>Beschreibung</th><th>Preis</th><th>Allergene</th><th style="width:36px"></th></tr></thead>
+        <tbody>${(cat.items || []).length === 0 ? '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:0.8rem">Keine Gerichte.</td></tr>' :
+    (cat.items || []).map(it => `<tr>
+          <td><strong>${it.name}</strong></td>
+          <td style="font-size:0.78rem;color:var(--text-muted)">${it.description || '–'}</td>
+          <td>${it.price?.toFixed(2).replace('.', ',')  || '0,00'} €</td>
+          <td>${it.allergens ? it.allergens.split(', ').map(a => '<span class="aller">' + a + '</span>').join('') : '–'}</td>
+          <td><button class="btn btn-sm" onclick="removeMenuItem(${it.id})" title="Entfernen" style="background:none;border:none;cursor:pointer;font-size:0.9rem">✕</button></td>
+        </tr>`).join('')}</tbody></table>
+      </div>
+    `).join('')}
+    <div class="card" style="border-style:dashed">
+      <div style="display:flex;gap:6px;align-items:flex-end">
+        <div class="fg" style="flex:1;margin-bottom:0"><label>Neue Kategorie</label><input id="new-cat-name" placeholder="z.B. Vorspeisen, Hauptgerichte..." onkeydown="if(event.key==='Enter')addMenuCategory()"></div>
+        <button class="btn btn-p" onclick="addMenuCategory()">Erstellen</button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleAddItem(catId) {
+  const el = $('add-item-' + catId);
+  if (!el.classList.contains('hidden')) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+  el.classList.remove('hidden');
+  el.innerHTML = `<div style="display:flex;gap:6px;align-items:flex-end">
+    <div class="fg" style="flex:2;margin-bottom:0"><label>Gericht aus Kochbuch</label><select id="ai-dish-${catId}" onchange="aiDishChanged(${catId})"><option value="">Wählen...</option>${CACHE.dishes.map(d => `<option value="${d.id}" data-price="${d.base_price || 0}">${d.name}${d.base_price ? ' (' + d.base_price.toFixed(2) + ' €)' : ''}</option>`).join('')}</select></div>
+    <div class="fg" style="flex:1;margin-bottom:0"><label>Preis (€)</label><input id="ai-price-${catId}" type="number" step="0.10"></div>
+    <button class="btn btn-ok btn-sm" onclick="addMenuItem(${catId})">Hinzufügen</button>
+  </div>`;
+}
+
+function aiDishChanged(catId) {
+  const sel = $('ai-dish-' + catId);
+  const opt = sel.options[sel.selectedIndex];
+  $('ai-price-' + catId).value = opt?.dataset.price || '';
+}
+
+async function addMenuItem(catId) {
+  const dish_id = parseInt($('ai-dish-' + catId).value);
+  const price = parseFloat($('ai-price-' + catId).value);
+  if (!dish_id || isNaN(price)) return;
+  try { await api('POST', '/menu/items', { category_id: catId, dish_id, price }); renderMenu(); msg('Hinzugefügt.'); } catch (e) { msg(e.message, false); }
+}
+
+async function removeMenuItem(id) {
+  if (!confirm('Von der Karte entfernen?')) return;
+  try { await api('DELETE', '/menu/items/' + id); renderMenu(); } catch (e) { msg(e.message, false); }
+}
+
+async function addMenuCategory() {
+  const name = $('new-cat-name')?.value;
+  if (!name) return;
+  try { await api('POST', '/menu/categories', { name, sort_order: CACHE.menu.length * 10 }); renderMenu(); msg('Kategorie erstellt.'); } catch (e) { msg(e.message, false); }
+}
+
+async function exportSpeisekarte() {
+  try { const r = await api('POST', '/export/speisekarte'); msg(r.message); } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// WOCHENKARTE
+// ═══════════════════════════════════════════
+const DAY_NAMES = { 1: 'Mo', 2: 'Di', 3: 'Mi', 4: 'Do', 5: 'Fr', 6: 'Sa' };
+
+async function renderWeekly() {
+  try {
+    CACHE.weeklyMenus = await api('GET', '/weekly-menu');
+    CACHE.dishes = await api('GET', '/dishes?active=true');
+  } catch (e) { msg(e.message, false); return; }
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Wochenkarten</h3>
+        <button class="btn btn-p" onclick="openWeeklyModal()">+ Neue Wochenkarte</button>
+      </div>
+      <table>
+        <thead><tr><th>Woche</th><th>Modus</th><th>Gerichte</th><th>Status</th><th style="width:110px"></th></tr></thead>
+        <tbody>${CACHE.weeklyMenus.length === 0 ? '<tr><td colspan="5" class="empty">Noch keine Wochenkarten.</td></tr>' :
+    CACHE.weeklyMenus.map(m => `<tr>
+          <td><strong>ab ${new Date(m.week_start).toLocaleDateString('de-DE')}</strong></td>
+          <td><span class="badge b-muted">${m.mode === 'daily' ? 'Tagesgerichte' : 'Wochengericht'}</span></td>
+          <td style="font-size:0.78rem">${(m.items || []).map(i => i.dish_name).join(', ') || '–'}</td>
+          <td>${m.is_published ? '<span class="badge b-ok">Veröffentlicht</span>' : '<span class="badge b-gold">Entwurf</span>'}</td>
+          <td>${!m.is_published ? `<button class="btn btn-sm btn-ok" onclick="publishWeekly(${m.id})">Veröffentlichen</button>` : ''}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div id="weekly-modal"></div>
+  `;
+}
+
+function openWeeklyModal() {
+  const nextMon = getNextMonday();
+  $('weekly-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" style="max-width:600px" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Neue Wochenkarte</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="row">
+            <div class="fg"><label>Woche ab (Montag)</label><input id="wk-start" type="date" value="${nextMon}"></div>
+            <div class="fg"><label>Modus</label><select id="wk-mode" onchange="toggleWeeklyMode()"><option value="daily">Jeden Tag ein Gericht</option><option value="weekly">Ganze Woche ein Gericht</option></select></div>
+          </div>
+          <div id="wk-days">
+            ${[1,2,3,4,5,6].map(d => `<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+              <span style="width:24px;font-weight:600;font-size:0.78rem;color:var(--terra)">${DAY_NAMES[d]}</span>
+              <select id="wk-d${d}" style="flex:2"><option value="">– kein Gericht –</option>${CACHE.dishes.map(di => `<option value="${di.id}" data-price="${di.base_price||0}">${di.name}</option>`).join('')}</select>
+              <input id="wk-p${d}" type="number" step="0.10" style="width:70px" placeholder="€">
+            </div>`).join('')}
+          </div>
+          <div id="wk-single" class="hidden">
+            <div style="display:flex;gap:6px;align-items:center">
+              <select id="wk-d0" style="flex:2"><option value="">Wochengericht wählen...</option>${CACHE.dishes.map(d => `<option value="${d.id}" data-price="${d.base_price||0}">${d.name}</option>`).join('')}</select>
+              <input id="wk-p0" type="number" step="0.10" style="width:70px" placeholder="€">
+            </div>
+          </div>
+          <div class="fg" style="margin-top:0.8rem"><label>Fußnote (optional)</label><input id="wk-note" placeholder="z.B. Alle Gerichte inkl. Salat"></div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveWeekly()">Erstellen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleWeeklyMode() {
+  const daily = $('wk-mode').value === 'daily';
+  $('wk-days').classList.toggle('hidden', !daily);
+  $('wk-single').classList.toggle('hidden', daily);
+}
+
+function getNextMonday() {
+  const d = new Date(); const day = d.getDay(); d.setDate(d.getDate() + (day === 0 ? 1 : 8 - day));
+  return d.toISOString().split('T')[0];
+}
+
+async function saveWeekly() {
+  const mode = $('wk-mode').value;
+  const items = [];
+  if (mode === 'daily') {
+    for (let d = 1; d <= 6; d++) {
+      const did = $('wk-d' + d)?.value;
+      if (did) items.push({ dish_id: parseInt(did), day_of_week: d, price: parseFloat($('wk-p' + d)?.value || 0) });
+    }
+  } else {
+    const did = $('wk-d0')?.value;
+    if (did) items.push({ dish_id: parseInt(did), day_of_week: null, price: parseFloat($('wk-p0')?.value || 0) });
+  }
+  try {
+    await api('POST', '/weekly-menu', { week_start: $('wk-start').value, mode, note: $('wk-note').value, items });
+    renderWeekly();
+    msg('Wochenkarte erstellt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function publishWeekly(id) {
+  try { const r = await api('POST', '/weekly-menu/' + id + '/publish'); msg(r.message); renderWeekly(); } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// RESERVIERUNGEN
+// ═══════════════════════════════════════════
+let resDateFilter = '';
+let resStatusFilter = '';
+
+async function renderReservations() {
+  if (!resDateFilter) resDateFilter = new Date().toISOString().split('T')[0];
+  let reservations = [];
+  let stats = {};
+  try {
+    const params = resDateFilter ? `?date=${resDateFilter}` : resStatusFilter ? `?status=${resStatusFilter}` : '';
+    reservations = await api('GET', '/reservations' + params);
+    stats = await api('GET', '/reservations/stats');
+  } catch (e) { msg(e.message, false); return; }
+
+  const statusBadge = (s) => {
+    const map = { pending: 'b-gold', confirmed: 'b-ok', declined: 'b-muted', cancelled: 'b-muted', no_show: 'badge b-terra', completed: 'b-ok' };
+    const labels = { pending: 'Offen', confirmed: 'Bestätigt', declined: 'Abgelehnt', cancelled: 'Storniert', no_show: 'No-Show', completed: 'Abgeschlossen' };
+    return `<span class="badge ${map[s] || 'b-muted'}">${labels[s] || s}</span>`;
+  };
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="stat-icon">📆</div><div class="stat-val">${stats.todayCount || 0}</div><div class="stat-lbl">Heute (${stats.todayGuests || 0} Gäste)</div></div>
+      <div class="stat" style="${stats.pendingCount > 0 ? 'border-color:var(--warning)' : ''}"><div class="stat-icon">⏳</div><div class="stat-val">${stats.pendingCount || 0}</div><div class="stat-lbl">Offene Anfragen</div></div>
+      <div class="stat"><div class="stat-icon">🔥</div><div class="stat-val">${stats.peakTime || '–'}</div><div class="stat-lbl">${stats.peakTime ? stats.peakGuests + ' Gäste (Stärkste Uhrzeit)' : 'Keine Reservierungen heute'}</div></div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h3>Reservierungen</h3>
+        <div class="btns">
+          <button class="btn btn-sm btn-s" onclick="resStatusFilter='pending';resDateFilter='';renderReservations()">⏳ Offene</button>
+          <button class="btn btn-sm btn-p" onclick="openNewReservation()">+ Neue Reservierung</button>
+        </div>
+      </div>
+      <div class="search">
+        <input id="res-date" type="date" value="${resDateFilter}" onchange="resDateFilter=this.value;resStatusFilter='';renderReservations()" style="width:170px">
+        <button class="btn btn-sm btn-s" onclick="resDateFilter=getTodayStr();resStatusFilter='';renderReservations()">Heute</button>
+        <button class="btn btn-sm btn-s" onclick="resDateFilter=getTomorrowStr();resStatusFilter='';renderReservations()">Morgen</button>
+        <button class="btn btn-sm btn-s" onclick="resDateFilter='';resStatusFilter='';renderReservations()">Alle</button>
+      </div>
+      <table>
+        <thead><tr><th>Zeit</th><th>Name</th><th>Personen</th><th>Kontakt</th><th>Wünsche</th><th>Status</th><th>Aktionen</th></tr></thead>
+        <tbody>${reservations.length === 0 ? '<tr><td colspan="7" class="empty">Keine Reservierungen für diesen Zeitraum.</td></tr>' :
+    reservations.map(r => `<tr>
+          <td><strong>${r.time}</strong><br><span style="font-size:0.72rem;color:var(--text-muted)">${formatDateShort(r.date)}</span></td>
+          <td><strong>${esc(r.guest_name)}</strong></td>
+          <td style="text-align:center"><strong>${r.party_size}</strong></td>
+          <td style="font-size:0.78rem">${r.guest_phone ? esc(r.guest_phone) + '<br>' : ''}${r.guest_email ? esc(r.guest_email) : ''}</td>
+          <td style="font-size:0.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis">${esc(r.message || '–')}</td>
+          <td>${statusBadge(r.status)}<br><span class="badge b-muted">${r.source}</span></td>
+          <td>
+            <div class="btns" style="flex-wrap:nowrap">
+              ${r.status === 'pending' ? `<button class="btn btn-sm btn-ok" onclick="confirmRes(${r.id})">✓</button><button class="btn btn-sm btn-d" onclick="declineRes(${r.id})">✕</button>` : ''}
+              ${r.status === 'confirmed' ? `<button class="btn btn-sm btn-s" onclick="cancelRes(${r.id})">Storno</button>` : ''}
+            </div>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h3>Gesperrte Tage</h3>
+        <button class="btn btn-sm btn-p" onclick="openBlockDate()">+ Tag sperren</button>
+      </div>
+      <div id="blocked-dates-list">Laden...</div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h3>Sonder-Öffnungstage</h3>
+        <button class="btn btn-sm btn-ok" onclick="openSpecialOpen()">+ Sonder-Öffnung</button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.6rem">Für Tage die normalerweise Ruhetag sind (z.B. Sonntag), aber ausnahmsweise geöffnet.</p>
+      <div id="special-open-list">Laden...</div>
+    </div>
+    <div id="res-modal"></div>
+  `;
+  loadBlockedDates();
+  loadSpecialOpen();
+}
+
+function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+function getTomorrowStr() { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; }
+function formatDateShort(d) { return new Date(d).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }); }
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function confirmRes(id) { try { await api('PUT', '/reservations/' + id + '/confirm'); msg('Reservierung bestätigt.'); renderReservations(); } catch (e) { msg(e.message, false); } }
+async function declineRes(id) { if (!confirm('Reservierung ablehnen?')) return; try { await api('PUT', '/reservations/' + id + '/decline'); msg('Abgelehnt.'); renderReservations(); } catch (e) { msg(e.message, false); } }
+async function cancelRes(id) { if (!confirm('Reservierung stornieren?')) return; try { await api('PUT', '/reservations/' + id + '/cancel'); msg('Storniert.'); renderReservations(); } catch (e) { msg(e.message, false); } }
+
+function openNewReservation() {
+  const today = getTodayStr();
+  document.getElementById('res-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Neue Reservierung</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Name *</label><input id="nr-name"></div>
+          <div class="row">
+            <div class="fg"><label>Telefon</label><input id="nr-phone"></div>
+            <div class="fg"><label>E-Mail</label><input id="nr-email" type="email"></div>
+          </div>
+          <div class="row3">
+            <div class="fg"><label>Datum *</label><input id="nr-date" type="date" value="${today}"></div>
+            <div class="fg"><label>Uhrzeit *</label><input id="nr-time" type="time" value="19:00"></div>
+            <div class="fg"><label>Personen *</label><input id="nr-size" type="number" value="2" min="1" max="20"></div>
+          </div>
+          <div class="fg"><label>Quelle</label><select id="nr-source"><option value="phone">Telefon</option><option value="email">E-Mail</option><option value="walkin">Walk-in</option><option value="whatsapp">WhatsApp</option></select></div>
+          <div class="fg"><label>Wünsche / Notizen</label><textarea id="nr-msg"></textarea></div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveNewReservation()">Reservierung eintragen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveNewReservation() {
+  try {
+    await api('POST', '/reservations', {
+      guest_name: $('nr-name').value,
+      guest_phone: $('nr-phone').value || null,
+      guest_email: $('nr-email').value || null,
+      date: $('nr-date').value,
+      time: $('nr-time').value,
+      party_size: parseInt($('nr-size').value),
+      source: $('nr-source').value,
+      message: $('nr-msg').value || null,
+      status: 'confirmed',
+    });
+    renderReservations();
+    msg('Reservierung eingetragen.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function loadBlockedDates() {
+  try {
+    const dates = await api('GET', '/reservations/blocked-dates/list');
+    $('blocked-dates-list').innerHTML = dates.length === 0 ? '<p style="color:var(--text-muted);font-size:0.82rem">Keine gesperrten Tage.</p>' :
+      '<table><thead><tr><th>Datum</th><th>Grund</th><th>Art</th><th></th></tr></thead><tbody>' +
+      dates.map(d => `<tr>
+        <td><strong>${formatDateShort(d.date)}</strong></td>
+        <td>${esc(d.reason)}</td>
+        <td>${d.is_full_day ? 'Ganzer Tag' : d.blocked_from + '–' + d.blocked_until}</td>
+        <td><button class="btn btn-sm btn-s" onclick="unblockDate(${d.id})">Aufheben</button></td>
+      </tr>`).join('') + '</tbody></table>';
+  } catch (e) { $('blocked-dates-list').innerHTML = 'Fehler'; }
+}
+
+function openBlockDate() {
+  document.getElementById('res-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Tag sperren</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="row">
+            <div class="fg"><label>Datum *</label><input id="bd-date" type="date"></div>
+            <div class="fg"><label>Grund *</label><input id="bd-reason" placeholder="Betriebsferien, Geschl. Gesellschaft..."></div>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveBlockDate()">Sperren</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveBlockDate() {
+  try {
+    await api('POST', '/reservations/blocked-dates', { date: $('bd-date').value, reason: $('bd-reason').value });
+    renderReservations();
+    msg('Tag gesperrt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function unblockDate(id) {
+  if (!confirm('Sperrung aufheben?')) return;
+  try { await api('DELETE', '/reservations/blocked-dates/' + id); loadBlockedDates(); msg('Sperrung aufgehoben.'); } catch (e) { msg(e.message, false); }
+}
+
+// Sonder-Öffnungstage
+async function loadSpecialOpen() {
+  try {
+    const dates = await api('GET', '/reservations/special-open/list');
+    $('special-open-list').innerHTML = dates.length === 0 ? '<p style="color:var(--text-muted);font-size:0.82rem">Keine Sonder-Öffnungstage.</p>' :
+      '<table><thead><tr><th>Datum</th><th>Grund</th><th>Öffnungszeit</th><th></th></tr></thead><tbody>' +
+      dates.map(d => `<tr>
+        <td><strong>${formatDateShort(d.date)}</strong></td>
+        <td>${esc(d.reason)}</td>
+        <td>${d.open_from} – ${d.open_until}</td>
+        <td><button class="btn btn-sm btn-s" onclick="removeSpecialOpen(${d.id})">Entfernen</button></td>
+      </tr>`).join('') + '</tbody></table>';
+  } catch (e) { $('special-open-list').innerHTML = 'Fehler'; }
+}
+
+function openSpecialOpen() {
+  document.getElementById('res-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Sonder-Öffnung eintragen</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.8rem">Für Tage die normalerweise Ruhetag sind, aber ausnahmsweise geöffnet werden (z.B. private Feier am Sonntag).</p>
+          <div class="fg"><label>Datum *</label><input id="so-date" type="date"></div>
+          <div class="fg"><label>Grund *</label><input id="so-reason" placeholder="Private Feier, Sonderveranstaltung..."></div>
+          <div class="row">
+            <div class="fg"><label>Geöffnet von</label><input id="so-from" type="time" value="11:00"></div>
+            <div class="fg"><label>Geöffnet bis</label><input id="so-until" type="time" value="22:00"></div>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-ok" onclick="saveSpecialOpen()">Eintragen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveSpecialOpen() {
+  try {
+    await api('POST', '/reservations/special-open', {
+      date: $('so-date').value,
+      reason: $('so-reason').value,
+      open_from: $('so-from').value || '11:00',
+      open_until: $('so-until').value || '22:00',
+    });
+    renderReservations();
+    msg('Sonder-Öffnung eingetragen.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function removeSpecialOpen(id) {
+  if (!confirm('Sonder-Öffnung entfernen?')) return;
+  try { await api('DELETE', '/reservations/special-open/' + id); loadSpecialOpen(); msg('Entfernt.'); } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// KUNDEN
+// ═══════════════════════════════════════════
+async function renderCustomers() {
+  let customers = [];
+  try { customers = await api('GET', '/customers'); } catch (e) { msg(e.message, false); return; }
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Kunden – ${customers.length}</h3>
+        <button class="btn btn-p" onclick="openNewCustomer()">+ Neuer Kunde</button>
+      </div>
+      <div class="search">
+        <input id="cust-search" placeholder="Suche nach Name, E-Mail, Telefon..." oninput="filterCustomers()">
+      </div>
+      <div id="cust-table"></div>
+    </div>
+    <div id="cust-modal"></div>
+  `;
+  CACHE.customers = customers;
+  filterCustomers();
+}
+
+function filterCustomers() {
+  const q = ($('cust-search')?.value || '').toLowerCase();
+  const filtered = (CACHE.customers || []).filter(c => {
+    if (!q) return true;
+    return c.name.toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q) || (c.phone || '').includes(q) || (c.company || '').toLowerCase().includes(q);
+  });
+
+  $('cust-table').innerHTML = `<table>
+    <thead><tr><th>Name</th><th>E-Mail</th><th>Telefon</th><th>Firma</th><th>Notizen</th><th></th></tr></thead>
+    <tbody>${filtered.length === 0 ? '<tr><td colspan="6" class="empty">Keine Kunden gefunden.</td></tr>' :
+    filtered.map(c => `<tr>
+      <td><strong>${esc(c.name)}</strong>${c.is_business_customer ? ' <span class="badge b-gold">Geschäftskunde</span>' : ''}</td>
+      <td style="font-size:0.78rem">${esc(c.email || '–')}</td>
+      <td style="font-size:0.78rem">${esc(c.phone || '–')}</td>
+      <td style="font-size:0.78rem">${esc(c.company || '–')}</td>
+      <td style="font-size:0.78rem;max-width:120px;overflow:hidden;text-overflow:ellipsis">${esc(c.notes || '–')}</td>
+      <td><button class="btn btn-sm btn-s" onclick="editCustomer(${c.id})">✏️</button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function openNewCustomer() {
+  showCustomerModal(null);
+}
+
+function editCustomer(id) {
+  const c = (CACHE.customers || []).find(x => x.id === id);
+  showCustomerModal(c);
+}
+
+function showCustomerModal(c) {
+  const container = $('cust-modal') || document.getElementById('page-content');
+  container.insertAdjacentHTML('beforeend', `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>${c ? 'Kunde bearbeiten' : 'Neuer Kunde'}</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Name *</label><input id="c-name" value="${c?.name || ''}"></div>
+          <div class="row">
+            <div class="fg"><label>E-Mail</label><input id="c-email" value="${c?.email || ''}"></div>
+            <div class="fg"><label>Telefon</label><input id="c-phone" value="${c?.phone || ''}"></div>
+          </div>
+          <div class="row">
+            <div class="fg"><label>Firma</label><input id="c-company" value="${c?.company || ''}"></div>
+            <div class="fg" style="display:flex;align-items:flex-end">
+              <div class="check"><input type="checkbox" id="c-biz" ${c?.is_business_customer ? 'checked' : ''}><label for="c-biz">Geschäftskunde</label></div>
+            </div>
+          </div>
+          <div class="fg"><label>Notizen</label><textarea id="c-notes">${c?.notes || ''}</textarea></div>
+        </div>
+        <div class="modal-f">
+          ${c ? '<button class="btn btn-d btn-sm" onclick="gdprDelete(' + c.id + ')" style="margin-right:auto">🗑 DSGVO löschen</button>' : ''}
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveCustomer(${c?.id || 'null'})">${c ? 'Speichern' : 'Erstellen'}</button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+async function saveCustomer(id) {
+  const data = {
+    name: $('c-name').value,
+    email: $('c-email').value || null,
+    phone: $('c-phone').value || null,
+    company: $('c-company').value || null,
+    is_business_customer: $('c-biz').checked,
+    notes: $('c-notes').value || null,
+  };
+  if (!data.name) return;
+  try {
+    if (id) await api('PUT', '/customers/' + id, data);
+    else await api('POST', '/customers', data);
+    renderCustomers();
+    msg(id ? 'Kunde aktualisiert.' : 'Kunde erstellt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function gdprDelete(id) {
+  if (!confirm('ACHTUNG: Kundendaten werden DSGVO-konform pseudonymisiert.\n\nDas bedeutet:\n- Name, E-Mail, Telefon → gelöscht\n- Reservierungen → anonymisiert\n- Rechnungen → bleiben (Aufbewahrungspflicht)\n\nDieser Vorgang kann NICHT rückgängig gemacht werden!\n\nFortfahren?')) return;
+  try {
+    await api('DELETE', '/customers/' + id + '/gdpr');
+    renderCustomers();
+    msg('Kundendaten DSGVO-konform pseudonymisiert.');
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// BESTELLUNGEN
+// ═══════════════════════════════════════════
+async function renderOrders() {
+  let orders = [], active = [];
+  try {
+    active = await api('GET', '/orders/active');
+    orders = await api('GET', '/orders');
+    CACHE.dishes = await api('GET', '/dishes?active=true');
+  } catch (e) { msg(e.message, false); return; }
+
+  const statusLabel = { 'new': '🔵 Neu', confirmed: '🟡 Bestätigt', preparing: '🟠 Zubereitung', ready: '🟢 Abholbereit', completed: '✅ Abgeschlossen', cancelled: '❌ Storniert' };
+  const statusBadge = { 'new': 'b-terra', confirmed: 'b-gold', preparing: 'b-gold', ready: 'b-ok', completed: 'b-muted', cancelled: 'b-muted' };
+
+  document.getElementById('page-content').innerHTML = `
+    ${active.length > 0 ? '<div class="card"><div class="card-h"><h3>🔴 Aktive Bestellungen (${active.length})</h3></div>' +
+      '<table><thead><tr><th>#</th><th>Name</th><th>Gerichte</th><th>Abholung</th><th>Summe</th><th>Status</th><th></th></tr></thead><tbody>' +
+      active.map(o => '<tr>' +
+        '<td><strong>#' + o.id + '</strong></td>' +
+        '<td>' + esc(o.guest_name || 'Gast') + (o.guest_phone ? '<br><span style="font-size:0.72rem;color:var(--text-muted)">' + esc(o.guest_phone) + '</span>' : '') + '</td>' +
+        '<td style="font-size:0.78rem">' + (o.items || []).map(i => i.quantity + 'x ' + i.dish_name).join(', ') + '</td>' +
+        '<td>' + (o.pickup_time || '–') + '</td>' +
+        '<td><strong>' + (o.total?.toFixed(2).replace('.',',') || '0,00') + ' €</strong></td>' +
+        '<td><span class="badge ' + (statusBadge[o.status] || 'b-muted') + '">' + (statusLabel[o.status] || o.status) + '</span></td>' +
+        '<td><div class="btns">' + nextStatusButtons(o) + '</div></td>' +
+      '</tr>').join('') + '</tbody></table></div>' : ''}
+    <div class="card">
+      <div class="card-h">
+        <h3>Neue Bestellung aufnehmen</h3>
+      </div>
+      <div class="fg"><label>Name</label><input id="o-name" placeholder="Kundenname"></div>
+      <div class="row">
+        <div class="fg"><label>Telefon</label><input id="o-phone" placeholder="Für Rückruf"></div>
+        <div class="fg"><label>Abholzeit</label><input id="o-time" type="time"></div>
+      </div>
+      <div class="fg"><label>Gerichte hinzufügen</label>
+        <div id="o-items-list"></div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <select id="o-dish" style="flex:2">
+            ${CACHE.dishes.filter(d => ['pinse','sonstiges'].includes(d.category) || d.base_price).map(d => '<option value="' + d.id + '" data-price="' + (d.base_price||0) + '">' + d.name + (d.base_price ? ' (' + d.base_price.toFixed(2) + ' €)' : '') + '</option>').join('')}
+          </select>
+          <input id="o-qty" type="number" value="1" min="1" style="width:60px">
+          <button class="btn btn-sm btn-p" onclick="addOrderItem()">+</button>
+        </div>
+      </div>
+      <div style="margin-top:8px;font-size:0.9rem;font-weight:600">Summe: <span id="o-total">0,00</span> €</div>
+      <div class="fg" style="margin-top:8px"><label>Notizen</label><input id="o-notes" placeholder="Sonderwünsche..."></div>
+      <button class="btn btn-p" style="margin-top:8px" onclick="submitOrder()">Bestellung aufnehmen</button>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Letzte Bestellungen</h3></div>
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Gerichte</th><th>Summe</th><th>Status</th><th>Datum</th></tr></thead>
+        <tbody>${orders.filter(o => !['new','confirmed','preparing','ready'].includes(o.status)).slice(0,20).map(o => '<tr>' +
+          '<td>#' + o.id + '</td><td>' + esc(o.guest_name || 'Gast') + '</td>' +
+          '<td style="font-size:0.78rem">' + (o.items || []).map(i => i.quantity + 'x ' + i.dish_name).join(', ') + '</td>' +
+          '<td>' + (o.total?.toFixed(2).replace('.',',') || '0') + ' €</td>' +
+          '<td><span class="badge ' + (statusBadge[o.status] || 'b-muted') + '">' + (statusLabel[o.status] || o.status) + '</span></td>' +
+          '<td style="font-size:0.72rem">' + new Date(o.created_at).toLocaleDateString('de-DE') + '</td></tr>').join('') || '<tr><td colspan="6" class="empty">Keine Bestellungen.</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+  window._orderItems = [];
+}
+
+function nextStatusButtons(o) {
+  const next = { 'new': 'confirmed', confirmed: 'preparing', preparing: 'ready', ready: 'completed' };
+  const labels = { confirmed: 'Bestätigen', preparing: 'In Zubereitung', ready: 'Abholbereit', completed: 'Abgeschlossen' };
+  let html = '';
+  if (next[o.status]) html += '<button class="btn btn-sm btn-ok" onclick="setOrderStatus(' + o.id + ',\'' + next[o.status] + '\')">' + labels[next[o.status]] + '</button>';
+  if (o.status !== 'completed' && o.status !== 'cancelled') html += '<button class="btn btn-sm btn-s" onclick="setOrderStatus(' + o.id + ',\'cancelled\')">Storno</button>';
+  return html;
+}
+
+async function setOrderStatus(id, status) {
+  try { await api('PUT', '/orders/' + id + '/status', { status }); renderOrders(); msg('Status aktualisiert.'); } catch (e) { msg(e.message, false); }
+}
+
+window._orderItems = [];
+function addOrderItem() {
+  const sel = $('o-dish'); const opt = sel.options[sel.selectedIndex];
+  const qty = parseInt($('o-qty').value) || 1;
+  window._orderItems.push({ dish_id: parseInt(sel.value), name: opt.text.split('(')[0].trim(), quantity: qty, price: parseFloat(opt.dataset.price) || 0 });
+  renderOrderItems();
+}
+function renderOrderItems() {
+  let total = 0;
+  $('o-items-list').innerHTML = window._orderItems.map((it, i) => { total += it.price * it.quantity; return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--cream-dark)"><span>' + it.quantity + 'x ' + esc(it.name) + '</span><span>' + (it.price * it.quantity).toFixed(2).replace('.',',') + ' € <button class="btn btn-sm" onclick="removeOrderItem(' + i + ')" style="background:none;border:none;cursor:pointer">✕</button></span></div>'; }).join('');
+  $('o-total').textContent = total.toFixed(2).replace('.',',');
+}
+function removeOrderItem(i) { window._orderItems.splice(i, 1); renderOrderItems(); }
+
+async function submitOrder() {
+  if (window._orderItems.length === 0) { msg('Füge mindestens ein Gericht hinzu.', false); return; }
+  try {
+    const r = await api('POST', '/orders', { guest_name: $('o-name').value || 'Gast', guest_phone: $('o-phone').value || null, pickup_time: $('o-time').value || null, notes: $('o-notes').value || null, items: window._orderItems.map(i => ({ dish_id: i.dish_id, quantity: i.quantity })) });
+    window._orderItems = [];
+    renderOrders(); msg(r.message);
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// RECHNUNGEN
+// ═══════════════════════════════════════════
+async function renderInvoices() {
+  let invoices = [], customers = [];
+  try {
+    invoices = await api('GET', '/invoices');
+    customers = await api('GET', '/customers');
+  } catch (e) { msg(e.message, false); return; }
+
+  const statusLabel = { draft: 'Entwurf', sent: 'Versendet', paid: 'Bezahlt', overdue: 'Überfällig', cancelled: 'Storniert' };
+  const statusBadge = { draft: 'b-muted', sent: 'b-gold', paid: 'b-ok', overdue: 'b-terra', cancelled: 'b-muted' };
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Rechnungen – ${invoices.length}</h3>
+        <button class="btn btn-p" onclick="openNewInvoice()">+ Neue Rechnung</button>
+      </div>
+      <table>
+        <thead><tr><th>Nr.</th><th>Kunde</th><th>Zeitraum</th><th>Summe</th><th>Status</th><th>Fällig</th><th></th></tr></thead>
+        <tbody>${invoices.length === 0 ? '<tr><td colspan="7" class="empty">Keine Rechnungen.</td></tr>' :
+    invoices.map(inv => '<tr>' +
+      '<td><strong>' + esc(inv.invoice_number) + '</strong></td>' +
+      '<td>' + esc(inv.company || inv.customer_name) + '</td>' +
+      '<td style="font-size:0.78rem">' + inv.period_from + ' – ' + inv.period_to + '</td>' +
+      '<td><strong>' + inv.total.toFixed(2).replace('.',',') + ' €</strong></td>' +
+      '<td><span class="badge ' + (statusBadge[inv.status] || 'b-muted') + '">' + (statusLabel[inv.status] || inv.status) + '</span></td>' +
+      '<td style="font-size:0.78rem">' + (inv.due_date || '–') + '</td>' +
+      '<td><div class="btns">' +
+        '<a class="btn btn-sm btn-s" href="/api/invoices/' + inv.id + '/pdf" target="_blank">PDF</a>' +
+        (inv.status === 'draft' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'sent\')">Versendet</button>' : '') +
+        (inv.status === 'sent' ? '<button class="btn btn-sm btn-ok" onclick="markInvoice(' + inv.id + ',\'paid\')">Bezahlt</button>' : '') +
+      '</div></td></tr>').join('')}</tbody>
+      </table>
+    </div>
+    <div id="inv-modal"></div>
+  `;
+  CACHE.customers = customers;
+}
+
+async function markInvoice(id, status) {
+  try { await api('PUT', '/invoices/' + id, { status }); renderInvoices(); msg('Status aktualisiert.'); } catch (e) { msg(e.message, false); }
+}
+
+function openNewInvoice() {
+  const today = getTodayStr();
+  const firstOfMonth = today.substring(0, 8) + '01';
+  $('inv-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" style="max-width:600px" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Neue Rechnung</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Geschäftskunde *</label>
+            <select id="inv-cust">${(CACHE.customers || []).filter(c => c.is_business_customer).map(c => '<option value="' + c.id + '">' + esc(c.company || c.name) + '</option>').join('')}</select>
+          </div>
+          <div class="row">
+            <div class="fg"><label>Zeitraum von *</label><input id="inv-from" type="date" value="${firstOfMonth}"></div>
+            <div class="fg"><label>Zeitraum bis *</label><input id="inv-to" type="date" value="${today}"></div>
+          </div>
+          <div class="fg"><label>Fällig bis</label><input id="inv-due" type="date"></div>
+          <div class="fg"><label>Positionen</label><div id="inv-items"></div>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <input id="inv-item-date" type="date" value="${today}" style="width:130px">
+              <input id="inv-item-desc" placeholder="Beschreibung" style="flex:2">
+              <input id="inv-item-qty" type="number" value="1" min="1" style="width:50px">
+              <input id="inv-item-price" type="number" step="0.01" placeholder="€" style="width:70px">
+              <button class="btn btn-sm btn-p" onclick="addInvItem()">+</button>
+            </div>
+          </div>
+          <div class="fg"><label>Notizen</label><input id="inv-notes" placeholder="Optional"></div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveInvoice()">Rechnung erstellen</button>
+        </div>
+      </div>
+    </div>
+  `;
+  window._invItems = [];
+}
+
+window._invItems = [];
+function addInvItem() {
+  window._invItems.push({ date: $('inv-item-date').value, description: $('inv-item-desc').value, quantity: parseInt($('inv-item-qty').value) || 1, unit_price: parseFloat($('inv-item-price').value) || 0 });
+  $('inv-item-desc').value = ''; $('inv-item-price').value = '';
+  $('inv-items').innerHTML = window._invItems.map((it, i) => '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--cream-dark);font-size:0.82rem"><span>' + it.date + ' | ' + esc(it.description) + ' (' + it.quantity + 'x)</span><span>' + (it.unit_price * it.quantity).toFixed(2) + ' € <button onclick="window._invItems.splice(' + i + ',1);addInvItem()" style="background:none;border:none;cursor:pointer">✕</button></span></div>').join('');
+}
+
+async function saveInvoice() {
+  if (window._invItems.length === 0) { msg('Füge mindestens eine Position hinzu.', false); return; }
+  try {
+    const r = await api('POST', '/invoices', { customer_id: parseInt($('inv-cust').value), period_from: $('inv-from').value, period_to: $('inv-to').value, due_date: $('inv-due').value || null, notes: $('inv-notes').value || null, items: window._invItems });
+    window._invItems = [];
+    renderInvoices(); msg(r.message + ' (' + r.invoice_number + ', ' + r.total.toFixed(2) + ' €)');
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// SCHICHTPLAN
+// ═══════════════════════════════════════════
+let shiftWeek = '';
+function getMonday() { const d = new Date(); const day = d.getDay(); d.setDate(d.getDate() - (day === 0 ? 6 : day - 1)); return d.toISOString().split('T')[0]; }
+
+async function renderShifts() {
+  if (!shiftWeek) shiftWeek = getMonday();
+  let shifts = [], employees = [], templates = [];
+  try {
+    shifts = await api('GET', '/shifts?week=' + shiftWeek);
+    employees = await api('GET', '/shifts/employees');
+    templates = await api('GET', '/shifts/templates');
+  } catch (e) { msg(e.message, false); return; }
+
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(shiftWeek); d.setDate(d.getDate() + i);
+    days.push({ date: d.toISOString().split('T')[0], label: ['Mo','Di','Mi','Do','Fr','Sa','So'][i], full: d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) });
+  }
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Schichtplan – KW ${getKW(shiftWeek)}</h3>
+        <div class="btns">
+          <button class="btn btn-sm btn-s" onclick="shiftWeek=prevWeek(shiftWeek);renderShifts()">← Vorher</button>
+          <button class="btn btn-sm btn-s" onclick="shiftWeek=getMonday();renderShifts()">Heute</button>
+          <button class="btn btn-sm btn-s" onclick="shiftWeek=nextWeek(shiftWeek);renderShifts()">Weiter →</button>
+          <button class="btn btn-sm btn-p" onclick="openNewShift()">+ Schicht</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th style="width:100px">Mitarbeiter</th>${days.map(d => '<th style="text-align:center"><strong>' + d.label + '</strong><br><span style="font-size:0.68rem;color:var(--text-muted)">' + d.full + '</span></th>').join('')}</tr></thead>
+          <tbody>${employees.length === 0 ? '<tr><td colspan="8" class="empty">Keine Mitarbeiter. Erst unter System → Mitarbeiter + Schichtplan → Personal anlegen.</td></tr>' :
+    employees.map(emp => '<tr><td><strong>' + esc(emp.first_name) + '</strong><br><span style="font-size:0.68rem;color:var(--text-muted)">' + esc(emp.last_name) + '</span></td>' +
+      days.map(day => {
+        const dayShifts = shifts.filter(s => s.employee_id === emp.id && s.date === day.date);
+        return '<td style="text-align:center;font-size:0.78rem">' + (dayShifts.length === 0 ? '<span style="color:var(--cream-dark)">–</span>' :
+          dayShifts.map(s => '<div style="background:' + (s.color || 'var(--cream-dark)') + ';color:white;padding:2px 6px;border-radius:3px;margin:2px;font-size:0.7rem;cursor:pointer" onclick="deleteShift(' + s.id + ')" title="Klick zum Löschen">' + s.start_time + '-' + s.end_time + '</div>').join('')) + '</td>';
+      }).join('') + '</tr>').join('')}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Personal</h3><button class="btn btn-sm btn-p" onclick="openNewEmployee()">+ Mitarbeiter anlegen</button></div>
+      <table>
+        <thead><tr><th>Name</th><th>Typ</th><th>Stunden/Woche</th><th>Start</th></tr></thead>
+        <tbody>${employees.map(e => '<tr><td><strong>' + esc(e.first_name + ' ' + e.last_name) + '</strong></td><td><span class="badge b-muted">' + (e.employment_type || '–') + '</span></td><td>' + (e.weekly_hours || '–') + '</td><td>' + (e.start_date || '–') + '</td></tr>').join('') || '<tr><td colspan="4" class="empty">Keine Mitarbeiter.</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div id="shift-modal"></div>
+  `;
+  CACHE.employees = employees;
+  CACHE.shiftTemplates = templates;
+}
+
+function prevWeek(w) { const d = new Date(w); d.setDate(d.getDate() - 7); return d.toISOString().split('T')[0]; }
+function nextWeek(w) { const d = new Date(w); d.setDate(d.getDate() + 7); return d.toISOString().split('T')[0]; }
+function getKW(dateStr) { const d = new Date(dateStr); d.setHours(0,0,0,0); d.setDate(d.getDate()+3-(d.getDay()+6)%7); const y = new Date(d.getFullYear(),0,4); return Math.ceil((((d-y)/86400000)+y.getDay()+1)/7); }
+
+function openNewShift() {
+  $('shift-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Schicht eintragen</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Mitarbeiter *</label><select id="sh-emp">${(CACHE.employees || []).map(e => '<option value="' + e.id + '">' + e.first_name + ' ' + e.last_name + '</option>').join('')}</select></div>
+          <div class="fg"><label>Datum *</label><input id="sh-date" type="date" value="${shiftWeek}"></div>
+          <div class="fg"><label>Vorlage</label><select id="sh-tmpl" onchange="applyTemplate()"><option value="">Manuell</option>${(CACHE.shiftTemplates || []).map(t => '<option value="' + t.id + '" data-start="' + t.start_time + '" data-end="' + t.end_time + '">' + t.name + ' (' + t.start_time + '–' + t.end_time + ')</option>').join('')}</select></div>
+          <div class="row">
+            <div class="fg"><label>Von</label><input id="sh-from" type="time" value="09:00"></div>
+            <div class="fg"><label>Bis</label><input id="sh-to" type="time" value="14:00"></div>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveShift()">Eintragen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function applyTemplate() {
+  const sel = $('sh-tmpl'); const opt = sel.options[sel.selectedIndex];
+  if (opt.dataset.start) { $('sh-from').value = opt.dataset.start; $('sh-to').value = opt.dataset.end; }
+}
+
+async function saveShift() {
+  try {
+    await api('POST', '/shifts', { employee_id: parseInt($('sh-emp').value), date: $('sh-date').value, template_id: $('sh-tmpl').value ? parseInt($('sh-tmpl').value) : null, start_time: $('sh-from').value, end_time: $('sh-to').value });
+    renderShifts(); msg('Schicht eingetragen.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function deleteShift(id) {
+  if (!confirm('Schicht löschen?')) return;
+  try { await api('DELETE', '/shifts/' + id); renderShifts(); } catch (e) { msg(e.message, false); }
+}
+
+function openNewEmployee() {
+  $('shift-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Mitarbeiter anlegen</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="row">
+            <div class="fg"><label>Vorname *</label><input id="emp-fn"></div>
+            <div class="fg"><label>Nachname *</label><input id="emp-ln"></div>
+          </div>
+          <div class="row">
+            <div class="fg"><label>Anstellungsart</label><select id="emp-type"><option value="vollzeit">Vollzeit</option><option value="teilzeit">Teilzeit</option><option value="minijob">Minijob</option><option value="aushilfe">Aushilfe</option></select></div>
+            <div class="fg"><label>Stunden/Woche</label><input id="emp-hours" type="number" step="0.5"></div>
+          </div>
+          <div class="row">
+            <div class="fg"><label>Telefon</label><input id="emp-phone"></div>
+            <div class="fg"><label>Startdatum</label><input id="emp-start" type="date"></div>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveEmployee()">Anlegen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveEmployee() {
+  try {
+    await api('POST', '/shifts/employees', { first_name: $('emp-fn').value, last_name: $('emp-ln').value, employment_type: $('emp-type').value, weekly_hours: $('emp-hours').value ? parseFloat($('emp-hours').value) : null, phone: $('emp-phone').value || null, start_date: $('emp-start').value || null });
+    renderShifts(); msg('Mitarbeiter angelegt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// URLAUB & ABWESENHEIT
+// ═══════════════════════════════════════════
+async function renderTimeOff() {
+  let requests = [], employees = [];
+  try {
+    requests = await api('GET', '/shifts/time-off');
+    employees = await api('GET', '/shifts/employees');
+  } catch (e) { msg(e.message, false); return; }
+
+  const typeLabel = { vacation: '🏖️ Urlaub', sick: '🤒 Krank', personal: '🏠 Persönlich', compensation: '⏰ Ausgleich' };
+  const statusBadge = { requested: 'b-gold', approved: 'b-ok', declined: 'b-terra', cancelled: 'b-muted' };
+  const statusLabel = { requested: 'Angefragt', approved: 'Genehmigt', declined: 'Abgelehnt', cancelled: 'Storniert' };
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Urlaub & Abwesenheit</h3>
+        <button class="btn btn-p" onclick="openNewTimeOff()">+ Neuer Antrag</button>
+      </div>
+      <table>
+        <thead><tr><th>Mitarbeiter</th><th>Art</th><th>Von</th><th>Bis</th><th>Tage</th><th>Grund</th><th>Status</th><th></th></tr></thead>
+        <tbody>${requests.length === 0 ? '<tr><td colspan="8" class="empty">Keine Anträge.</td></tr>' :
+    requests.map(r => '<tr>' +
+      '<td><strong>' + esc(r.first_name + ' ' + r.last_name) + '</strong></td>' +
+      '<td>' + (typeLabel[r.type] || r.type) + '</td>' +
+      '<td>' + formatDateShort(r.date_from) + '</td>' +
+      '<td>' + formatDateShort(r.date_to) + '</td>' +
+      '<td style="text-align:center">' + r.days_count + '</td>' +
+      '<td style="font-size:0.78rem">' + esc(r.reason || '–') + '</td>' +
+      '<td><span class="badge ' + (statusBadge[r.status] || 'b-muted') + '">' + (statusLabel[r.status] || r.status) + '</span></td>' +
+      '<td>' + (r.status === 'requested' ? '<div class="btns"><button class="btn btn-sm btn-ok" onclick="approveTimeOff(' + r.id + ')">✓</button><button class="btn btn-sm btn-d" onclick="declineTimeOff(' + r.id + ')">✕</button></div>' : '') + '</td></tr>').join('')}</tbody>
+      </table>
+    </div>
+    <div id="to-modal"></div>
+  `;
+  CACHE.employees = employees;
+}
+
+function openNewTimeOff() {
+  $('to-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Abwesenheit eintragen</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Mitarbeiter *</label><select id="to-emp">${(CACHE.employees || []).map(e => '<option value="' + e.id + '">' + e.first_name + ' ' + e.last_name + '</option>').join('')}</select></div>
+          <div class="fg"><label>Art *</label><select id="to-type"><option value="vacation">🏖️ Urlaub</option><option value="sick">🤒 Krank</option><option value="personal">🏠 Persönlich</option><option value="compensation">⏰ Freizeitausgleich</option></select></div>
+          <div class="row">
+            <div class="fg"><label>Von *</label><input id="to-from" type="date"></div>
+            <div class="fg"><label>Bis *</label><input id="to-to" type="date"></div>
+          </div>
+          <div class="fg"><label>Tage *</label><input id="to-days" type="number" step="0.5" value="1" min="0.5"></div>
+          <div class="fg"><label>Grund</label><input id="to-reason" placeholder="Optional"></div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveTimeOff()">Eintragen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveTimeOff() {
+  try {
+    await api('POST', '/shifts/time-off', { employee_id: parseInt($('to-emp').value), type: $('to-type').value, date_from: $('to-from').value, date_to: $('to-to').value, days_count: parseFloat($('to-days').value), reason: $('to-reason').value || null });
+    renderTimeOff(); msg('Antrag eingereicht.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function approveTimeOff(id) { try { await api('PUT', '/shifts/time-off/' + id + '/approve'); renderTimeOff(); msg('Genehmigt.'); } catch (e) { msg(e.message, false); } }
+async function declineTimeOff(id) { if (!confirm('Ablehnen?')) return; try { await api('PUT', '/shifts/time-off/' + id + '/decline'); renderTimeOff(); msg('Abgelehnt.'); } catch (e) { msg(e.message, false); } }
+
+// ═══════════════════════════════════════════
+// MITARBEITER
+// ═══════════════════════════════════════════
+async function renderUsers() {
+  let users = [];
+  try { users = await api('GET', '/auth/users'); } catch (e) { msg(e.message, false); return; }
+
+  const roleName = { admin: 'Admin', inhaber: 'Inhaber', leitung: 'Leitung', team: 'Team' };
+  const roleBadge = { admin: 'b-terra', inhaber: 'b-terra', leitung: 'b-gold', team: 'b-muted' };
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h">
+        <h3>Mitarbeiter – ${users.length}</h3>
+        <button class="btn btn-p" onclick="openNewUser()">+ Neuer Mitarbeiter</button>
+      </div>
+      <table>
+        <thead><tr><th>Name</th><th>E-Mail</th><th>Rolle</th><th>Telefon</th><th>Letzter Login</th><th>Status</th></tr></thead>
+        <tbody>${users.length === 0 ? '<tr><td colspan="6" class="empty">Keine Mitarbeiter.</td></tr>' :
+    users.map(u => `<tr style="opacity:${u.is_active ? 1 : 0.4}">
+          <td><strong>${esc(u.display_name)}</strong></td>
+          <td style="font-size:0.78rem">${esc(u.email)}</td>
+          <td><span class="badge ${roleBadge[u.role] || 'b-muted'}">${roleName[u.role] || u.role}</span></td>
+          <td style="font-size:0.78rem">${esc(u.phone || '–')}</td>
+          <td style="font-size:0.78rem">${u.last_login ? new Date(u.last_login).toLocaleDateString('de-DE') : 'Noch nie'}</td>
+          <td>${u.is_active ? '<span class="badge b-ok">Aktiv</span>' : '<span class="badge b-muted">Deaktiviert</span>'}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Rollen-Übersicht</h3></div>
+      <table>
+        <thead><tr><th>Rolle</th><th>Beschreibung</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-terra">Inhaber</span></td><td>Vollzugriff – Finanzen, Personal, alle Einstellungen</td></tr>
+          <tr><td><span class="badge b-gold">Leitung</span></td><td>Tagesgeschäft – Karte, Reservierungen, Schichtplan, Kunden</td></tr>
+          <tr><td><span class="badge b-muted">Team</span></td><td>Eigene Schichten, Wünsche/Urlaub, Tagesreservierungen lesen</td></tr>
+          <tr><td><span class="badge b-terra">Admin</span></td><td>Technisch – Nutzerverwaltung, Einstellungen, DSGVO</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="user-modal"></div>
+  `;
+}
+
+function openNewUser() {
+  $('user-modal').innerHTML = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-h"><h3>Neuer Mitarbeiter</h3><button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button></div>
+        <div class="modal-b">
+          <div class="fg"><label>Name *</label><input id="u-name" placeholder="Vorname Nachname"></div>
+          <div class="fg"><label>E-Mail * (= Login)</label><input id="u-email" type="email" placeholder="name@da-enzo-muenchen.de"></div>
+          <div class="row">
+            <div class="fg"><label>Passwort *</label><input id="u-pw" type="password" placeholder="Min. 8 Zeichen"></div>
+            <div class="fg"><label>Rolle *</label>
+              <select id="u-role">
+                <option value="team">Team (Mitarbeiter)</option>
+                <option value="leitung">Leitung</option>
+                <option value="inhaber">Inhaber</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label>Telefon</label><input id="u-phone" placeholder="Optional"></div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-s" onclick="this.closest('.modal-bg').remove()">Abbrechen</button>
+          <button class="btn btn-p" onclick="saveNewUser()">Erstellen</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveNewUser() {
+  const data = {
+    display_name: $('u-name').value,
+    email: $('u-email').value,
+    password: $('u-pw').value,
+    role: $('u-role').value,
+    phone: $('u-phone').value || null,
+  };
+  if (!data.display_name || !data.email || !data.password) { msg('Name, E-Mail und Passwort erforderlich.', false); return; }
+  if (data.password.length < 8) { msg('Passwort muss mindestens 8 Zeichen haben.', false); return; }
+  try {
+    const r = await api('POST', '/auth/users', data);
+    renderUsers();
+    msg(r.message || 'Mitarbeiter erstellt.');
+  } catch (e) { msg(e.message, false); }
+}
+
+// ═══════════════════════════════════════════
+// EINSTELLUNGEN
+// ═══════════════════════════════════════════
+async function renderSettings() {
+  let s = {};
+  try { s = await api('GET', '/settings'); } catch (e) {}
+  const oh = typeof s.opening_hours === 'object' ? s.opening_hours : (function() { try { return JSON.parse(s.opening_hours || '{}'); } catch { return {}; } })();
+  const days = [
+    { key: 'mo', label: 'Montag' }, { key: 'di', label: 'Dienstag' }, { key: 'mi', label: 'Mittwoch' },
+    { key: 'do', label: 'Donnerstag' }, { key: 'fr', label: 'Freitag' }, { key: 'sa', label: 'Samstag' }, { key: 'so', label: 'Sonntag' }
+  ];
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="card">
+      <div class="card-h"><h3>Restaurant-Einstellungen</h3><button class="btn btn-p" onclick="saveSettings()">Speichern</button></div>
+      <div class="row">
+        <div class="fg"><label>Restaurant-Name</label><input id="s-name" value="${s.restaurant_name || ''}"></div>
+        <div class="fg"><label>Adresse</label><input id="s-addr" value="${s.address || ''}"></div>
+      </div>
+      <div class="row">
+        <div class="fg"><label>Telefon</label><input id="s-phone" value="${s.phone || ''}"></div>
+        <div class="fg"><label>E-Mail</label><input id="s-email" value="${s.email || ''}"></div>
+      </div>
+      <div class="fg"><label>Booking E-Mail</label><input id="s-booking" value="${s.booking_email || ''}"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>Öffnungszeiten</h3></div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.8rem">Tage ohne Uhrzeiten = Ruhetag. Format: HH:MM-HH:MM</p>
+      <table>
+        <thead><tr><th>Tag</th><th>Geöffnet</th><th>Von – Bis</th></tr></thead>
+        <tbody>
+          ${days.map(d => {
+            const val = oh[d.key] || '';
+            const isOpen = !!val;
+            const parts = val ? val.split('-') : ['', ''];
+            return '<tr>' +
+              '<td><strong>' + d.label + '</strong></td>' +
+              '<td><input type="checkbox" id="oh-open-' + d.key + '" ' + (isOpen ? 'checked' : '') + ' onchange="toggleDay(\'' + d.key + '\')" style="width:18px;height:18px;accent-color:var(--terra)"></td>' +
+              '<td><div style="display:flex;gap:6px;align-items:center;' + (isOpen ? '' : 'opacity:0.3;pointer-events:none;') + '" id="oh-times-' + d.key + '">' +
+              '<input type="time" id="oh-from-' + d.key + '" value="' + (parts[0] || '09:00') + '" style="width:110px">' +
+              '<span>–</span>' +
+              '<input type="time" id="oh-to-' + d.key + '" value="' + (parts[1] || '18:00') + '" style="width:110px">' +
+              '</div></td></tr>';
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>Reservierungs-Einstellungen</h3></div>
+      <div class="row">
+        <div class="fg"><label>Sitzplätze gesamt</label><input id="s-seats" type="number" value="${s.total_seats || '30'}"></div>
+        <div class="fg"><label>Max. Personen pro Reservierung</label><input id="s-maxparty" type="number" value="${s.max_party_size || '8'}"></div>
+      </div>
+      <div class="row">
+        <div class="fg"><label>Buchbare Uhrzeiten von</label><input id="s-bookstart" type="time" value="${s.booking_start_time || '11:00'}"></div>
+        <div class="fg"><label>Buchbare Uhrzeiten bis</label><input id="s-bookend" type="time" value="${s.booking_end_time || '21:00'}"></div>
+      </div>
+      <div class="row">
+        <div class="fg"><label>Zeitslot-Intervall (Minuten)</label><input id="s-slot" type="number" value="${s.reservation_slot_minutes || '30'}" min="15" max="120" step="15"></div>
+        <div class="fg"><label>Wie viele Tage im Voraus buchbar</label><input id="s-advance" type="number" value="${s.booking_advance_days || '30'}"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>Bestellsystem (Pizza/Pinsa Abholung)</h3></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <label style="font-size:0.9rem;font-weight:600">Bestellungen auf der Website:</label>
+        <button id="s-orders-toggle" class="btn btn-sm ${(s.orders_enabled === 'true' || s.orders_enabled === true) ? 'btn-ok' : 'btn-s'}" onclick="toggleOrders()" style="min-width:100px">
+          ${(s.orders_enabled === 'true' || s.orders_enabled === true) ? '🟢 Aktiv' : '🔴 Deaktiviert'}
+        </button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px">Wenn aktiv, können Gäste auf der Website Pizza und Pinsa zur Abholung bestellen.</p>
+      <div class="fg"><label>Hinweis für Kunden</label><input id="s-orders-notice" value="${s.orders_notice || 'Abholung ca. 20 Minuten nach Bestellung.'}"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>Speisekarten-Texte</h3></div>
+      <div class="fg"><label>Einleitungstext</label><textarea id="s-intro">${s.menu_intro || ''}</textarea></div>
+      <div class="fg"><label>Allergen-Hinweis</label><textarea id="s-allergen" style="min-height:90px">${s.allergen_note || ''}</textarea></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Website aktualisieren</h3></div>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.8rem">JSON-Dateien auf der Website aktualisieren:</p>
+      <div class="btns">
+        <button class="btn btn-ok" onclick="exportAll()">🔄 Speisekarte + Wochenkarte exportieren</button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleDay(key) {
+  const isOpen = $('oh-open-' + key).checked;
+  const timesEl = $('oh-times-' + key);
+  if (timesEl) {
+    timesEl.style.opacity = isOpen ? '1' : '0.3';
+    timesEl.style.pointerEvents = isOpen ? 'auto' : 'none';
+  }
+}
+
+async function toggleOrders() {
+  const btn = $('s-orders-toggle');
+  const isActive = btn.textContent.includes('Aktiv');
+  const newState = !isActive;
+  try {
+    await api('PUT', '/settings', { orders_enabled: newState ? 'true' : 'false' });
+    btn.className = 'btn btn-sm ' + (newState ? 'btn-ok' : 'btn-s');
+    btn.textContent = newState ? '🟢 Aktiv' : '🔴 Deaktiviert';
+    msg(newState ? 'Bestellsystem aktiviert.' : 'Bestellsystem deaktiviert.');
+  } catch (e) { msg(e.message, false); }
+}
+
+async function saveSettings() {
+  // Öffnungszeiten zusammenbauen
+  const days = ['mo', 'di', 'mi', 'do', 'fr', 'sa', 'so'];
+  const oh = {};
+  for (const d of days) {
+    if ($('oh-open-' + d)?.checked) {
+      oh[d] = ($('oh-from-' + d)?.value || '09:00') + '-' + ($('oh-to-' + d)?.value || '18:00');
+    } else {
+      oh[d] = null;
+    }
+  }
+
+  try {
+    await api('PUT', '/settings', {
+      restaurant_name: $('s-name').value,
+      address: $('s-addr').value,
+      phone: $('s-phone').value,
+      email: $('s-email').value,
+      booking_email: $('s-booking').value,
+      total_seats: $('s-seats').value,
+      max_party_size: $('s-maxparty').value,
+      opening_hours: JSON.stringify(oh),
+      booking_start_time: $('s-bookstart').value,
+      booking_end_time: $('s-bookend').value,
+      reservation_slot_minutes: $('s-slot').value,
+      booking_advance_days: $('s-advance').value,
+      menu_intro: $('s-intro').value,
+      allergen_note: $('s-allergen').value,
+      orders_notice: $('s-orders-notice')?.value || '',
+    });
+    msg('Einstellungen gespeichert.');
+  } catch (e) { msg(e.message, false); }
+}
+</script>
+</body>
+</html>
