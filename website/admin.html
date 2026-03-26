@@ -241,23 +241,23 @@ tbody tr:hover { background: rgba(250,245,238,0.5); }
     </div>
     <div class="sidebar-section">Übersicht</div>
     <div class="sidebar-link active" onclick="showPage('dashboard')">📊 Dashboard</div>
-    <div class="sidebar-section">Küche</div>
-    <div class="sidebar-link" onclick="showPage('dishes')">📖 Kochbuch</div>
-    <div class="sidebar-link" onclick="showPage('ingredients')">🧂 Zutaten</div>
-    <div class="sidebar-section">Karte</div>
-    <div class="sidebar-link" onclick="showPage('menu')">📋 Speisekarte</div>
-    <div class="sidebar-link" onclick="showPage('weekly')">📅 Wochenkarte</div>
+    <div class="sidebar-section" data-min-role="leitung">Küche</div>
+    <div class="sidebar-link" onclick="showPage('dishes')" data-min-role="leitung">📖 Kochbuch</div>
+    <div class="sidebar-link" onclick="showPage('ingredients')" data-min-role="leitung">🧂 Zutaten</div>
+    <div class="sidebar-section" data-min-role="leitung">Karte</div>
+    <div class="sidebar-link" onclick="showPage('menu')" data-min-role="leitung">📋 Speisekarte</div>
+    <div class="sidebar-link" onclick="showPage('weekly')" data-min-role="leitung">📅 Wochenkarte</div>
     <div class="sidebar-section">Gäste</div>
     <div class="sidebar-link" onclick="showPage('reservations')">📆 Reservierungen</div>
     <div class="sidebar-link" onclick="showPage('orders')">🛒 Bestellungen</div>
-    <div class="sidebar-link" onclick="showPage('customers')">👤 Kunden</div>
-    <div class="sidebar-link" onclick="showPage('invoices')">📄 Rechnungen</div>
+    <div class="sidebar-link" onclick="showPage('customers')" data-min-role="leitung">👤 Kunden</div>
+    <div class="sidebar-link" onclick="showPage('invoices')" data-min-role="inhaber">📄 Rechnungen</div>
     <div class="sidebar-section">Personal</div>
     <div class="sidebar-link" onclick="showPage('shifts')">📅 Schichtplan</div>
     <div class="sidebar-link" onclick="showPage('timeoff')">🏖️ Urlaub</div>
-    <div class="sidebar-section">System</div>
-    <div class="sidebar-link" onclick="showPage('users')">👥 Mitarbeiter</div>
-    <div class="sidebar-link" onclick="showPage('settings')">⚙️ Einstellungen</div>
+    <div class="sidebar-section" data-min-role="inhaber">System</div>
+    <div class="sidebar-link" onclick="showPage('users')" data-min-role="inhaber">👥 Mitarbeiter</div>
+    <div class="sidebar-link" onclick="showPage('settings')" data-min-role="inhaber">⚙️ Einstellungen</div>
     <div class="sidebar-footer">
       <div id="user-name"></div>
       <button onclick="doLogout()" style="margin-top:4px">Abmelden</button>
@@ -316,6 +316,7 @@ async function doLogin() {
     document.getElementById('app-view').classList.remove('hidden');
     document.getElementById('user-name').textContent = USER.display_name;
     document.getElementById('today-date').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    applyRoleVisibility();
     showPage('dashboard');
   } catch (e) {
     const el = document.getElementById('login-error');
@@ -333,6 +334,21 @@ function doLogout() {
   document.getElementById('login-error').classList.add('hidden');
 }
 
+// Rollenbasierte Sidebar-Sichtbarkeit
+const ROLE_LEVEL = { admin: 100, inhaber: 90, leitung: 50, team: 10 };
+
+function applyRoleVisibility() {
+  if (!USER) return;
+  const userLevel = ROLE_LEVEL[USER.role] || 0;
+  document.querySelectorAll('[data-min-role]').forEach(el => {
+    const minLevel = ROLE_LEVEL[el.dataset.minRole] || 0;
+    el.style.display = userLevel >= minLevel ? '' : 'none';
+  });
+  // Begrüßung anpassen
+  const roleNames = { inhaber: 'Chef', leitung: 'Leitung', team: 'Mitarbeiter', admin: 'Admin' };
+  document.getElementById('user-name').textContent = USER.display_name + ' (' + (roleNames[USER.role] || USER.role) + ')';
+}
+
 // Auto-login
 if (TOKEN) {
   api('GET', '/auth/me').then(d => {
@@ -341,6 +357,7 @@ if (TOKEN) {
     document.getElementById('app-view').classList.remove('hidden');
     document.getElementById('user-name').textContent = USER.display_name;
     document.getElementById('today-date').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    applyRoleVisibility();
     showPage('dashboard');
   }).catch(doLogout);
 }
@@ -359,7 +376,16 @@ function toggleSidebar() {
   ov.classList.toggle('open');
 }
 
+// Mindest-Rolle pro Seite
+const PAGE_MIN_ROLE = { dishes: 'leitung', ingredients: 'leitung', menu: 'leitung', weekly: 'leitung', customers: 'leitung', invoices: 'inhaber', users: 'inhaber', settings: 'inhaber' };
+
 function showPage(page) {
+  // Rollenprüfung
+  const minRole = PAGE_MIN_ROLE[page];
+  if (minRole && (ROLE_LEVEL[USER?.role] || 0) < (ROLE_LEVEL[minRole] || 0)) {
+    msg('Keine Berechtigung für diesen Bereich.', false);
+    return;
+  }
   // Close mobile sidebar
   document.getElementById('sidebar')?.classList.remove('open');
   document.getElementById('sidebar-overlay')?.classList.remove('open');
@@ -384,34 +410,46 @@ function msg(text, ok = true) {
 // DASHBOARD
 // ═══════════════════════════════════════════
 async function renderDashboard() {
+  const roleNames = { inhaber: 'Chef', leitung: 'Leitung', team: 'Mitarbeiter', admin: 'Admin' };
+  const userLevel = ROLE_LEVEL[USER?.role] || 0;
   let resStats = { todayCount: 0, todayGuests: 0, pendingCount: 0, peakTime: null, peakGuests: 0 };
   try {
-    const [dishes, menu, ingredients] = await Promise.all([
-      api('GET', '/dishes?active=true').catch(() => []),
-      api('GET', '/menu').catch(() => []),
-      api('GET', '/ingredients').catch(() => []),
-    ]);
-    CACHE.dishes = dishes || [];
-    CACHE.menu = menu || [];
-    CACHE.ingredients = ingredients || [];
-    resStats = await api('GET', '/reservations/stats').catch(() => resStats);
+    const fetches = [api('GET', '/reservations/stats').catch(() => resStats)];
+    if (userLevel >= 50) {
+      fetches.push(
+        api('GET', '/dishes?active=true').catch(() => []),
+        api('GET', '/menu').catch(() => []),
+        api('GET', '/ingredients').catch(() => []),
+      );
+    }
+    const [stats, dishes, menu, ingredients] = await Promise.all(fetches);
+    resStats = stats || resStats;
+    if (dishes) CACHE.dishes = dishes;
+    if (menu) CACHE.menu = menu;
+    if (ingredients) CACHE.ingredients = ingredients;
   } catch (e) {}
+
+  let statsHtml = `
+    <div class="stat" onclick="showPage('reservations')"><div class="stat-icon">📆</div><div class="stat-val">${resStats.todayCount}</div><div class="stat-lbl">Reservierungen heute (${resStats.todayGuests} Gäste)</div></div>
+    <div class="stat" onclick="showPage('reservations')" style="${resStats.pendingCount > 0 ? 'border-color:var(--warning)' : ''}"><div class="stat-icon">⏳</div><div class="stat-val">${resStats.pendingCount}</div><div class="stat-lbl">Offene Anfragen</div></div>`;
+  if (userLevel >= 50) {
+    statsHtml += `<div class="stat" onclick="showPage('dishes')"><div class="stat-icon">📖</div><div class="stat-val">${(CACHE.dishes||[]).length}</div><div class="stat-lbl">Gerichte im Kochbuch</div></div>`;
+  }
+  statsHtml += `<div class="stat" onclick="window.open('https://da-enzo-muenchen.de','_blank')"><div class="stat-icon">🌐</div><div class="stat-val" style="font-size:1rem">Website</div><div class="stat-lbl">da-enzo-muenchen.de öffnen</div></div>`;
+
+  let actionsHtml = `<button class="btn btn-p" onclick="showPage('reservations')">📆 Reservierungen</button>`;
+  if (userLevel >= 50) {
+    actionsHtml += `<button class="btn btn-s" onclick="showPage('weekly')">📅 Wochenkarte</button>`;
+    actionsHtml += `<button class="btn btn-ok" onclick="exportAll()">🔄 Website aktualisieren</button>`;
+  }
+  actionsHtml += `<button class="btn btn-s" onclick="showPage('shifts')">📅 Schichtplan</button>`;
 
   document.getElementById('page-content').innerHTML = `
     <p style="color:var(--text-muted);margin-bottom:1rem">Ciao ${USER?.display_name || ''}! 👋</p>
-    <div class="stats">
-      <div class="stat" onclick="showPage('reservations')"><div class="stat-icon">📆</div><div class="stat-val">${resStats.todayCount}</div><div class="stat-lbl">Reservierungen heute (${resStats.todayGuests} Gäste)</div></div>
-      <div class="stat" onclick="showPage('reservations')" style="${resStats.pendingCount > 0 ? 'border-color:var(--warning)' : ''}"><div class="stat-icon">⏳</div><div class="stat-val">${resStats.pendingCount}</div><div class="stat-lbl">Offene Anfragen</div></div>
-      <div class="stat" onclick="showPage('dishes')"><div class="stat-icon">📖</div><div class="stat-val">${CACHE.dishes.length}</div><div class="stat-lbl">Gerichte im Kochbuch</div></div>
-      <div class="stat" onclick="window.open('index.html','_blank')"><div class="stat-icon">🌐</div><div class="stat-val" style="font-size:1rem">Website</div><div class="stat-lbl">da-enzo-muenchen.de öffnen</div></div>
-    </div>
+    <div class="stats">${statsHtml}</div>
     <div class="card">
       <div class="card-h"><h3>Schnellaktionen</h3></div>
-      <div class="btns">
-        <button class="btn btn-p" onclick="showPage('reservations')">📆 Reservierungen</button>
-        <button class="btn btn-s" onclick="showPage('weekly')">📅 Wochenkarte</button>
-        <button class="btn btn-ok" onclick="exportAll()">🔄 Website aktualisieren</button>
-      </div>
+      <div class="btns">${actionsHtml}</div>
     </div>
   `;
 }
