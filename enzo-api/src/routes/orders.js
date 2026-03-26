@@ -1,6 +1,7 @@
 const express = require('express');
 const { getDb, logAudit } = require('../db/init');
 const { authenticate, requireRole } = require('../middleware/auth');
+const { notifyOrder } = require('../utils/telegram');
 
 const router = express.Router();
 
@@ -52,6 +53,10 @@ router.post('/public/place', (req, res) => {
       total += price * (item.quantity || 1);
     }
     db.prepare('UPDATE orders SET total = ? WHERE id = ?').run(total, orderId);
+
+    // Telegram Push-Notification
+    const orderItems = db.prepare('SELECT oi.quantity, d.name FROM order_items oi JOIN dishes d ON oi.dish_id = d.id WHERE oi.order_id = ?').all(orderId);
+    notifyOrder({ guest_name, guest_phone, pickup_time, total, items: orderItems }).catch(e => console.error('[telegram]', e.message));
 
     res.json({ status: 'ok', id: orderId, total, message: 'Bestellung empfangen! Wir rufen Sie an wenn sie abholbereit ist.' });
   } catch (err) { res.status(500).json({ error: err.message }); }

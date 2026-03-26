@@ -2,6 +2,7 @@ const express = require('express');
 const { getDb, logAudit } = require('../db/init');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { sendReservationNotification } = require('../utils/email');
+const { notifyReservation } = require('../utils/telegram');
 
 const router = express.Router();
 
@@ -117,6 +118,8 @@ router.post('/public/book', (req, res) => {
     const result = db.prepare("INSERT INTO reservations (guest_name, guest_email, guest_phone, date, time, party_size, message, source, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'website', 'pending')").run(guest_name, guest_email || null, guest_phone || null, date, time, party_size, message || null);
     // E-Mail-Benachrichtigung (asynchron, blockiert nicht die Antwort)
     sendReservationNotification({ guest_name, guest_email, guest_phone, date, time, party_size, message }).catch(e => console.error('[mail]', e.message));
+    // Telegram Push-Notification
+    notifyReservation({ guest_name, guest_email, guest_phone, date, time, party_size, message }).catch(e => console.error('[telegram]', e.message));
     res.json({ status: 'ok', id: result.lastInsertRowid, message: 'Vielen Dank! Ihre Reservierung wurde empfangen und wird zeitnah bestätigt.' });
   } catch (err) { console.error('[book]', err); res.status(500).json({ error: 'Fehler: ' + err.message }); }
 });
