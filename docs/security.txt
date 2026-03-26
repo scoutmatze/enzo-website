@@ -1,0 +1,5 @@
+Contact: mailto:info@da-enzo-muenchen.de
+Expires: 2027-03-26T00:00:00.000Z
+Preferred-Languages: de, en
+Canonical: https://da-enzo-muenchen.de/.well-known/security.txt
+Encryption: https://da-enzo-muenchen.de/.well-known/security.txt
