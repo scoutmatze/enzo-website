@@ -75,59 +75,62 @@ function exportWochenkarte() {
 
   const menu = db.prepare(`
     SELECT * FROM weekly_menu
-    WHERE is_published = 1 AND week_start <= ?
+    WHERE is_published = 1 AND week_start <= ? AND (week_end IS NULL OR week_end >= ?)
     ORDER BY week_start DESC LIMIT 1
-  `).get(today);
+  `).get(today, today);
 
   let result;
 
   if (!menu) {
     result = {
-      title: 'Wochenkarte',
-      subtitle: 'Aktuell keine Wochenkarte verfügbar.',
-      items: [],
+      title: 'Le specialità dello Chef',
+      subtitle: 'Aktuell keine Spezialitäten verfügbar.',
+      categories: [],
     };
   } else {
     const items = db.prepare(`
-      SELECT wmi.day_of_week, wmi.price, wmi.custom_name, wmi.custom_description, wmi.custom_allergens,
-        d.name, d.description,
-        COALESCE(wmi.custom_allergens, das.allergens, '') AS allergens
+      SELECT wmi.*, wmi.category AS item_category,
+        COALESCE(wmi.custom_name, d.name) AS dish_name,
+        COALESCE(wmi.custom_description, d.description) AS dish_description,
+        COALESCE(wmi.custom_allergens, das.allergens, '') AS allergens,
+        d.category AS dish_category
       FROM weekly_menu_items wmi
       LEFT JOIN dishes d ON wmi.dish_id = d.id
       LEFT JOIN dish_allergen_string das ON d.id = das.dish_id
       WHERE wmi.weekly_menu_id = ?
-      ORDER BY wmi.day_of_week, wmi.sort_order
+      ORDER BY wmi.sort_order, wmi.category, d.name
     `).all(menu.id);
 
-    const dayNames = { 1: 'Montag', 2: 'Dienstag', 3: 'Mittwoch', 4: 'Donnerstag', 5: 'Freitag', 6: 'Samstag' };
+    const catLabels = { antipasti: 'Antipasti', primi: 'Primi Piatti', secondi: 'Secondi', pinse: 'Pinse & Pizza', dolci: 'Dolci', caffe: 'Caffè', alkoholfrei: 'Alkoholfrei', bier: 'Birra', aperitivi: 'Aperitivi', wein: 'Vino', digestivi: 'Digestivi', sonstiges: 'Sonstiges' };
 
-    if (menu.mode === 'daily') {
-      result = {
-        title: 'Wochenkarte',
-        subtitle: formatWeekRange(menu.week_start),
-        items: items.map(item => ({
-          day: dayNames[item.day_of_week] || '',
-          name: item.custom_name || item.name || '',
-          desc: item.custom_description || item.description || '',
-          price: formatPrice(item.price),
-          allergens: item.allergens || '',
-        })),
-        note: menu.note || '',
-      };
-    } else {
-      result = {
-        title: 'Wochenkarte',
-        subtitle: formatWeekRange(menu.week_start),
-        items: items.map(item => ({
-          day: 'Wochengericht',
-          name: item.custom_name || item.name || '',
-          desc: item.custom_description || item.description || '',
-          price: formatPrice(item.price),
-          allergens: item.allergens || '',
-        })),
-        note: menu.note || '',
-      };
+    // Nach Kategorie gruppieren
+    const grouped = {};
+    for (const item of items) {
+      const cat = item.item_category || item.dish_category || 'sonstiges';
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push({
+        name: item.dish_name || '',
+        desc: item.dish_description || '',
+        price: formatPrice(item.price),
+        allergens: item.allergens || '',
+      });
     }
+
+    const startDate = new Date(menu.week_start);
+    const endDate = menu.week_end ? new Date(menu.week_end) : new Date(startDate.getTime() + 13 * 86400000);
+    const dateOpts = { day: '2-digit', month: '2-digit' };
+    const subtitle = `${startDate.toLocaleDateString('de-DE', dateOpts)} – ${endDate.toLocaleDateString('de-DE', { ...dateOpts, year: 'numeric' })}`;
+
+    result = {
+      title: 'Le specialità dello Chef',
+      subtitle,
+      categories: Object.entries(grouped).map(([key, items]) => ({
+        name: catLabels[key] || key,
+        key,
+        items,
+      })),
+      note: menu.note || '',
+    };
   }
 
   const json = JSON.stringify(result, null, 2);
@@ -409,7 +412,7 @@ router.get('/wochenkarte-pdf', authenticate, (req, res) => {
     const data = exportWochenkarte();
     const db = getDb();
     const restaurantName = getSetting(db, 'restaurant_name', 'Da Enzo – Caffé & Ristorante');
-    const address = getSetting(db, 'address', 'Zschokkestraße 34, 80686 München');
+    const address = getSetting(db, 'address', 'Zschokkestraße 34, 80687 München');
     const allergenNote = getSetting(db, 'allergen_note', '');
 
     const doc = new PDFDocument({ size: 'A4', margin: 50 });
@@ -417,52 +420,30 @@ router.get('/wochenkarte-pdf', authenticate, (req, res) => {
     res.setHeader('Content-Disposition', 'inline; filename="Wochenkarte.pdf"');
     doc.pipe(res);
 
+    // Logo (Stein) oben mittig – falls vorhanden
+    const logoPath = path.join(WEBSITE_PATH, 'img', 'logo-footer.webp');
+    const logoPng = path.join(WEBSITE_PATH, 'img', 'logo-stamp.png');
+    try {
+      const lp = require('fs').existsSync(logoPng) ? logoPng : (require('fs').existsSync(logoPath) ? logoPath : null);
+      if (lp) {
+        doc.image(lp, 248, 30, { width: 100 });
+        doc.y = 90;
+      }
+    } catch (e) { /* Logo nicht verfügbar */ }
+
     drawPageHeader(doc, restaurantName, address);
-    drawMenuTitle(doc, 'Wochenkarte', data.subtitle || 'Ogni Settimana');
+    drawMenuTitle(doc, 'Le specialità dello Chef', data.subtitle || '');
 
-    for (const item of (data.items || [])) {
-      if (doc.y > 680) doc.addPage();
-      const y = doc.y;
-
-      // Tag (links, in Terracotta)
-      if (item.day) {
-        doc.fontSize(11).font('Helvetica-Bold').fillColor(C.terra);
-        doc.text(item.day, 65, y, { width: 100 });
-        doc.fillColor(C.espresso);
+    // Kategorien rendern
+    const categories = data.categories || [];
+    if (categories.length === 0 && data.items) {
+      // Fallback: alte Format-Kompatibilität
+      for (const item of data.items) drawDish(doc, item);
+    } else {
+      for (const cat of categories) {
+        if (!cat.items || cat.items.length === 0) continue;
+        drawCategory(doc, cat.name, cat.items);
       }
-
-      const nameX = item.day ? 175 : 65;
-
-      // Gerichtname
-      doc.fontSize(12).font('Helvetica-Bold').fillColor(C.espresso);
-      doc.text(item.name || '', nameX, y);
-
-      // Beschreibung
-      if (item.desc) {
-        doc.fontSize(8.5).font('Helvetica').fillColor(C.muted);
-        doc.text(item.desc, nameX, doc.y + 1, { width: 280 });
-      }
-
-      // Allergene
-      if (item.allergens) {
-        doc.fontSize(7).font('Helvetica').fillColor(C.gold);
-        doc.text('Allergene: ' + item.allergens, nameX, doc.y + 1);
-      }
-
-      // Preis (rechts oben auf gleicher Höhe wie Name)
-      if (item.price) {
-        doc.fontSize(12).font('Helvetica-Bold').fillColor(C.terra);
-        doc.text(item.price, 440, y, { width: 90, align: 'right' });
-      }
-
-      doc.fillColor(C.espresso);
-      doc.moveDown(0.6);
-
-      // Trennlinie
-      doc.lineWidth(0.2).strokeColor(C.light);
-      doc.moveTo(65, doc.y).lineTo(530, doc.y).stroke();
-      doc.strokeColor(C.espresso);
-      doc.moveDown(0.6);
     }
 
     // Fußnote

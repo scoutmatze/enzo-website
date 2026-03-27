@@ -591,6 +591,20 @@
   .wk-desc { font-size: 0.8rem; color: rgba(250,245,238,0.6); margin-top: 2px; }
   .wk-allergens { font-size: 0.7rem; color: var(--col-gold); margin-top: 2px; font-style: italic; }
 
+  .wk-category {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--col-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 1rem;
+    margin-bottom: 0.3rem;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid rgba(201,169,110,0.2);
+  }
+  .wk-category:first-child { margin-top: 0; }
+
   .wk-day {
     font-family: var(--font-display);
     font-weight: 600;
@@ -1472,7 +1486,7 @@
   <div class="wochenkarte-inner">
     <div class="reveal">
       <div class="section-label" data-i18n="wk.label">Ogni settimana</div>
-      <h2 id="wochenkarte-title" class="section-title" data-i18n="wk.title">Die <em>Wochenkarte</em></h2>
+      <h2 id="wochenkarte-title" class="section-title" data-i18n="wk.title">Le specialità <em>dello Chef</em></h2>
     </div>
     <div id="wochenkarteContent" class="reveal">
       <!-- Wird per JS aus wochenkarte.json geladen -->
@@ -1747,15 +1761,20 @@ async function loadWochenkarte() {
     renderWochenkarte(data, container);
   } catch (e) {
     const demo = {
-      title: "Wochenkarte 10.–14. März",
-      items: [
-        { day: "Mo", dish: "Lasagne al Forno mit gemischtem Salat", price: "11,90 €" },
-        { day: "Di", dish: "Risotto ai Funghi Porcini", price: "12,90 €" },
-        { day: "Mi", dish: "Spaghetti alle Vongole", price: "13,90 €" },
-        { day: "Do", dish: "Pollo alla Cacciatora mit Rosmarinkartoffeln", price: "12,50 €" },
-        { day: "Fr", dish: "Tagliatelle al Salmone", price: "13,50 €" }
+      title: "Le specialità dello Chef",
+      subtitle: "31.03. – 13.04.2026",
+      categories: [
+        { name: "Antipasti", items: [
+          { name: "Carpaccio di Manzo", desc: "Hauchdünn geschnittenes Rindfleisch mit Rucola und Parmesan", price: "17,50 €", allergens: "G" },
+        ]},
+        { name: "Primi Piatti", items: [
+          { name: "Risotto ai Funghi Porcini", desc: "Steinpilzrisotto mit Trüffelöl", price: "16,50 €", allergens: "G" },
+        ]},
+        { name: "Dolci", items: [
+          { name: "Tiramisù della Casa", desc: "Hauseigenes Tiramisu nach Familienrezept", price: "8,50 €", allergens: "A,C,G" },
+        ]},
       ],
-      note: "Zu jedem Mittagsgericht: Wasser oder Espresso inklusive."
+      note: "Alle Gerichte auch zum Mitnehmen."
     };
     renderWochenkarte(demo, container);
   }
@@ -1765,37 +1784,52 @@ function renderWochenkarte(data, container) {
   let html = '';
   if (data.subtitle) {
     html += `<p class="wochenkarte-date">${data.subtitle}</p>`;
-  } else if (data.title && data.title !== 'Wochenkarte') {
-    html += `<p class="wochenkarte-date">${data.title}</p>`;
   }
 
-  const items = data.items || [];
-  if (items.length === 0) {
-    html += '<p class="wochenkarte-empty">Aktuell keine Wochenkarte verfügbar.</p>';
-    container.innerHTML = html;
-    return;
+  // Neues Format: Kategorien
+  if (data.categories && data.categories.length > 0) {
+    html += '<div class="wochenkarte-grid">';
+    for (const cat of data.categories) {
+      if (!cat.items || cat.items.length === 0) continue;
+      html += `<div class="wk-category">${cat.name}</div>`;
+      for (const item of cat.items) {
+        html += `
+          <div class="wochenkarte-item">
+            <div class="wk-details">
+              <span class="wk-dish">${item.name || ''}</span>
+              ${item.desc ? `<span class="wk-desc">${item.desc}</span>` : ''}
+              ${item.allergens ? `<span class="wk-allergens">Allergene: ${item.allergens}</span>` : ''}
+            </div>
+            ${item.price ? `<span class="wk-price">${item.price}</span>` : ''}
+          </div>`;
+      }
+    }
+    html += '</div>';
   }
-
-  html += '<div class="wochenkarte-grid">';
-  for (const item of items) {
-    const name = item.name || item.dish || '';
-    const desc = item.desc || item.description || '';
-    const price = item.price || '';
-    const allergens = item.allergens || '';
-    const day = item.day || '';
-
-    html += `
-      <div class="wochenkarte-item">
-        ${day ? `<span class="wk-day">${day}</span>` : ''}
-        <div class="wk-details">
-          <span class="wk-dish">${name}</span>
-          ${desc ? `<span class="wk-desc">${desc}</span>` : ''}
-          ${allergens ? `<span class="wk-allergens">Allergene: ${allergens}</span>` : ''}
-        </div>
-        ${price ? `<span class="wk-price">${price}</span>` : ''}
-      </div>`;
+  // Altes Format: flache Items (Abwärtskompatibilität)
+  else if (data.items && data.items.length > 0) {
+    html += '<div class="wochenkarte-grid">';
+    for (const item of data.items) {
+      const name = item.name || item.dish || '';
+      const desc = item.desc || item.description || '';
+      const price = item.price || '';
+      const allergens = item.allergens || '';
+      const day = item.day || '';
+      html += `
+        <div class="wochenkarte-item">
+          ${day ? `<span class="wk-day">${day}</span>` : ''}
+          <div class="wk-details">
+            <span class="wk-dish">${name}</span>
+            ${desc ? `<span class="wk-desc">${desc}</span>` : ''}
+            ${allergens ? `<span class="wk-allergens">Allergene: ${allergens}</span>` : ''}
+          </div>
+          ${price ? `<span class="wk-price">${price}</span>` : ''}
+        </div>`;
+    }
+    html += '</div>';
+  } else {
+    html += '<p class="wochenkarte-empty">Aktuell keine Spezialitäten verfügbar.</p>';
   }
-  html += '</div>';
 
   if (data.note) {
     html += `<p class="wochenkarte-note">${data.note}</p>`;
