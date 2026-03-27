@@ -578,12 +578,12 @@
   }
 
   .wochenkarte-item {
-    display: grid;
-    grid-template-columns: 80px 1fr auto;
-    gap: var(--space-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-md);
     padding: var(--space-sm) 0;
     border-bottom: 1px solid rgba(240,232,219,0.08);
-    align-items: center;
   }
 
   .wochenkarte-item:last-child { border-bottom: none; }
@@ -622,6 +622,8 @@
     color: var(--col-terra-light);
     font-size: 1.05rem;
     text-align: right;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .wochenkarte-note {
@@ -1262,7 +1264,7 @@
     .form-row { grid-template-columns: 1fr; }
 
     .wochenkarte-item {
-      grid-template-columns: 1fr;
+      flex-wrap: wrap;
       gap: 4px;
       padding: var(--space-sm) 0;
     }
