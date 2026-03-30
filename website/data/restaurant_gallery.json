@@ -1,0 +1,88 @@
+{
+  "gallery": {
+    "außen": [
+      {
+        "id": "a1",
+        "filename": "aussen_1_Logo_Identitaet.webp",
+        "title": "Da Enzo — Logo & Identität",
+        "category": "außen"
+      },
+      {
+        "id": "a2",
+        "filename": "aussen_2_Terrazza_Fruehling.webp",
+        "title": "Terrazza — Frühling",
+        "category": "außen"
+      },
+      {
+        "id": "a3",
+        "filename": "aussen_3_Terrazza_Sommer.webp",
+        "title": "Terrazza — Sommer",
+        "category": "außen"
+      },
+      {
+        "id": "a4",
+        "filename": "aussen_4_Abend_Event.webp",
+        "title": "Una Serata Speciale — Außen",
+        "category": "außen"
+      }
+    ],
+    "innen": [
+      {
+        "id": "i1",
+        "filename": "innen_1_Aperitivo_Lifestyle.webp",
+        "title": "Aperitivo Time",
+        "category": "innen"
+      },
+      {
+        "id": "i2",
+        "filename": "innen_2_Il_Ristorante.webp",
+        "title": "Il Ristorante",
+        "category": "innen"
+      },
+      {
+        "id": "i3",
+        "filename": "innen_3_Campari_Bar.webp",
+        "title": "Bar & Charakter",
+        "category": "innen"
+      },
+      {
+        "id": "i4",
+        "filename": "innen_4_Gastraum_Voll.webp",
+        "title": "Voll besetzt",
+        "category": "innen"
+      },
+      {
+        "id": "i5",
+        "filename": "innen_5_La_Lounge.webp",
+        "title": "La Lounge",
+        "category": "innen"
+      },
+      {
+        "id": "i6",
+        "filename": "innen_6_Una_Serata.webp",
+        "title": "Una Serata da Enzo",
+        "category": "innen"
+      }
+    ],
+    "party": [
+      {
+        "id": "p1",
+        "filename": "party_1_Balloon_Arch.webp",
+        "title": "Festlich dekoriert",
+        "category": "party"
+      },
+      {
+        "id": "p2",
+        "filename": "party_2_Tavola_Grande.webp",
+        "title": "Tavola Grande",
+        "category": "party"
+      },
+      {
+        "id": "p3",
+        "filename": "party_3_Serata_Speciale.webp",
+        "title": "Una Serata Speciale",
+        "category": "party"
+      }
+    ]
+  }
+}

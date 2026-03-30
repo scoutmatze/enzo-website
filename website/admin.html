@@ -781,7 +781,7 @@ async function renderWeekly() {
       <div class="card-h">
         <h3>Le specialità dello Chef</h3>
         <div class="btns">
-          <button class="btn btn-p" onclick="openWeeklyModal()">+ Neue Karte</button>
+          <button class="btn btn-p" onclick="wkEditId=null;openWeeklyModal()">+ Neue Karte</button>
           <button class="btn btn-s" onclick="printMenuPdf('wochenkarte')">🖨️ Drucken</button>
         </div>
       </div>
@@ -812,7 +812,9 @@ async function renderWeekly() {
         <td><strong>${start} – ${end}</strong></td>
         <td style="font-size:0.78rem">${itemsHtml}</td>
         <td>${m.is_published ? '<span class="badge b-ok">Veröffentlicht</span>' : '<span class="badge b-gold">Entwurf</span>'}</td>
-        <td><div class="btns">${!m.is_published ? `<button class="btn btn-sm btn-ok" onclick="publishWeekly(${m.id})">Veröffentlichen</button>` : ''}
+        <td><div class="btns">
+          <button class="btn btn-sm btn-s" onclick="editWeekly(${m.id})">✏️</button>
+          ${!m.is_published ? `<button class="btn btn-sm btn-ok" onclick="publishWeekly(${m.id})">Veröffentlichen</button>` : `<button class="btn btn-sm btn-ok" onclick="publishWeekly(${m.id})">🔄 Aktualisieren</button>`}
           <button class="btn btn-sm btn-s" onclick="deleteWeekly(${m.id})">🗑️</button></div></td>
       </tr>`;
     }).join('')}</tbody>
@@ -834,7 +836,7 @@ function getTwoWeeksEnd(s) {
 
 function openWeeklyModal() {
   const nextMon = getNextMonday();
-  wkItems = [];
+  if (!wkEditId) wkItems = []; // nur zurücksetzen wenn neu
 
   $('weekly-modal').innerHTML = `
     <div class="modal-bg" onclick="this.remove()">
@@ -939,12 +941,56 @@ function wkRender() {
   $('wk-items-list').innerHTML = h;
 }
 
+let wkEditId = null; // null = neu, Zahl = bearbeiten
+
+function editWeekly(id) {
+  const menu = CACHE.weeklyMenus.find(m => m.id === id);
+  if (!menu) { msg('Wochenkarte nicht gefunden.', false); return; }
+
+  // Items aus der bestehenden Karte laden
+  wkItems = (menu.items || []).map(i => ({
+    dish_id: i.dish_id || null,
+    category: i.category || i.dish_category || 'sonstiges',
+    price: i.price || 0,
+    custom_name: i.custom_name || null,
+    custom_description: i.custom_description || null,
+    custom_allergens: i.custom_allergens || null,
+    _name: i.dish_name || i.custom_name || '?',
+    _all: i.allergens || '',
+  }));
+
+  wkEditId = id;
+  openWeeklyModal();
+
+  // Werte setzen nach Modal-Öffnung
+  setTimeout(() => {
+    if ($('wk-start')) $('wk-start').value = menu.week_start;
+    if ($('wk-end')) $('wk-end').value = menu.week_end || getTwoWeeksEnd(menu.week_start);
+    if ($('wk-note')) $('wk-note').value = menu.note || '';
+    wkRender();
+    // Modal-Titel anpassen
+    const titleEl = document.querySelector('#weekly-modal .modal-h h3');
+    if (titleEl) titleEl.textContent = 'Wochenkarte bearbeiten';
+    const saveBtn = document.querySelector('#weekly-modal .modal-f .btn-p');
+    if (saveBtn) saveBtn.textContent = 'Speichern';
+  }, 50);
+}
+
 async function saveWeekly() {
   if (!wkItems.length) { msg('Mindestens ein Gericht hinzufügen.', false); return; }
   const items = wkItems.map(it => ({ dish_id: it.dish_id||null, category: it.category||null, price: it.price||0, custom_name: it.custom_name||null, custom_description: it.custom_description||null, custom_allergens: it.custom_allergens||null }));
+  const payload = { week_start: $('wk-start').value, week_end: $('wk-end').value, note: $('wk-note').value, items };
+
   try {
-    await api('POST', '/weekly-menu', { week_start: $('wk-start').value, week_end: $('wk-end').value, note: $('wk-note').value, items });
-    renderWeekly(); msg('Wochenkarte erstellt.');
+    if (wkEditId) {
+      await api('PUT', '/weekly-menu/' + wkEditId, payload);
+      msg('Wochenkarte gespeichert.');
+    } else {
+      await api('POST', '/weekly-menu', payload);
+      msg('Wochenkarte erstellt.');
+    }
+    wkEditId = null;
+    renderWeekly();
   } catch (e) { msg(e.message, false); }
 }
 

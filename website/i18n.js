@@ -10,6 +10,7 @@ const I18N = {
   'nav.wochenkarte':   { de: 'Wochenkarte',    en: 'Weekly Special',it: 'Menù Settimanale',ls: 'Wochen-Essen' },
   'nav.reservieren':   { de: 'Reservieren',    en: 'Reservation',  it: 'Prenotare',       ls: 'Tisch buchen' },
   'nav.kontakt':       { de: 'Kontakt',        en: 'Contact',      it: 'Contatti',        ls: 'Kontakt' },
+  'nav.galerie':       { de: 'Galerie',        en: 'Gallery',      it: 'Galleria',        ls: 'Bilder' },
 
   // ── Hero ──
   'hero.tag':          { de: 'München · Laim · Zschokkestraße 34',
@@ -78,10 +79,10 @@ const I18N = {
 
   // ── Wochenkarte ──
   'wk.label':          { de: 'Ogni settimana',  en: 'Every Week',    it: 'Ogni settimana',  ls: 'Jede Woche' },
-  'wk.title':          { de: 'Die <em>Wochenkarte</em>',
-                         en: 'The <em>Weekly Menu</em>',
-                         it: 'Il <em>Menù Settimanale</em>',
-                         ls: 'Das <em>Wochen-Essen</em>' },
+  'wk.title':          { de: 'Le specialità <em>dello Chef</em>',
+                         en: 'The Chef\'s <em>Specials</em>',
+                         it: 'Le specialità <em>dello Chef</em>',
+                         ls: 'Die <em>Empfehlungen vom Koch</em>' },
   'wk.loading':        { de: 'Die Wochenkarte wird geladen...',
                          en: 'Loading weekly menu...',
                          it: 'Caricamento del menù settimanale...',
@@ -124,6 +125,13 @@ const I18N = {
                          en: '❌ Something went wrong. Please call us or write via WhatsApp.',
                          it: '❌ Qualcosa è andato storto. Chiamaci o scrivici su WhatsApp.',
                          ls: '❌ Das hat leider nicht geklappt. Bitte rufen Sie uns an. Oder schreiben Sie per WhatsApp.' },
+
+  // ── Galerie ──
+  'galerie.label':    { de: 'La Galleria',      en: 'Gallery',        it: 'La Galleria',     ls: 'Bilder' },
+  'galerie.title':    { de: 'Eindrücke <em>aus da Enzo.</em>',
+                         en: 'Impressions <em>from da Enzo.</em>',
+                         it: 'Impressioni <em>da Enzo.</em>',
+                         ls: 'So sieht es <em>bei uns aus.</em>' },
 
   // ── Kontakt ──
   'kontakt.label':     { de: 'Trovarci',        en: 'Find Us',       it: 'Trovarci',        ls: 'Wo sind wir' },

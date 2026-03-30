@@ -1,0 +1,231 @@
+{
+  "gallery": {
+    "hero": [
+      {
+        "id": "hero1",
+        "filename": "HERO1_26_Tagliatelle_Pancetta_IMG_9996.webp",
+        "title": "Tagliatelle con Pancetta",
+        "category": "hero"
+      },
+      {
+        "id": "hero2",
+        "filename": "HERO2_7_Pizza_BurrataRucola_IMG_3637.webp",
+        "title": "Pizza Burrata e Rucola",
+        "category": "hero"
+      }
+    ],
+    "pizza": [
+      {
+        "id": 1,
+        "filename": "1_Hero_Pizza_IMG_2239.webp",
+        "title": "Pizza con Salumi e Funghi",
+        "category": "pizza"
+      },
+      {
+        "id": 4,
+        "filename": "4_Pizza_close-up_IMG_2389.webp",
+        "title": "Pizza — Detail",
+        "category": "pizza"
+      },
+      {
+        "id": 8,
+        "filename": "8_Pizza_Capricciosa_IMG_3826.webp",
+        "title": "Pizza Capricciosa",
+        "category": "pizza"
+      },
+      {
+        "id": 9,
+        "filename": "9_TulpenPizza_IMG_2391.webp",
+        "title": "Pizza ai Funghi e Prosciutto",
+        "category": "pizza"
+      },
+      {
+        "id": 11,
+        "filename": "11_Pizza_Margherita_IMG_3830.webp",
+        "title": "Pizza Margherita",
+        "category": "pizza"
+      },
+      {
+        "id": 33,
+        "filename": "33_Pizza_TegliaProsciutto_IMG_3999.webp",
+        "title": "Pizza al Taglio — Prosciutto",
+        "category": "pizza"
+      }
+    ],
+    "pasta": [
+      {
+        "id": 3,
+        "filename": "3_Tagliatelle_ai_frutti_di_mare_IMG_0049.webp",
+        "title": "Tagliatelle ai Frutti di Mare",
+        "category": "pasta"
+      },
+      {
+        "id": 12,
+        "filename": "12_Pasta_Orecchiette_IMG_2708.webp",
+        "title": "Orecchiette al Verde",
+        "category": "pasta"
+      },
+      {
+        "id": 13,
+        "filename": "13_Pasta_Ravioli_IMG_2492.webp",
+        "title": "Ravioli al Pesto",
+        "category": "pasta"
+      },
+      {
+        "id": 27,
+        "filename": "27_Pasta_Rigatoni_IMG_8451.webp",
+        "title": "Rigatoni al Pesto",
+        "category": "pasta"
+      },
+      {
+        "id": 28,
+        "filename": "28_Pasta_Tortelloni_IMG_8449.webp",
+        "title": "Tortelloni al Burro e Salvia",
+        "category": "pasta"
+      },
+      {
+        "id": 34,
+        "filename": "34_Pasta_Spaghetti_IMG_3168.webp",
+        "title": "Spaghetti con Gamberi",
+        "category": "pasta"
+      }
+    ],
+    "secondi": [
+      {
+        "id": 2,
+        "filename": "2_Polpo-su-crema_Enzo_Restaurant-10.webp",
+        "title": "Polpo su Crema",
+        "category": "secondi"
+      },
+      {
+        "id": 18,
+        "filename": "18_Secondo_Vitello_IMG_2888.webp",
+        "title": "Vitello con Verdure",
+        "category": "secondi"
+      }
+    ],
+    "pesce": [
+      {
+        "id": 24,
+        "filename": "24_Pesce_RoherFisch_IMG_3903.webp",
+        "title": "Il Pesce Fresco",
+        "category": "pesce"
+      },
+      {
+        "id": 25,
+        "filename": "25_Pesce_PlattfischGemüse_IMG_3941.webp",
+        "title": "Platessa alla Griglia con Verdure",
+        "category": "pesce"
+      }
+    ],
+    "antipasti": [
+      {
+        "id": 5,
+        "filename": "5_Carpaccio_Enzo_Restaurant-12.webp",
+        "title": "Carpaccio di Salmone",
+        "category": "antipasti"
+      },
+      {
+        "id": 14,
+        "filename": "14_Antipasti_Affettati_IMG_3814.webp",
+        "title": "Affettati Misti",
+        "category": "antipasti"
+      },
+      {
+        "id": 15,
+        "filename": "15_Antipasti_InsalataDiMare_IMG_3899.webp",
+        "title": "Insalata di Mare",
+        "category": "antipasti"
+      },
+      {
+        "id": 16,
+        "filename": "16_Antipasti_CarpaccioDiManzo_IMG_2687.webp",
+        "title": "Carpaccio di Manzo",
+        "category": "antipasti"
+      },
+      {
+        "id": 17,
+        "filename": "17_Antipasti_BurrataPomodori_IMG_3545.webp",
+        "title": "Burrata con Pomodori",
+        "category": "antipasti"
+      },
+      {
+        "id": 29,
+        "filename": "29_Antipasti_InsalataDiMare_IMG_3902.webp",
+        "title": "Insalata di Mare — Gran Piatto",
+        "category": "antipasti"
+      },
+      {
+        "id": 30,
+        "filename": "30_Antipasti_ThunfischCarpaccio_IMG_8452.webp",
+        "title": "Carpaccio di Tonno",
+        "category": "antipasti"
+      },
+      {
+        "id": 31,
+        "filename": "31_Antipasti_ThunfischCarpaccio_IMG_8454.webp",
+        "title": "Carpaccio di Tonno — Detail",
+        "category": "antipasti"
+      },
+      {
+        "id": 32,
+        "filename": "32_Antipasti_CapreseBurrata_IMG_7396.webp",
+        "title": "Caprese con Burrata",
+        "category": "antipasti"
+      },
+   
+      {
+        "id": 20,
+        "filename": "20_Salat_Bunt_IMG_3833.webp",
+        "title": "Insalata Mista",
+        "category": "insalate"
+      }
+    ],
+    "bevande": [
+      {
+        "id": 19,
+        "filename": "19_Getraenke_Aperol_IMG_3551.webp",
+        "title": "Aperol Spritz",
+        "category": "bevande"
+      }
+    ],
+    "dolci": [
+      {
+        "id": "d1",
+        "filename": "dolci_1_Cappuccino_Cornetto.webp",
+        "title": "Cappuccino e Cornetto",
+        "category": "dolci"
+      },
+      {
+        "id": "d2",
+        "filename": "dolci_2_Tiramisu.webp",
+        "title": "Tiramisù della Casa",
+        "category": "dolci"
+      },
+      {
+        "id": "d3",
+        "filename": "dolci_3_Fragole_Martini.webp",
+        "title": "Fragole al Martini",
+        "category": "dolci"
+      },
+      {
+        "id": "d4",
+        "filename": "dolci_4_Cannoli_Siciliani.webp",
+        "title": "Cannoli Siciliani",
+        "category": "dolci"
+      },
+      {
+        "id": "d5",
+        "filename": "dolci_5_Dolce_Cioccolato.webp",
+        "title": "Dolce al Cioccolato",
+        "category": "dolci"
+      },
+      {
+        "id": "d6",
+        "filename": "dolci_6_Cappuccino_Vespa.webp",
+        "title": "Cappuccino con Vespa",
+        "category": "dolci"
+      }
+    ]
+  }
+}
